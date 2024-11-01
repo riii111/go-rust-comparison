@@ -1,0 +1,98 @@
+name: 新規タスク登録
+description: プロジェクトタスクの登録用テンプレート
+body:
+  - type: input
+    id: title
+    attributes:
+      label: タスク名
+      description: タスクの内容が分かる簡潔な名前をつけてください
+      placeholder: "Goのパフォーマンステスト実装"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: assignee
+    attributes:
+      label: 担当者
+      description: このタスクの担当者を選択してください
+      multiple: false
+      options:
+        - riii111
+        - yuu0305
+        - shun198
+        - sotaheavymetal21
+    validations:
+      required: true
+
+  - type: dropdown
+    id: status
+    attributes:
+      label: ステータス
+      description: 現在のステータスを選択してください
+      options:
+        - ToDo
+        - Pending
+        - In Progress
+        - In Review
+        - Done
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: タスクの優先度を選択してください
+      options:
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+
+  - type: dropdown
+    id: iteration
+    attributes:
+      label: イテレーション
+      description: どのイテレーションに含まれるかを選択してください
+      options:
+        - 1. go - 言語習得
+        - 2. go - アプリ作成
+        - 3. rust - 言語習得
+        - 4. rust - アプリ作成
+    validations:
+      required: true
+
+  - type: input
+    id: start-date
+    attributes:
+      label: 開始日
+      description: 形式：YYYY-MM-DD
+      placeholder: "2024-11-01"
+    validations:
+      required: true
+
+  - type: input
+    id: end-date
+    attributes:
+      label: 終了日
+      description: 形式：YYYY-MM-DD
+      placeholder: "2024-11-05"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 詳細説明
+      description: タスクの詳細な内容、目的、成果物などを記載してください
+      placeholder: |
+        ## 目的
+
+        ## 実施内容
+
+        ## 期待される成果
+
+        ## 備考
+    validations:
+      required: true
