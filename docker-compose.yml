@@ -5,7 +5,7 @@ services:
     container_name: app
     build:
       context: .
-      dockerfile: containers/go/Dockerfile
+      dockerfile: containers/golang/Dockerfile
     volumes:
       - ./backend:/usr/local/go/src/go_rust_comparison
     ports:
