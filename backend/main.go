@@ -8,10 +8,10 @@ import (
 
 func main() {
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
+	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
+			"msg": "pass",
 		})
 	})
-	r.Run()
+	r.Run(":8000")
 }
