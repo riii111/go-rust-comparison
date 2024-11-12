@@ -27,9 +27,9 @@ services:
       timeout: 5s
       retries: 5
     environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_NAME
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
     ports:
       - '5432:5432' # デバッグ用
 volumes:
