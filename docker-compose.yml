@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: containers/go/Dockerfile
     volumes:
-      - ./application:/usr/local/go/src/go_crm
+      - ./application:/usr/local/go/src/go_rust_comparison
     ports:
       - "8000:8000"
     command: air -d
@@ -18,7 +18,9 @@ services:
         condition: service_healthy
   db:
     container_name: db
-    image: postgres:16.2
+    build:
+      context: .
+      dockerfile: containers/postgres/Dockerfile
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
@@ -32,5 +34,14 @@ services:
       - POSTGRES_PASSWORD
     ports:
       - '5432:5432' # デバッグ用
+  nginx:
+    container_name: web
+    build:
+      context: .
+      dockerfile: containers/nginx/Dockerfile
+    ports:
+      - 80:80
+    depends_on:
+      - app
 volumes:
   db_data:
