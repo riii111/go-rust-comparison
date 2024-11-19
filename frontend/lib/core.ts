@@ -16,8 +16,8 @@ type CustomFetchResponse<T> = {
 };
 
 // フェッチオプションのインターフェース定義
-interface IFetchOptions<T extends Record<string, any>> {
-  headers?: Record<string, any>;
+interface IFetchOptions<T extends Record<string, unknown>> {
+  headers?: Record<string, unknown>;
   method: HttpMethod;
   credentials?: RequestCredentials;
   params?: T;
@@ -39,7 +39,7 @@ const isServerSide = typeof window === "undefined";
 
 // リクエスト設定の共通化
 const createRequestConfig = (
-  options: Partial<IFetchOptions<any>>,
+  options: Partial<IFetchOptions<Record<string, unknown>>>,
   headers: Headers
 ): RequestInit => ({
   method: options.method,
@@ -52,12 +52,15 @@ const createRequestConfig = (
 
 // カスタムフェッチ関数
 export async function customFetch<
-  RequestInput extends Record<string, any> | undefined = Record<string, any>,
+  RequestInput extends Record<string, unknown> | undefined = Record<
+    string,
+    unknown
+  >,
   RequestResult = unknown
 >(
   endpoint: string,
   options: IFetchOptions<
-    RequestInput extends Record<string, any>
+    RequestInput extends Record<string, unknown>
       ? RequestInput
       : Record<string, never>
   >
@@ -79,12 +82,12 @@ export async function customFetch<
       return getClientSideAuthHeader();
     }
   }
-
   let authHeader = await getAuthHeader();
-  let headers = new Headers({
-    ...options.headers,
+  const headersInit: HeadersInit = {
+    ...(options.headers as Record<string, string>),
     ...authHeader,
-  });
+  };
+  let headers = new Headers(headersInit);
 
   if (!(options.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
@@ -114,10 +117,11 @@ export async function customFetch<
       if (refreshed) {
         // 新しいアクセストークンでリトライ（循環参照防止のためにcustomFetchを使用しない）
         authHeader = await getAuthHeader();
-        headers = new Headers({
-          ...options.headers,
+        const headersInit: HeadersInit = {
+          ...(options.headers as Record<string, string>),
           ...authHeader,
-        });
+        };
+        headers = new Headers(headersInit);
         // TODO: 新しいアクセストークンを反映してリクエストできないので別途調査
         fetchOptions = createRequestConfig(options, headers);
         const retryResponse = await fetch(url, fetchOptions);
@@ -148,7 +152,7 @@ export async function customFetch<
       throw new ApiError(response.status, errorMessage);
     }
 
-    const data = await handleResponse(response);
+    const data = (await handleResponse(response)) as RequestResult;
     return {
       data,
       headers: response.headers,
@@ -166,7 +170,7 @@ async function refreshAccessToken(): Promise<boolean> {
   try {
     console.log("Refreshing access token...");
 
-    let fetchOptions: RequestInit = {
+    const fetchOptions: RequestInit = {
       method: "POST",
     };
 
@@ -207,7 +211,7 @@ function redirectToAuth() {
 }
 
 // レスポンスハンドリング
-async function handleResponse(response: Response): Promise<any> {
+async function handleResponse(response: Response): Promise<unknown> {
   if (response.status === 204) {
     return {};
   }

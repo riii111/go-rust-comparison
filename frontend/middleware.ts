@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
 
   // 保護対象のルートにアクセスする場合
   if (protectedRoutes.some((route) => pathname.startsWith(route))) {
-    let accessToken = request.cookies.get("access_token");
+    const accessToken = request.cookies.get("access_token");
 
     // アクセストークンが存在しない、または無効（期限切れを含む）の場合
     if (!accessToken || !accessToken.value) {
@@ -41,7 +41,9 @@ export async function middleware(request: NextRequest) {
           // リフレッシュに失敗した場合、ログイン画面にリダイレクト
           return NextResponse.redirect(new URL("/auth", request.url));
         }
-      } catch (error) {
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_err) {
         // エラーの場合、ログイン画面にリダイレクト
         return NextResponse.redirect(new URL("/auth", request.url));
       }

@@ -27,8 +27,13 @@ export async function proxyServerCookies(headers: Headers) {
     const splitCookieHeaders = setCookieParser.splitCookiesString(setCookie);
     const cookieObjects = setCookieParser.parse(splitCookieHeaders);
 
-    cookieObjects.forEach(async (cookieObject: any) => {
-      const { name, value, sameSite, ...rest } = cookieObject;
+    cookieObjects.forEach(async (cookieObject: unknown) => {
+      const { name, value, sameSite, ...rest } = cookieObject as {
+        name: string;
+        value: string;
+        sameSite: string;
+        [key: string]: unknown;
+      };
       (await cookies()).set(name, value, {
         sameSite: sameSite === "strict" ? "strict" : "lax",
         ...rest,
