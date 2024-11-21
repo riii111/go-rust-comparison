@@ -7,7 +7,7 @@ const LineChartComponent = dynamic(
     () => import('@/components/layout/auth/BrandingSection/contents/LineChart'),
     {
         ssr: false,
-        loading: () => <div className="h-16 bg-gray-50 animate-pulse rounded" />
+        loading: () => <div className="h-16 animate-pulse rounded" />   // 色は背景に合わせる
     }
 );
 
