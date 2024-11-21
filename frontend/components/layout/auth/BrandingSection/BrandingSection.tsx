@@ -19,7 +19,7 @@ export default function BrandingSection() {
                             <h1 className="text-2xl font-bold text-[#202020]">Store Analytics</h1>
                         </div>
                         <p className="text-[#A0A0A0] text-center text-sm">
-                            効率的な在庫管理と売上分析を、<br />シンプルに一元化
+                            商品の在庫管理と売上分析を、<br />シンプルに一元化
                         </p>
                     </div>
 
