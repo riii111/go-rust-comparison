@@ -2,9 +2,9 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import FormField from "@/components/common/FormField";
+
 export default function LoginForm() {
     const router = useRouter();
     const handleSubmit = async (e: React.FormEvent) => {
@@ -25,28 +25,26 @@ export default function LoginForm() {
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="email" className="text-gray-800 text-sm">
-                            メールアドレス
-                        </Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            placeholder="your-email@example.com"
-                            className="w-full border-gray-200 text-sm"
-                        />
-                    </div>
+                    <FormField
+                        id="email"
+                        name="email"
+                        type="email"
+                        label="メールアドレス"
+                        placeholder="your-email@example.com"
+                        className="w-full border-gray-200 text-sm"
+                        labelClassName="text-gray-800 text-sm"
+                        required
+                    />
 
-                    <div className="space-y-2">
-                        <Label htmlFor="password" className="text-gray-800 text-sm">
-                            パスワード
-                        </Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            className="w-full border-gray-200 text-sm"
-                        />
-                    </div>
+                    <FormField
+                        id="password"
+                        name="password"
+                        type="password"
+                        label="パスワード"
+                        className="w-full border-gray-200 text-sm"
+                        labelClassName="text-gray-800 text-sm"
+                        required
+                    />
 
                     <div className="flex items-center justify-between">
                         <label className="flex items-center space-x-2">

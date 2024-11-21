@@ -30,7 +30,7 @@ export default function RegisterForm() {
 
     return (
         <Card className="w-full max-w-md border border-gray-200 shadow-sm">
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
                 <CardHeader className="space-y-1">
                     {/* Step Indicator */}
                     <div className="flex justify-center space-x-2 mb-6">
