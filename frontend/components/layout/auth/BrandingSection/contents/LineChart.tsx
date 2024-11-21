@@ -14,7 +14,7 @@ const LineChartComponent = () => {
                 <Line
                     type="monotone"
                     dataKey="value"
-                    stroke="#E02060"
+                    stroke="hsl(var(--primary))"
                     strokeWidth={2}
                     dot={false}
                     strokeDasharray="0 0"
