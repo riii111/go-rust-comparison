@@ -1,44 +1,73 @@
 import { CardContent } from "@/components/ui/card";
-import FormField from "@/components/common/molecules/FormField";
 import FormSelect from "@/components/common/molecules/FormSelect";
-import { TermsCheckbox } from "@/components/feature/auth/register/contents/TermsCheckBox";
-import { memo } from "react";
+import { Button } from "@/components/ui/button";
+import { StoreInfoFormData } from "@/config/validations/register";
+import { STORE_OPTIONS } from "@/config/constants/stores";
+import { ROLE_OPTIONS } from "@/config/constants/roles";
 
-const ROLE_OPTIONS = [
-    { value: "owner", label: "店舗オーナー" },
-    { value: "manager", label: "店舗管理者" },
-    { value: "staff", label: "スタッフ" }
-];
+interface StoreInfoStepProps {
+    formData: StoreInfoFormData;
+    onChange: (data: Partial<StoreInfoFormData>) => void;
+    errors: Record<string, string>;
+}
 
-export const StoreInfoStep = memo(function StoreInfoStep() {
+export function StoreInfoStep({ formData, onChange, errors }: StoreInfoStepProps) {
+    const handleChange = (name: keyof StoreInfoFormData, value: string | boolean) => {
+        onChange({ ...formData, [name]: value });
+    };
+
     return (
         <CardContent className="space-y-4">
-            <div className="space-y-4">
-                <FormField
-                    id="storeName"
-                    name="storeName"
-                    type="text"
-                    label="店舗名"
-                    placeholder="Store Analytics 東京店"
-                    autoComplete="organization"
-                    className="w-full border-gray-200 text-sm"
-                    labelClassName="text-gray-800 text-sm"
-                    required
-                />
+            <FormSelect
+                id="storeId"
+                name="storeId"
+                label="店舗"
+                options={STORE_OPTIONS}
+                placeholder="店舗を選択してください"
+                className="w-full border-gray-200 text-sm"
+                labelClassName="text-gray-800 text-sm"
+                required
+                value={formData.storeId}
+                onChange={(value) => handleChange('storeId', value)}
+                error={errors.storeId}
+            />
 
-                <FormSelect
-                    id="role"
-                    name="role"
-                    label="役割"
-                    options={ROLE_OPTIONS}
-                    placeholder="役割を選択してください"
-                    className="w-full border-gray-200 text-sm"
-                    labelClassName="text-gray-800 text-sm"
-                    required
-                />
+            <FormSelect
+                id="role"
+                name="role"
+                label="役割"
+                options={ROLE_OPTIONS}
+                placeholder="役割を選択してください"
+                className="w-full border-gray-200 text-sm"
+                labelClassName="text-gray-800 text-sm"
+                required
+                value={formData.role}
+                onChange={(value) => handleChange('role', value)}
+                error={errors.role}
+            />
 
-                <TermsCheckbox required />
-            </div>
+            <label className="flex items-start space-x-2 mt-4">
+                <input
+                    type="checkbox"
+                    name="agreedToTerms"
+                    className="form-checkbox h-4 w-4 mt-2 text-primary border-gray-200"
+                    checked={formData.agreedToTerms}
+                    onChange={(e) => handleChange('agreedToTerms', e.target.checked)}
+                />
+                <span className="text-gray-400 text-sm">
+                    <Button variant="link" className="text-primary hover:text-primary/80 p-0">
+                        利用規約
+                    </Button>
+                    と
+                    <Button variant="link" className="text-primary hover:text-primary/80 p-0">
+                        プライバシーポリシー
+                    </Button>
+                    に同意します
+                </span>
+            </label>
+            {errors.agreedToTerms && (
+                <p className="text-red-500 text-sm">{errors.agreedToTerms}</p>
+            )}
         </CardContent>
     );
-});
+}
