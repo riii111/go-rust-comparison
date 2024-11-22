@@ -1,5 +1,5 @@
 import { toast } from "@/hooks/ui/use-toast";
-import { getClientSideAuthHeader } from "@/lib/utils/cookies";
+import { getClientSideAuthHeader } from "@/lib/cookies/cookies";
 import { redirect } from "next/navigation";
 
 // APIのベースURL
@@ -75,7 +75,7 @@ export async function customFetch<
   async function getAuthHeader(): Promise<Record<string, string>> {
     if (isServerSide) {
       const { getServerSideAuthHeader } = await import(
-        "@/lib/utils/cookiesForServer"
+        "@/lib/cookiesForServer"
       );
       return getServerSideAuthHeader();
     } else {

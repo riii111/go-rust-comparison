@@ -1,6 +1,6 @@
 "use server";
 import { cookies } from "next/headers";
-import { COOKIE_KEYS } from "@/lib/utils/cookies";
+import { COOKIE_KEYS } from "@/lib/cookies/cookies";
 import setCookieParser from "set-cookie-parser";
 
 export async function getServerSideCookie(
