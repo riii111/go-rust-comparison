@@ -1,5 +1,5 @@
 import { CardContent } from "@/components/ui/card";
-import FormField from "@/components/common/FormField";
+import FormField from "@/components/common/molecules/FormField";
 
 export function AccountInfoStep() {
     return (

@@ -3,9 +3,12 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import FormField from "@/components/common/FormField";
+import FormField from "@/components/common/molecules/FormField";
+import { useState } from "react";
+import { LinkText } from "@/components/common/atoms/LinkText";
 
 export default function LoginForm() {
+
     const router = useRouter();
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -34,6 +37,7 @@ export default function LoginForm() {
                         className="w-full border-gray-200 text-sm"
                         labelClassName="text-gray-800 text-sm"
                         required
+                        error={errors.email}
                     />
 
                     <FormField
@@ -44,6 +48,7 @@ export default function LoginForm() {
                         className="w-full border-gray-200 text-sm"
                         labelClassName="text-gray-800 text-sm"
                         required
+                        error={errors.password}
                     />
 
                     <div className="flex items-center justify-between">
@@ -56,12 +61,10 @@ export default function LoginForm() {
                                 ログイン情報を保存
                             </span>
                         </label>
-                        <Button
-                            variant="link"
+                        <LinkText
+                            text="パスワードをお忘れの方"
                             className="text-sm text-primary hover:text-primary/80 p-0"
-                        >
-                            パスワードをお忘れの方
-                        </Button>
+                        />
                     </div>
                 </CardContent>
 
@@ -69,19 +72,15 @@ export default function LoginForm() {
                     <Button
                         type="submit"
                         className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                        disabled={isLoading}
                     >
                         ログイン
                     </Button>
-                    <p className="text-sm text-gray-400 text-center">
-                        アカウントをお持ちでない方は{' '}
-                        <Button
-                            variant="link"
-                            className="text-primary hover:text-primary/80 p-0"
-                            onClick={() => router.push('/management/auth/register')}
-                        >
-                            こちら
-                        </Button>
-                    </p>
+                    <LinkText
+                        text="こちら"
+                        onClick={() => router.push('/management/auth/register')}
+                        prefix="アカウントをお持ちでない方は "
+                    />
                 </CardFooter>
             </form>
         </Card>

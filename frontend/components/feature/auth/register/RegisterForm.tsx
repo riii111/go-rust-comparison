@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { AccountInfoStep } from './contents/AccountInfoStep';
 import { StoreInfoStep } from './contents/StoreInfoStep';
+import { LinkText } from "@/components/common/atoms/LinkText";
 
 export default function RegisterForm() {
     const router = useRouter();
@@ -85,16 +86,11 @@ export default function RegisterForm() {
                             </Button>
                         )}
                     </div>
-                    <p className="text-sm text-gray-400 text-center">
-                        すでにアカウントをお持ちの方は{' '}
-                        <Button
-                            variant="link"
-                            className="text-primary hover:text-primary/80 p-0"
-                            onClick={() => router.push('/management/auth/login')}
-                        >
-                            こちら
-                        </Button>
-                    </p>
+                    <LinkText
+                        text="こちら"
+                        onClick={() => router.push('/management/auth/login')}
+                        prefix="すでにアカウントをお持ちの方は "
+                    />
                 </CardFooter>
             </form>
         </Card>
