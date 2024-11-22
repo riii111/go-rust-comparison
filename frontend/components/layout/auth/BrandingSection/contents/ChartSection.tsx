@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 
-// Hydrationエラー対策のためにdynamicインポート（サーバー・クライアントそれぞれで生成するHTMLが異なるためエラー）
+// Hydrationエラー対策のためにdynamicインポート
 const LineChartComponent = dynamic(
     () => import('@/components/layout/auth/BrandingSection/contents/LineChart'),
     {
