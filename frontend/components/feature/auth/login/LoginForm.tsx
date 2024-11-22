@@ -4,15 +4,56 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import FormField from "@/components/common/molecules/FormField";
+import { loginAction, LoginActionResult } from "@/components/feature/auth/login/actions";
+import { z } from "zod";
 import { useState } from "react";
 import { LinkText } from "@/components/common/atoms/LinkText";
+
+const loginSchema = z.object({
+    email: z.string().email("有効なメールアドレスを入力してください"),
+    password: z.string().min(8, "パスワードは8文字以上である必要があります"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
 
     const router = useRouter();
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        // TODO: ログイン処理の実装
+    const [isLoading, setIsLoading] = useState(false);
+    const [errors, setErrors] = useState<Partial<Record<keyof LoginFormData, string>>>({});
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setIsLoading(true);
+        setErrors({});
+
+        try {
+            const formData = new FormData(event.currentTarget);
+            const validatedData = loginSchema.parse(formData);
+            const result: LoginActionResult = await loginAction(
+                validatedData.email,
+                validatedData.password
+            );
+
+            // リダイレクトの場合はresultが一瞬undefinedになる
+            if (result && !result.success) {
+                setErrors(prev => ({ ...prev, form: result.error || "ログインに失敗しました。" }));
+            }
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const fieldErrors: Partial<Record<keyof LoginFormData, string>> = {};
+                error.errors.forEach(err => {
+                    if (err.path[0]) {
+                        fieldErrors[err.path[0] as keyof LoginFormData] = err.message;
+                    }
+                });
+                setErrors(prev => ({ ...prev, ...fieldErrors }));
+            } else {
+                setErrors(prev => ({ ...prev, form: "予期せぬエラーが発生しました。" }));
+            }
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

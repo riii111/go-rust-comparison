@@ -1,5 +1,5 @@
 import { toast } from "@/hooks/ui/use-toast";
-import { getClientSideAuthHeader } from "@/lib/cookies/cookies";
+import { getClientSideAuthHeader } from "@/lib/cookies";
 import { redirect } from "next/navigation";
 
 // APIのベースURL
