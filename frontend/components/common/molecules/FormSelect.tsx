@@ -11,7 +11,7 @@ interface FormSelectProps {
     id: string;
     name: string;
     label: string;
-    options: SelectOption[];
+    options: readonly SelectOption[] | SelectOption[];
     placeholder?: string;
     required?: boolean;
     value?: string;
