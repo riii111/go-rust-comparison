@@ -1,0 +1,45 @@
+services:
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: containers/golang/Dockerfile
+    volumes:
+      - ./backend:/usr/local/go/src/go_rust_comparison
+    ports:
+      - "8000:8000"
+    command: air -d
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    container_name: db
+    build:
+      context: .
+      dockerfile: containers/postgres/Dockerfile
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U "${POSTGRES_USER:-postgres}" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      - POSTGRES_NAME
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    ports:
+      - '5432:5432' # デバッグ用
+  nginx:
+    container_name: web
+    build:
+      context: .
+      dockerfile: containers/nginx/Dockerfile
+    ports:
+      - 80:80
+    depends_on:
+      - app
+volumes:
+  db_data:
