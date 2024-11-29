@@ -49,7 +49,7 @@ export default function RegisterForm() {
             return parseWithZod(formData, { schema });
         },
         shouldValidate: "onBlur",
-        shouldRevalidate: "onInput",
+        shouldRevalidate: "onInput",    // submit失敗後の再バリデーションモード
         onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();  // 複数ステップに分かれるので、フォームのデフォルト送信を防止
 

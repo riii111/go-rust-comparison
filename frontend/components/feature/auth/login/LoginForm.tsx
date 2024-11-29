@@ -29,7 +29,7 @@ export default function LoginForm() {
             });
         },
         shouldValidate: "onBlur",
-        shouldRevalidate: "onInput",    // 入力時に再バリデーション
+        shouldRevalidate: "onInput",    // submit失敗後の再バリデーションモード
         onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
             const formData = new FormData(event.currentTarget);
             const submission = parseWithZod(formData, {
