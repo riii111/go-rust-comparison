@@ -1,4 +1,4 @@
-name: Lint and Format Code
+name: Build Code
 on:
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
@@ -15,7 +15,7 @@ jobs:
       github.event.pull_request.draft == false
       && !startsWith(github.head_ref, 'release')
       && !startsWith(github.head_ref, 'doc')
-    name: Run Test Code
+    name: Build
     runs-on: ubuntu-latest
     defaults:
       run:
