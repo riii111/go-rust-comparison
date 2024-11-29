@@ -13,6 +13,6 @@ up:
 down:
 	docker-compose down
 
-fmt:
+format:
 	docker-compose exec app go fmt
 	docker-compose exec app goimports -l -w .
