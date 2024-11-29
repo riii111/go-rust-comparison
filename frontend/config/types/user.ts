@@ -11,7 +11,7 @@ export interface User {
   updated_at: string;
 }
 
-export interface UpdateUserRequest {
+export interface UpdateUserRequest extends Record<string, unknown> {
   username?: string;
   email?: string;
   password?: string;
@@ -29,12 +29,12 @@ export interface AuthTokenCreatedResponse {
   message: string;
 }
 
-export interface LoginRequest {
+export interface LoginRequest extends Record<string, unknown> {
   email: string;
   password: string;
 }
 
-export interface RegisterRequest {
+export interface RegisterRequest extends Record<string, unknown> {
   username: string;
   email: string;
   password: string;

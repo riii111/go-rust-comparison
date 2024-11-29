@@ -4,14 +4,11 @@
 // import { AuthResponse, LoginRequest } from "@/config/types/user";
 // import { proxyServerCookies } from "@/lib/utils/cookies/cookiesForServer";
 import { redirect } from "next/navigation";
+import { loginSchema } from "@/components/feature/auth/validation";
 import { z } from "zod";
+import { LoginRequest } from "@/config/types/user";
 
 // const ENDPOINT = "/auth";
-
-const loginSchema = z.object({
-  email: z.string().email("有効なメールアドレスを入力してください"),
-  password: z.string().min(8, "パスワードは8文字以上である必要があります"),
-});
 
 type LoginActionResult = {
   success: boolean;
@@ -22,13 +19,12 @@ type LoginActionResult = {
  * ユーザーログイン関数
  */
 export async function loginAction(
-  email: string,
-  password: string
+  payload: LoginRequest
 ): Promise<LoginActionResult> {
   let redirectFlag = false;
   try {
     // セキュリティ対策としてサーバーサイドでもバリデーション
-    loginSchema.parse({ email, password });
+    loginSchema.parse(payload);
 
     // TODO: API実装されたら置き換え
     return { success: true };
