@@ -6,7 +6,7 @@
 import { redirect } from "next/navigation";
 import { loginSchema } from "@/components/feature/auth/validation";
 import { z } from "zod";
-import { LoginRequest } from "@/config/types/user";
+import { LoginRequest } from "@/config/types/api/user";
 
 // const ENDPOINT = "/auth";
 

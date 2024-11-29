@@ -12,7 +12,7 @@ import { useForm } from "@conform-to/react";
 import { parseWithZod } from '@conform-to/zod';
 import { useActionState } from 'react';
 import { useState } from 'react';
-import { RegisterRequest } from '@/config/types/user';
+import { RegisterRequest } from '@/config/types/api/user';
 import { UserRole } from "@/config/constants/roles";
 
 export default function RegisterForm() {

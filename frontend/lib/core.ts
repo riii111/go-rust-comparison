@@ -1,6 +1,7 @@
 import { toast } from "@/hooks/ui/use-toast";
 import { getClientSideAuthHeader } from "@/lib/cookies";
 import { redirect } from "next/navigation";
+import { ApiRequestBody } from "@/config/types/api/core";
 
 // APIのベースURL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -52,17 +53,12 @@ const createRequestConfig = (
 
 // カスタムフェッチ関数
 export async function customFetch<
-  RequestInput extends Record<string, unknown> | undefined = Record<
-    string,
-    unknown
-  >,
+  RequestInput extends ApiRequestBody | undefined = ApiRequestBody,
   RequestResult = unknown
 >(
   endpoint: string,
   options: IFetchOptions<
-    RequestInput extends Record<string, unknown>
-      ? RequestInput
-      : Record<string, never>
+    RequestInput extends ApiRequestBody ? RequestInput : Record<string, never>
   >
 ): Promise<CustomFetchResponse<RequestResult>> {
   if (!API_BASE_URL) {
