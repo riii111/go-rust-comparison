@@ -1,3 +1,6 @@
+APP_SERVICE_NAME = app
+RUN_APP = docker-compose exec $(APP_SERVICE_NAME)
+
 prepare:
 	docker-compose up -d --build
 
@@ -14,5 +17,8 @@ down:
 	docker-compose down
 
 format:
-	docker-compose exec app go fmt
-	docker-compose exec app goimports -l -w .
+	$(RUN_APP) go fmt
+	$(RUN_APP) goimports -l -w .
+
+lint:
+	$(RUN_APP) golangci-lint run
