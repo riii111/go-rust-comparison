@@ -15,27 +15,27 @@ import { Button } from '@/components/ui/button'
 const navItems = [
     {
         title: '商品一覧',
-        href: '/products',
+        href: '/management/dashboard/products',
         icon: Package2,
     },
     {
         title: '在庫管理',
-        href: '/inventory',
+        href: '/management/dashboard/inventory',
         icon: BarChart3,
     },
     {
         title: '店舗一覧',
-        href: '/stores',
+        href: '/management/dashboard/stores',
         icon: Store,
     },
     {
         title: 'ユーザー一覧',
-        href: '/users',
+        href: '/management/dashboard/users',
         icon: Users,
     },
     {
         title: '設定',
-        href: '/settings',
+        href: '/management/dashboard/settings',
         icon: Settings,
     },
 ]
