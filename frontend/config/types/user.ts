@@ -1,4 +1,3 @@
-import { UserRole } from "@/config/constants/roles";
 import { ApiRequestBody } from "@/config/types/api/core";
 
 export interface User {
@@ -6,7 +5,6 @@ export interface User {
   username: string;
   email: string;
   avatar_url: string;
-  role: UserRole;
   store_id: string;
   created_at: string;
   updated_at: string;
@@ -17,7 +15,6 @@ export interface UpdateUserRequest extends ApiRequestBody {
   email?: string;
   password?: string;
   avatar?: string | null;
-  role?: UserRole;
   store_id?: string;
 }
 
@@ -40,5 +37,4 @@ export interface RegisterRequest extends ApiRequestBody {
   email: string;
   password: string;
   store_id: string;
-  role: UserRole;
 }

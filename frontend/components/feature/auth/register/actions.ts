@@ -35,7 +35,6 @@ export async function registerAction(
       password: payload.password,
       confirmPassword: payload.password,
       storeId: payload.store_id,
-      role: payload.role,
       agreedToTerms: true,
     });
 
