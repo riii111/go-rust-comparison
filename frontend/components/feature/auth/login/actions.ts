@@ -13,7 +13,7 @@ const loginSchema = z.object({
   password: z.string().min(8, "パスワードは8文字以上である必要があります"),
 });
 
-export type LoginActionResult = {
+type LoginActionResult = {
   success: boolean;
   error?: string;
 };

@@ -19,6 +19,7 @@ interface FormSelectProps {
     className?: string;
     labelClassName?: string;
     error?: string;
+    onOpenChange?: (open: boolean) => void;
 }
 
 const FormSelect: React.FC<FormSelectProps> = ({
@@ -32,7 +33,8 @@ const FormSelect: React.FC<FormSelectProps> = ({
     onChange,
     className,
     labelClassName,
-    error
+    error,
+    onOpenChange
 }) => {
     return (
         <div className="space-y-2">
@@ -45,11 +47,12 @@ const FormSelect: React.FC<FormSelectProps> = ({
             <Select
                 id={id}
                 name={name}
-                options={options}
+                options={options as SelectOption[]}
                 placeholder={placeholder}
                 required={required}
                 value={value}
                 onChange={onChange}
+                onOpenChange={onOpenChange}
                 className={className}
             />
             {error && <p className="text-red-500 text-sm">{error}</p>}

@@ -1,64 +1,74 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import FormField from "@/components/common/molecules/FormField";
-import { loginAction, LoginActionResult } from "@/components/feature/auth/login/actions";
-import { z } from "zod";
-import { useState } from "react";
+import { loginAction } from "@/components/feature/auth/login/actions";
 import { LinkText } from "@/components/common/atoms/LinkText";
-
-const loginSchema = z.object({
-    email: z.string().email("有効なメールアドレスを入力してください"),
-    password: z.string().min(8, "パスワードは8文字以上である必要があります"),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import { loginSchema } from "@/components/feature/auth/validation";
+import { MESSAGES } from "@/components/feature/auth/constants";
+import { useForm } from "@conform-to/react";
+import { parseWithZod } from '@conform-to/zod';
 
 export default function LoginForm() {
-
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState(false);
-    const [errors, setErrors] = useState<Partial<Record<keyof LoginFormData, string>>>({});
-
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        setIsLoading(true);
-        setErrors({});
-
-        try {
+    // useStateと異なり、Reactの並行性機能を利用できる
+    // Reactのライフサイクルフック内で自動制御可能（アンマウント→自動でクリーンアップ）
+    // エラー発生時は自動でエラーバウンダリに通知されるのでtry-catchも不要
+    const [isPending, startTransition] = useTransition();
+    const [form, { email, password }] = useForm({
+        id: "login-form",
+        defaultValue: {
+            email: "",
+            password: ""
+        },
+        onValidate: ({ formData }) => {
+            return parseWithZod(formData, {
+                schema: loginSchema
+            });
+        },
+        shouldValidate: "onBlur",
+        shouldRevalidate: "onInput",    // 入力時に再バリデーション
+        onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
             const formData = new FormData(event.currentTarget);
-            const validatedData = loginSchema.parse(formData);
-            const result: LoginActionResult = await loginAction(
-                validatedData.email,
-                validatedData.password
-            );
+            const submission = parseWithZod(formData, {
+                schema: loginSchema
+            });
 
-            // リダイレクトの場合はresultが一瞬undefinedになる
-            if (result && !result.success) {
-                setErrors(prev => ({ ...prev, form: result.error || "ログインに失敗しました。" }));
+            if (submission.status !== "success") {
+                return submission.reply();
             }
-        } catch (error) {
-            if (error instanceof z.ZodError) {
-                const fieldErrors: Partial<Record<keyof LoginFormData, string>> = {};
-                error.errors.forEach(err => {
-                    if (err.path[0]) {
-                        fieldErrors[err.path[0] as keyof LoginFormData] = err.message;
+
+            startTransition(() => {
+                void (async () => {
+                    const result = await loginAction(
+                        submission.value.email,
+                        submission.value.password
+                    );
+
+                    if (result && !result.success) {
+                        return submission.reply({
+                            formErrors: [result.error || MESSAGES.login.failed]
+                        });
                     }
-                });
-                setErrors(prev => ({ ...prev, ...fieldErrors }));
-            } else {
-                setErrors(prev => ({ ...prev, form: "予期せぬエラーが発生しました。" }));
-            }
-        } finally {
-            setIsLoading(false);
+                    router.push('/management/dashboard');
+                })();
+            });
         }
+    });
+
+    const handleRegisterClick = (e: React.MouseEvent) => {
+        // 画面遷移時にsubmitイベントが発火され、バリデーションエラー文言が出るのを防止
+        e.preventDefault();
+        e.stopPropagation();
+        router.push('/management/auth/register');
     };
 
     return (
         <Card className="w-full max-w-md border border-gray-200 shadow-sm">
-            <form onSubmit={handleSubmit}>
+            <form id={form.id} onSubmit={form.onSubmit} noValidate>
                 <CardHeader className="space-y-1">
                     <CardTitle className="text-xl font-bold text-gray-800">
                         ログイン
@@ -70,26 +80,28 @@ export default function LoginForm() {
 
                 <CardContent className="space-y-4">
                     <FormField
-                        id="email"
-                        name="email"
+                        id={email.id}
+                        name={email.name}
                         type="email"
                         label="メールアドレス"
                         placeholder="your-email@example.com"
                         className="w-full border-gray-200 text-sm"
                         labelClassName="text-gray-800 text-sm"
                         required
-                        error={errors.email}
+                        error={email.errors?.[0]}
+                        autoComplete="email"
                     />
 
                     <FormField
-                        id="password"
-                        name="password"
+                        id={password.id}
+                        name={password.name}
                         type="password"
                         label="パスワード"
                         className="w-full border-gray-200 text-sm"
                         labelClassName="text-gray-800 text-sm"
                         required
-                        error={errors.password}
+                        error={password.errors?.[0]}
+                        autoComplete="current-password"
                     />
 
                     <div className="flex items-center justify-between">
@@ -113,15 +125,16 @@ export default function LoginForm() {
                     <Button
                         type="submit"
                         className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                        disabled={isLoading}
+                        disabled={isPending || form.status === 'error'}  // フォームが未変更のまま送信されるのを防ぐためdirtyも設定
                     >
-                        ログイン
+                        {isPending ? 'ログイン中...' : 'ログイン'}
                     </Button>
-                    <LinkText
-                        text="こちら"
-                        onClick={() => router.push('/management/auth/register')}
-                        prefix="アカウントをお持ちでない方は "
-                    />
+                    <div onClick={handleRegisterClick}>
+                        <LinkText
+                            text="こちら"
+                            prefix="アカウントをお持ちでない方は "
+                        />
+                    </div>
                 </CardFooter>
             </form>
         </Card>

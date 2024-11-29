@@ -1,7 +1,7 @@
 import { CardContent } from "@/components/ui/card";
 import FormSelect from "@/components/common/molecules/FormSelect";
 import { Button } from "@/components/ui/button";
-import { StoreInfoFormData } from "@/config/validations/register";
+import { StoreInfoFormData } from "@/components/feature/auth/validation";
 import { STORE_OPTIONS } from "@/config/constants/stores";
 import { ROLE_OPTIONS } from "@/config/constants/roles";
 
@@ -9,9 +9,11 @@ interface StoreInfoStepProps {
     formData: StoreInfoFormData;
     onChange: (data: Partial<StoreInfoFormData>) => void;
     errors: Record<string, string>;
+    onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
+    onOpenChange?: (open: boolean) => void;
 }
 
-export function StoreInfoStep({ formData, onChange, errors }: StoreInfoStepProps) {
+export function StoreInfoStep({ formData, onChange, errors, onBlur, onOpenChange }: StoreInfoStepProps) {
     const handleChange = (name: keyof StoreInfoFormData, value: string | boolean) => {
         onChange({ ...formData, [name]: value });
     };
@@ -30,6 +32,7 @@ export function StoreInfoStep({ formData, onChange, errors }: StoreInfoStepProps
                 value={formData.storeId}
                 onChange={(value) => handleChange('storeId', value)}
                 error={errors.storeId}
+                onOpenChange={onOpenChange}
             />
 
             <FormSelect
@@ -44,6 +47,7 @@ export function StoreInfoStep({ formData, onChange, errors }: StoreInfoStepProps
                 value={formData.role}
                 onChange={(value) => handleChange('role', value)}
                 error={errors.role}
+                onOpenChange={onOpenChange}
             />
 
             <label className="flex items-start space-x-2 mt-4">
@@ -53,6 +57,7 @@ export function StoreInfoStep({ formData, onChange, errors }: StoreInfoStepProps
                     className="form-checkbox h-4 w-4 mt-2 text-primary border-gray-200"
                     checked={formData.agreedToTerms}
                     onChange={(e) => handleChange('agreedToTerms', e.target.checked)}
+                    onBlur={onBlur}
                 />
                 <span className="text-gray-400 text-sm">
                     <Button variant="link" className="text-primary hover:text-primary/80 p-0">

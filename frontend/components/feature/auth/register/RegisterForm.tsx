@@ -7,84 +7,86 @@ import { useRouter } from "next/navigation";
 import { AccountInfoStep } from './contents/AccountInfoStep';
 import { StoreInfoStep } from './contents/StoreInfoStep';
 import { LinkText } from "@/components/common/atoms/LinkText";
-import { AccountInfo, RegisterFormData } from '@/config/types/auth/register';
-import { accountInfoSchema, StoreInfoFormData, storeInfoSchema } from '@/config/validations/register';
-import { registerAction } from './actions';
-// import { useToast } from '@/components/ui/use-toast';
-import { z } from 'zod';
-
-const initialFormData: RegisterFormData = {
-    lastName: "",
-    firstName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    storeId: "",
-    role: "",
-    agreedToTerms: false,
-};
+import { registerAction, RegisterActionResult } from './actions';
+import { RULES } from '@/components/feature/auth/constants';
+import { emailSchema, passwordSchema, validateField, RegisterFormData, accountInfoSchema, storeInfoSchema } from "@/components/feature/auth/validation";
+import * as z from "zod";
 
 export default function RegisterForm() {
     const router = useRouter();
-    const [currentStep, setCurrentStep] = useState(1);
-    const [formData, setFormData] = useState<RegisterFormData>(initialFormData);
-    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [currentStep, setCurrentStep] = useState<typeof RULES.steps.account | typeof RULES.steps.store>(
+        RULES.steps.account
+    );
+    const [formData, setFormData] = useState<RegisterFormData>({
+        lastName: "",
+        firstName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        storeId: "",
+        role: "",
+        agreedToTerms: false,
+    });
+    const [errors, setErrors] = useState({
+        accountInfo: {} as Record<string, string>,
+        storeInfo: {} as Record<string, string>,
+    });
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const totalSteps = 2;
 
-    const validateStep = async (step: number) => {
-        try {
-            if (step === 1) {
-                await accountInfoSchema.parseAsync({
-                    lastName: formData.lastName,
-                    firstName: formData.firstName,
-                    email: formData.email,
-                    password: formData.password,
-                    confirmPassword: formData.confirmPassword,
-                });
-            } else {
-                await storeInfoSchema.parseAsync({
-                    storeId: formData.storeId,
-                    role: formData.role,
-                    agreedToTerms: formData.agreedToTerms,
-                });
-            }
-            setErrors({});
-            return true;
-        } catch (error: unknown) {
-            const newErrors: Record<string, string> = {};
-            if (error instanceof z.ZodError) {
-                error.errors.forEach((err) => {
-                    if (err.path) {
-                        newErrors[err.path[0]] = err.message;
-                    }
-                });
-                setErrors(newErrors);
-                return false;
-            }
-        };
-    }
+    const getCurrentErrors = () =>
+        currentStep === RULES.steps.account ? errors.accountInfo : errors.storeInfo;
 
+    const setCurrentErrors = (newErrors: Record<string, string>) => {
+        setErrors(prev => ({
+            ...prev,
+            [getCurrentStepKey(currentStep)]: newErrors
+        }));
+    };
+
+    const getCurrentStepKey = (step: typeof RULES.steps.account | typeof RULES.steps.store): 'accountInfo' | 'storeInfo' =>
+        step === RULES.steps.account ? 'accountInfo' : 'storeInfo';
+
+    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        let schema;
+        switch (name) {
+            case 'email':
+                schema = emailSchema;
+                break;
+            case 'password':
+            case 'confirmPassword':
+                schema = passwordSchema;
+                break;
+            default:
+                return;
+        }
+        validateField(schema, name, value, setErrors, getCurrentStepKey(currentStep));
+    };
     const handleNext = async () => {
-        const isValid = await validateStep(currentStep);
+        const isValid = await validateStep(
+            currentStep,
+            formData,
+            setCurrentErrors
+        );
         if (isValid) {
-            setCurrentStep(prev => prev + 1);
+            setCurrentStep(RULES.steps.store);
         }
     };
 
     const handleBack = () => {
-        setCurrentStep(prev => prev - 1);
-        setErrors({});
+        setCurrentStep(prev => prev === RULES.steps.account ? RULES.steps.account : RULES.steps.store);
+        setCurrentErrors({});
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const isValid = await validateStep(currentStep);
+
+        const isValid = await validateStep(currentStep, formData, setCurrentErrors);
         if (!isValid) return;
 
         setIsSubmitting(true);
         try {
-            const result = await registerAction(
+            const result: RegisterActionResult = await registerAction(
                 `${formData.lastName} ${formData.firstName}`,
                 formData.email,
                 formData.password,
@@ -96,11 +98,57 @@ export default function RegisterForm() {
                 throw new Error(result.error);
             }
 
-            // toast.success('アカウントを作成しました');
-        } catch (error: any) {
-            // toast.error(error.message || 'アカウントの作成に失敗しました');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                // エラーハンドリング
+                console.error(error.message);
+            }
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleLoginClick = (e: React.MouseEvent) => {
+        // 画面遷移時にsubmitイベントが発火され、バリデーションエラー文言が出るのを防止
+        e.preventDefault();
+        e.stopPropagation();
+        router.push('/management/auth/login');
+    };
+
+    const handleStepChange = (data: Partial<RegisterFormData>) => {
+        setFormData(prev => ({ ...prev, ...data }));
+    };
+
+    const stepProps = {
+        formData,
+        onChange: handleStepChange,
+        errors: getCurrentErrors(),
+        onBlur: handleBlur,
+    };
+
+    const validateStep = async (
+        step: typeof RULES.steps.account | typeof RULES.steps.store,
+        data: RegisterFormData,
+        setFieldErrors: (errors: Record<string, string>) => void
+    ) => {
+        try {
+            if (step === RULES.steps.account) {
+                await accountInfoSchema.parseAsync(data);
+            } else {
+                await storeInfoSchema.parseAsync(data);
+            }
+            return true;
+        } catch (err) {
+            if (err instanceof z.ZodError) {
+                const fieldErrors: Record<string, string> = {};
+                err.errors.forEach(error => {
+                    if (error.path[0]) {
+                        fieldErrors[error.path[0]] = error.message;
+                    }
+                });
+                setFieldErrors(fieldErrors);
+            }
+            return false;
         }
     };
 
@@ -110,7 +158,7 @@ export default function RegisterForm() {
                 <CardHeader className="space-y-1">
                     {/* Step Indicator */}
                     <div className="flex justify-center space-x-2 mb-6">
-                        {[1, 2].map((step) => (
+                        {[RULES.steps.account, RULES.steps.store].map((step) => (
                             <div
                                 key={step}
                                 className={`w-24 h-1 rounded-full ${step <= currentStep ? 'bg-primary' : 'bg-gray-200'
@@ -120,33 +168,25 @@ export default function RegisterForm() {
                     </div>
 
                     <CardTitle className="text-xl font-bold text-gray-800">
-                        {currentStep === 1 ? "アカウント情報" : "店舗情報"}
+                        {currentStep === RULES.steps.account ? "アカウント情報" : "店舗情報"}
                     </CardTitle>
                     <CardDescription className="text-gray-400 text-sm">
-                        {currentStep === 1
+                        {currentStep === RULES.steps.account
                             ? "基本情報を入力してください"
                             : "所属する店舗の情報を入力してください"
                         }
                     </CardDescription>
                 </CardHeader>
 
-                {currentStep === 1 ? (
-                    <AccountInfoStep
-                        formData={formData as AccountInfo}
-                        onChange={setFormData as (data: AccountInfo) => void}
-                        errors={errors}
-                    />
+                {currentStep === RULES.steps.account ? (
+                    <AccountInfoStep {...stepProps} />
                 ) : (
-                    <StoreInfoStep
-                        formData={formData as StoreInfoFormData}
-                        onChange={setFormData as (data: Partial<StoreInfoFormData>) => void}
-                        errors={errors}
-                    />
+                    <StoreInfoStep {...stepProps} />
                 )}
 
                 <CardFooter className="flex flex-col space-y-4">
                     <div className="flex space-x-2 w-full">
-                        {currentStep > 1 && (
+                        {currentStep > RULES.steps.account && (
                             <Button
                                 type="button"
                                 variant="outline"
@@ -156,7 +196,7 @@ export default function RegisterForm() {
                                 戻る
                             </Button>
                         )}
-                        {currentStep < totalSteps ? (
+                        {currentStep < RULES.steps.total ? (
                             <Button
                                 type="button"
                                 className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -174,11 +214,12 @@ export default function RegisterForm() {
                             </Button>
                         )}
                     </div>
-                    <LinkText
-                        text="こちら"
-                        onClick={() => router.push('/management/auth/login')}
-                        prefix="すでにアカウントをお持ちの方は "
-                    />
+                    <div onClick={handleLoginClick}>
+                        <LinkText
+                            text="こちら"
+                            prefix="すでにアカウントをお持ちの方は "
+                        />
+                    </div>
                 </CardFooter>
             </form>
         </Card>
