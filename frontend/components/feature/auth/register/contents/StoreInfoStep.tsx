@@ -5,7 +5,7 @@ import { STORE_OPTIONS } from "@/config/constants/stores";
 import { ROLE_OPTIONS } from "@/config/constants/roles";
 import { TermsCheckbox } from "@/components/feature/auth/register/contents/TermsCheckBox";
 
-export interface StoreInfoStepProps {
+interface StoreInfoStepProps {
     storeId: FieldMetadata<string>;
     role: FieldMetadata<string>;
     agreedToTerms: FieldMetadata<boolean>;

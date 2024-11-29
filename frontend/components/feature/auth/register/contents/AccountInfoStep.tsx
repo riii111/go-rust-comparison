@@ -2,7 +2,7 @@ import { CardContent } from "@/components/ui/card";
 import FormField from "@/components/common/molecules/FormField";
 import { type FieldMetadata } from "@conform-to/react";
 
-export interface AccountInfoStepProps {
+interface AccountInfoStepProps {
     lastName: FieldMetadata<string>;
     firstName: FieldMetadata<string>;
     email: FieldMetadata<string>;
