@@ -123,7 +123,7 @@ export default function LoginForm() {
                     <Button
                         type="submit"
                         className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                        disabled={isPending || form.status === 'error'}  // フォームが未変更のまま送信されるのを防ぐためdirtyも設定
+                        disabled={isPending || form.status === 'error'}
                     >
                         {isPending ? 'ログイン中...' : 'ログイン'}
                     </Button>
