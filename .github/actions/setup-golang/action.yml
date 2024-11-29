@@ -1,0 +1,21 @@
+name: 'Setup Golang'
+
+description: 'Setup Golang by using cache'
+
+inputs:
+  working-directory:
+    description: 'working-directory of go.mod'
+    required: true
+
+runs:
+  # compositeが必須
+  using: 'composite'
+  steps:
+      - name: Setup Golang
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: '${{ env.WORKING_DIRECTORY }}/go.mod'
+          cache: true
+          cache-dependency-path: |
+            **/go.sum
+            **/go.mod

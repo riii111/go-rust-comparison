@@ -24,23 +24,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Golang
-        uses: actions/setup-go@v5
+        uses: ./.github/actions/setup-golang
         with:
-          go-version-file: '${{ env.WORKING_DIRECTORY }}/go.mod'
-          cache: true
-          cache-dependency-path: |
-            **/go.sum
-            **/go.mod
+          working-directory: ${{ env.WORKING_DIRECTORY }}
       - name: Format Code
         run: |
           go fmt
           goimports -l -w .
       - name: Lint Code
         run: golangci-lint run
-      - name: Commit Code
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add .
-          git commit -m "Update"
-          git push
