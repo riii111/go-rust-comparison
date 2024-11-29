@@ -13,7 +13,6 @@ import { parseWithZod } from '@conform-to/zod';
 import { useActionState } from 'react';
 import { useState } from 'react';
 import { RegisterRequest } from '@/config/types/api/user';
-import { UserRole } from "@/config/constants/roles";
 
 export default function RegisterForm() {
     const router = useRouter();
@@ -37,7 +36,6 @@ export default function RegisterForm() {
             password: "",
             confirmPassword: "",
             storeId: "",
-            role: "",
             agreedToTerms: false,
         },
         onValidate: ({ formData }) => {
@@ -91,7 +89,6 @@ export default function RegisterForm() {
         password: fields.password,
         confirmPassword: fields.confirmPassword,
         storeId: fields.storeId,
-        role: fields.role,
         agreedToTerms: fields.agreedToTerms
     };
 
@@ -108,7 +105,6 @@ export default function RegisterForm() {
                             email: formData.get('email') as string,
                             password: formData.get('password') as string,
                             store_id: formData.get('storeId') as string,
-                            role: formData.get('role') as UserRole,
                         };
                         await dispatch(payload);
                     }

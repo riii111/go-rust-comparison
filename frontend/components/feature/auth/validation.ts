@@ -126,9 +126,7 @@ export const storeInfoSchema = z.object({
   storeId: z.string({
     required_error: "店舗を選択してください",
   }),
-  role: z.string({
-    required_error: "役割を選択してください",
-  }),
+
   agreedToTerms: z
     .boolean({
       required_error: "利用規約とプライバシーポリシーに同意してください",
@@ -146,7 +144,6 @@ export const registerSchema = z.object({
   password: z.string(),
   confirmPassword: z.string(),
   storeId: z.string(),
-  role: z.string(),
   agreedToTerms: z.boolean(),
 });
 
