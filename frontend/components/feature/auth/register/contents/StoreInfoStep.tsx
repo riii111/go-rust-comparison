@@ -1,63 +1,53 @@
 import { CardContent } from "@/components/ui/card";
 import FormSelect from "@/components/common/molecules/FormSelect";
-import { Button } from "@/components/ui/button";
-import { StoreInfoFormData } from "@/components/feature/auth/validation";
+import { type FieldMetadata } from "@conform-to/react";
 import { STORE_OPTIONS } from "@/config/constants/stores";
 import { ROLE_OPTIONS } from "@/config/constants/roles";
+import { Button } from "@/components/ui/button";
 
 interface StoreInfoStepProps {
-    formData: StoreInfoFormData;
-    onChange: (data: Partial<StoreInfoFormData>) => void;
-    errors: Record<string, string>;
-    onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
-    onOpenChange?: (open: boolean) => void;
+    storeId: FieldMetadata<string>;
+    role: FieldMetadata<string>;
+    agreedToTerms: FieldMetadata<boolean>;
 }
 
-export function StoreInfoStep({ formData, onChange, errors, onBlur, onOpenChange }: StoreInfoStepProps) {
-    const handleChange = (name: keyof StoreInfoFormData, value: string | boolean) => {
-        onChange({ ...formData, [name]: value });
-    };
-
+export function StoreInfoStep({
+    storeId,
+    role,
+    agreedToTerms
+}: StoreInfoStepProps) {
     return (
         <CardContent className="space-y-4">
             <FormSelect
-                id="storeId"
-                name="storeId"
+                id={storeId.id}
+                name={storeId.name}
                 label="店舗"
                 options={STORE_OPTIONS}
                 placeholder="店舗を選択してください"
                 className="w-full border-gray-200 text-sm"
                 labelClassName="text-gray-800 text-sm"
                 required
-                value={formData.storeId}
-                onChange={(value) => handleChange('storeId', value)}
-                error={errors.storeId}
-                onOpenChange={onOpenChange}
+                error={storeId.errors?.[0]}
             />
 
             <FormSelect
-                id="role"
-                name="role"
+                id={role.id}
+                name={role.name}
                 label="役割"
                 options={ROLE_OPTIONS}
                 placeholder="役割を選択してください"
                 className="w-full border-gray-200 text-sm"
                 labelClassName="text-gray-800 text-sm"
                 required
-                value={formData.role}
-                onChange={(value) => handleChange('role', value)}
-                error={errors.role}
-                onOpenChange={onOpenChange}
+                error={role.errors?.[0]}
             />
 
             <label className="flex items-start space-x-2 mt-4">
                 <input
                     type="checkbox"
-                    name="agreedToTerms"
+                    id={agreedToTerms.id}
+                    name={agreedToTerms.name}
                     className="form-checkbox h-4 w-4 mt-2 text-primary border-gray-200"
-                    checked={formData.agreedToTerms}
-                    onChange={(e) => handleChange('agreedToTerms', e.target.checked)}
-                    onBlur={onBlur}
                 />
                 <span className="text-gray-400 text-sm">
                     <Button variant="link" className="text-primary hover:text-primary/80 p-0">
@@ -70,8 +60,8 @@ export function StoreInfoStep({ formData, onChange, errors, onBlur, onOpenChange
                     に同意します
                 </span>
             </label>
-            {errors.agreedToTerms && (
-                <p className="text-red-500 text-sm">{errors.agreedToTerms}</p>
+            {agreedToTerms.errors?.[0] && (
+                <p className="text-red-500 text-sm">{agreedToTerms.errors[0]}</p>
             )}
         </CardContent>
     );

@@ -1,26 +1,28 @@
 import { CardContent } from "@/components/ui/card";
 import FormField from "@/components/common/molecules/FormField";
-import { AccountInfoFormData } from "@/components/feature/auth/validation";
+import { type FieldMetadata } from "@conform-to/react";
 
 interface AccountInfoStepProps {
-    formData: AccountInfoFormData;
-    onChange: (data: AccountInfoFormData) => void;
-    errors: Record<string, string>;
-    onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
+    lastName: FieldMetadata<string>;
+    firstName: FieldMetadata<string>;
+    email: FieldMetadata<string>;
+    password: FieldMetadata<string>;
+    confirmPassword: FieldMetadata<string>;
 }
 
-export function AccountInfoStep({ formData, onChange, errors, onBlur }: AccountInfoStepProps) {
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        onChange({ ...formData, [name]: value });
-    };
-
+export function AccountInfoStep({
+    lastName,
+    firstName,
+    email,
+    password,
+    confirmPassword
+}: AccountInfoStepProps) {
     return (
         <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
                 <FormField
-                    id="lastName"
-                    name="lastName"
+                    id={lastName.id}
+                    name={lastName.name}
                     type="text"
                     label="姓"
                     placeholder="山田"
@@ -28,14 +30,11 @@ export function AccountInfoStep({ formData, onChange, errors, onBlur }: AccountI
                     className="w-full border-gray-200 text-sm"
                     labelClassName="text-gray-800 text-sm"
                     required
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    error={errors.lastName}
-                    onBlur={onBlur}
+                    error={lastName.errors?.[0]}
                 />
                 <FormField
-                    id="firstName"
-                    name="firstName"
+                    id={firstName.id}
+                    name={firstName.name}
                     type="text"
                     label="名"
                     placeholder="太郎"
@@ -43,16 +42,13 @@ export function AccountInfoStep({ formData, onChange, errors, onBlur }: AccountI
                     className="w-full border-gray-200 text-sm"
                     labelClassName="text-gray-800 text-sm"
                     required
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    error={errors.firstName}
-                    onBlur={onBlur}
+                    error={firstName.errors?.[0]}
                 />
             </div>
 
             <FormField
-                id="email"
-                name="email"
+                id={email.id}
+                name={email.name}
                 type="email"
                 label="メールアドレス"
                 placeholder="your-email@example.com"
@@ -60,15 +56,12 @@ export function AccountInfoStep({ formData, onChange, errors, onBlur }: AccountI
                 className="w-full border-gray-200 text-sm"
                 labelClassName="text-gray-800 text-sm"
                 required
-                value={formData.email}
-                onChange={handleChange}
-                error={errors.email}
-                onBlur={onBlur}
+                error={email.errors?.[0]}
             />
 
             <FormField
-                id="password"
-                name="password"
+                id={password.id}
+                name={password.name}
                 type="password"
                 label="パスワード"
                 autoComplete="new-password"
@@ -76,25 +69,19 @@ export function AccountInfoStep({ formData, onChange, errors, onBlur }: AccountI
                 labelClassName="text-gray-800 text-sm"
                 description="8文字以上の半角英数字で入力してください"
                 required
-                value={formData.password}
-                onChange={handleChange}
-                error={errors.password}
-                onBlur={onBlur}
+                error={password.errors?.[0]}
             />
 
             <FormField
-                id="confirmPassword"
-                name="confirmPassword"
+                id={confirmPassword.id}
+                name={confirmPassword.name}
                 type="password"
                 label="パスワード（確認）"
                 autoComplete="new-password"
                 className="w-full border-gray-200 text-sm"
                 labelClassName="text-gray-800 text-sm"
                 required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                error={errors.confirmPassword}
-                onBlur={onBlur}
+                error={confirmPassword.errors?.[0]}
             />
         </CardContent>
     );

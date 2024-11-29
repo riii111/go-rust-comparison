@@ -7,8 +7,7 @@ import { useRouter } from "next/navigation";
 import FormField from "@/components/common/molecules/FormField";
 import { loginAction } from "@/components/feature/auth/login/actions";
 import { LinkText } from "@/components/common/atoms/LinkText";
-import { loginSchema } from "@/components/feature/auth/validation";
-import { MESSAGES } from "@/components/feature/auth/constants";
+import { loginSchema, MESSAGES } from "@/components/feature/auth/validation";
 import { useForm } from "@conform-to/react";
 import { parseWithZod } from '@conform-to/zod';
 
@@ -44,8 +43,7 @@ export default function LoginForm() {
             startTransition(() => {
                 void (async () => {
                     const result = await loginAction(
-                        submission.value.email,
-                        submission.value.password
+                        submission.value
                     );
 
                     if (result && !result.success) {

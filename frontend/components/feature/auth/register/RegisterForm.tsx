@@ -1,111 +1,80 @@
 'use client';
 
-import { useState } from 'react';
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { AccountInfoStep } from './contents/AccountInfoStep';
 import { StoreInfoStep } from './contents/StoreInfoStep';
 import { LinkText } from "@/components/common/atoms/LinkText";
-import { registerAction, RegisterActionResult } from './actions';
-import { RULES } from '@/components/feature/auth/constants';
-import { emailSchema, passwordSchema, validateField, RegisterFormData, accountInfoSchema, storeInfoSchema } from "@/components/feature/auth/validation";
-import * as z from "zod";
+import { registerAction, RegisterActionResult } from '@/components/feature/auth/register/actions';
+import { accountInfoSchema, storeInfoSchema, RULES } from "@/components/feature/auth/validation";
+import { useForm } from "@conform-to/react";
+import { parseWithZod } from '@conform-to/zod';
+import { useActionState } from 'react';
+import { useState } from 'react';
+import { RegisterRequest } from '@/config/types/user';
+import { UserRole } from "@/config/constants/roles";
 
 export default function RegisterForm() {
     const router = useRouter();
+    const [state, dispatch] = useActionState<RegisterActionResult, RegisterRequest>(
+        registerAction,
+        {
+            success: false,
+            isPending: false
+        }
+    );
     const [currentStep, setCurrentStep] = useState<typeof RULES.steps.account | typeof RULES.steps.store>(
         RULES.steps.account
     );
-    const [formData, setFormData] = useState<RegisterFormData>({
-        lastName: "",
-        firstName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        storeId: "",
-        role: "",
-        agreedToTerms: false,
-    });
-    const [errors, setErrors] = useState({
-        accountInfo: {} as Record<string, string>,
-        storeInfo: {} as Record<string, string>,
-    });
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const getCurrentErrors = () =>
-        currentStep === RULES.steps.account ? errors.accountInfo : errors.storeInfo;
+    const [form, fields] = useForm({
+        id: "register-form",
+        defaultValue: {
+            lastName: "",
+            firstName: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+            storeId: "",
+            role: "",
+            agreedToTerms: false,
+        },
+        onValidate: ({ formData }) => {
+            // 現在のステップに応じてバリデーションスキーマを切り替え
+            const schema = currentStep === RULES.steps.account
+                ? accountInfoSchema
+                : storeInfoSchema;
 
-    const setCurrentErrors = (newErrors: Record<string, string>) => {
-        setErrors(prev => ({
-            ...prev,
-            [getCurrentStepKey(currentStep)]: newErrors
-        }));
-    };
+            return parseWithZod(formData, { schema });
+        },
+        shouldValidate: "onBlur",
+        shouldRevalidate: "onInput",
+        onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
+            event.preventDefault();  // 複数ステップに分かれるので、フォームのデフォルト送信を防止
 
-    const getCurrentStepKey = (step: typeof RULES.steps.account | typeof RULES.steps.store): 'accountInfo' | 'storeInfo' =>
-        step === RULES.steps.account ? 'accountInfo' : 'storeInfo';
+            const formData = new FormData(event.currentTarget);
+            const schema = currentStep === RULES.steps.account
+                ? accountInfoSchema
+                : storeInfoSchema;
 
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        let schema;
-        switch (name) {
-            case 'email':
-                schema = emailSchema;
-                break;
-            case 'password':
-            case 'confirmPassword':
-                schema = passwordSchema;
-                break;
-            default:
+            const submission = parseWithZod(formData, { schema });
+
+            if (submission.status !== "success") {
+                return submission.reply();
+            }
+
+            if (currentStep === RULES.steps.account) {
+                setCurrentStep(RULES.steps.store);
                 return;
+            }
+
+            return submission.reply();
         }
-        validateField(schema, name, value, setErrors, getCurrentStepKey(currentStep));
-    };
-    const handleNext = async () => {
-        const isValid = await validateStep(
-            currentStep,
-            formData,
-            setCurrentErrors
-        );
-        if (isValid) {
-            setCurrentStep(RULES.steps.store);
-        }
-    };
+    });
 
     const handleBack = () => {
-        setCurrentStep(prev => prev === RULES.steps.account ? RULES.steps.account : RULES.steps.store);
-        setCurrentErrors({});
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        const isValid = await validateStep(currentStep, formData, setCurrentErrors);
-        if (!isValid) return;
-
-        setIsSubmitting(true);
-        try {
-            const result: RegisterActionResult = await registerAction(
-                `${formData.lastName} ${formData.firstName}`,
-                formData.email,
-                formData.password,
-                formData.storeId,
-                formData.role
-            );
-
-            if (!result.success) {
-                throw new Error(result.error);
-            }
-
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                // エラーハンドリング
-                console.error(error.message);
-            }
-        } finally {
-            setIsSubmitting(false);
-        }
+        setCurrentStep(RULES.steps.account);
     };
 
     const handleLoginClick = (e: React.MouseEvent) => {
@@ -115,46 +84,36 @@ export default function RegisterForm() {
         router.push('/management/auth/login');
     };
 
-    const handleStepChange = (data: Partial<RegisterFormData>) => {
-        setFormData(prev => ({ ...prev, ...data }));
-    };
-
     const stepProps = {
-        formData,
-        onChange: handleStepChange,
-        errors: getCurrentErrors(),
-        onBlur: handleBlur,
-    };
-
-    const validateStep = async (
-        step: typeof RULES.steps.account | typeof RULES.steps.store,
-        data: RegisterFormData,
-        setFieldErrors: (errors: Record<string, string>) => void
-    ) => {
-        try {
-            if (step === RULES.steps.account) {
-                await accountInfoSchema.parseAsync(data);
-            } else {
-                await storeInfoSchema.parseAsync(data);
-            }
-            return true;
-        } catch (err) {
-            if (err instanceof z.ZodError) {
-                const fieldErrors: Record<string, string> = {};
-                err.errors.forEach(error => {
-                    if (error.path[0]) {
-                        fieldErrors[error.path[0]] = error.message;
-                    }
-                });
-                setFieldErrors(fieldErrors);
-            }
-            return false;
-        }
+        lastName: fields.lastName,
+        firstName: fields.firstName,
+        email: fields.email,
+        password: fields.password,
+        confirmPassword: fields.confirmPassword,
+        storeId: fields.storeId,
+        role: fields.role,
+        agreedToTerms: fields.agreedToTerms
     };
 
     return (
         <Card className="w-full max-w-md border border-gray-200 shadow-sm">
-            <form onSubmit={handleSubmit} noValidate>
+            <form
+                id={form.id}
+                onSubmit={form.onSubmit}
+                action={async (formData: FormData) => {
+                    if (currentStep === RULES.steps.store) {
+                        const payload: RegisterRequest = {
+                            username: `${formData.get('lastName')} ${formData.get('firstName')}`,
+                            email: formData.get('email') as string,
+                            password: formData.get('password') as string,
+                            store_id: formData.get('storeId') as string,
+                            role: formData.get('role') as UserRole,
+                        };
+                        await dispatch(payload);
+                    }
+                }}
+                noValidate
+            >
                 <CardHeader className="space-y-1">
                     {/* Step Indicator */}
                     <div className="flex justify-center space-x-2 mb-6">
@@ -196,23 +155,18 @@ export default function RegisterForm() {
                                 戻る
                             </Button>
                         )}
-                        {currentStep < RULES.steps.total ? (
-                            <Button
-                                type="button"
-                                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
-                                onClick={handleNext}
-                            >
-                                次へ
-                            </Button>
-                        ) : (
-                            <Button
-                                type="submit"
-                                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
-                                disabled={isSubmitting}
-                            >
-                                {isSubmitting ? '作成中...' : 'アカウントを作成'}
-                            </Button>
-                        )}
+                        <Button
+                            type="submit"
+                            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
+                            disabled={state.isPending || form.status === 'error'}
+                        >
+                            {currentStep < RULES.steps.total
+                                ? '次へ'
+                                : state.isPending
+                                    ? '作成中...'
+                                    : 'アカウントを作成'
+                            }
+                        </Button>
                     </div>
                     <div onClick={handleLoginClick}>
                         <LinkText

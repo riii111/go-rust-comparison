@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-const RULES = {
+export const RULES = {
   password: {
     min: 8,
-    max: 72,
+    max: 72, // bcryptの制限に基づく一般的な上限
   },
   steps: {
     account: 1,
@@ -12,7 +12,7 @@ const RULES = {
   },
 } as const;
 
-const MESSAGES = {
+export const MESSAGES = {
   email: {
     invalid: "有効なメールアドレスを入力してください",
     required: "メールアドレスを入力してください",
@@ -24,6 +24,9 @@ const MESSAGES = {
     requirements:
       "パスワードは大文字、小文字、数字、特殊文字をそれぞれ1文字以上含める必要があります",
     mismatch: "パスワードが一致しません",
+  },
+  login: {
+    failed: "ログインに失敗しました。",
   },
   unexpected: "予期せぬエラーが発生しました",
 } as const;
@@ -103,11 +106,15 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 // アカウント情報のバリデーション
 export const accountInfoSchema = z
   .object({
-    lastName: z.string().min(1, "姓を入力してください"),
-    firstName: z.string().min(1, "名を入力してください"),
+    lastName: z.string({
+      required_error: "姓を入力してください",
+    }),
+    firstName: z.string({
+      required_error: "名を入力してください",
+    }),
     email: emailSchema,
     password: passwordSchema,
-    confirmPassword: z.string(),
+    confirmPassword: passwordSchema,
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: MESSAGES.password.mismatch,
@@ -116,8 +123,12 @@ export const accountInfoSchema = z
 
 // 店舗情報のバリデーション
 export const storeInfoSchema = z.object({
-  storeId: z.string().min(1, "店舗を選択してください"),
-  role: z.string().min(1, "役割を選択してください"),
+  storeId: z.string({
+    required_error: "店舗を選択してください",
+  }),
+  role: z.string({
+    required_error: "役割を選択してください",
+  }),
   agreedToTerms: z.boolean().refine((val) => val === true, {
     message: "利用規約とプライバシーポリシーに同意してください",
   }),

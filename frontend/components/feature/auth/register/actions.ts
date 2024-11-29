@@ -1,77 +1,83 @@
 "use server";
 
-import { customFetch } from "@/lib/core";
-import { AuthTokenCreatedResponse } from "@/config/types/user";
-import { proxyServerCookies } from "@/lib/cookiesForServer";
+// import { customFetch } from "@/lib/core";
+// import { AuthTokenCreatedResponse, RegisterRequest } from "@/config/types/user";
+// import { proxyServerCookies } from "@/lib/cookiesForServer";
 import { redirect } from "next/navigation";
 import { registerSchema } from "@/components/feature/auth/validation";
 import { z } from "zod";
+import { RegisterRequest } from "@/config/types/user";
 
-const ENDPOINT = "/auth";
+// const ENDPOINT = "/auth";
 
 export type RegisterActionResult = {
   success: boolean;
   error?: string;
+  isPending?: boolean;
 };
-
-interface RegisterRequest {
-  username: string;
-  email: string;
-  password: string;
-  storeId: string;
-  role: string;
-}
 
 /**
  * ユーザー登録関数
+ * @param state - 現在の状態
+ * @param payload - 登録データ
  */
 export async function registerAction(
-  username: string,
-  email: string,
-  password: string,
-  storeId: string,
-  role: string
+  state: RegisterActionResult,
+  payload: RegisterRequest
 ): Promise<RegisterActionResult> {
   let redirectFlag = false;
   try {
     // サーバーサイドでも入力値の検証を行う
     registerSchema.parse({
-      lastName: username.split(" ")[0],
-      firstName: username.split(" ")[1] || "",
-      email,
-      password,
-      confirmPassword: password, // サーバーサイドでは既に確認済みの値
-      storeId,
-      role,
-      agreedToTerms: true, // クライアントで確認済み
+      lastName: payload.username.split(" ")[0],
+      firstName: payload.username.split(" ")[1] || "",
+      email: payload.email,
+      password: payload.password,
+      confirmPassword: payload.password,
+      storeId: payload.store_id,
+      role: payload.role,
+      agreedToTerms: true,
     });
 
-    const { headers } = await customFetch<
-      RegisterRequest,
-      AuthTokenCreatedResponse
-    >(`${ENDPOINT}/register/`, {
-      method: "POST",
-      body: { username, email, password, storeId, role },
-    });
+    // TODO: API実装されたら置き換え
+    return { success: true };
 
-    // レスポンスヘッダーからCookieを設定
-    await proxyServerCookies(headers);
+    // const { headers } = await customFetch<
+    //   RegisterRequest,
+    //   AuthTokenCreatedResponse
+    // >(`${ENDPOINT}/register/`, {
+    //   method: "POST",
+    //   body: payload,
+    // });
+
+    // // レスポンスヘッダーからCookieを設定
+    // await proxyServerCookies(headers);
 
     redirectFlag = true;
   } catch (error: unknown) {
     console.error("アカウント登録に失敗しました", error);
     if (error instanceof z.ZodError) {
-      return { success: false, error: "入力内容が正しくありません。" };
-    } else {
       return {
+        ...state,
+        success: false,
+        error: "入力内容が正しくありません。",
+      };
+    } else if (error instanceof Error) {
+      return {
+        ...state,
         success: false,
         error: error.message || "アカウント登録に失敗しました",
       };
     }
+    return {
+      ...state,
+      success: false,
+      error: "アカウント登録に失敗しました",
+    };
   }
 
   if (redirectFlag) {
     redirect("/dashboard");
   }
-  return { success: true };
+  return { ...state, success: true };
 }
