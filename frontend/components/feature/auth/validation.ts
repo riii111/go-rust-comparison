@@ -129,9 +129,13 @@ export const storeInfoSchema = z.object({
   role: z.string({
     required_error: "役割を選択してください",
   }),
-  agreedToTerms: z.boolean().refine((val) => val === true, {
-    message: "利用規約とプライバシーポリシーに同意してください",
-  }),
+  agreedToTerms: z
+    .boolean({
+      required_error: "利用規約とプライバシーポリシーに同意してください",
+    })
+    .refine((val) => val === true, {
+      message: "利用規約とプライバシーポリシーに同意してください",
+    }),
 });
 
 // 全体のスキーマ
