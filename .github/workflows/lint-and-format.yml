@@ -24,7 +24,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Format Code
-        run: go fmt
+        run: |
+          go fmt
+          goimports -l -w .
       - name: Lint Code
         run: golangci-lint run
       - name: Commit Code
