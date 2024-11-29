@@ -3,8 +3,8 @@
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { AccountInfoStep } from './contents/AccountInfoStep';
-import { StoreInfoStep } from './contents/StoreInfoStep';
+import { AccountInfoStep, AccountInfoStepProps } from '@/components/feature/auth/register/contents/AccountInfoStep';
+import { StoreInfoStep, StoreInfoStepProps } from '@/components/feature/auth/register/contents/StoreInfoStep';
 import { LinkText } from "@/components/common/atoms/LinkText";
 import { registerAction, RegisterActionResult } from '@/components/feature/auth/register/actions';
 import { accountInfoSchema, storeInfoSchema, RULES } from "@/components/feature/auth/validation";
@@ -14,6 +14,30 @@ import { useActionState } from 'react';
 import { useState } from 'react';
 import { RegisterRequest } from '@/config/types/api/user';
 import { UserRole } from "@/config/constants/roles";
+
+// フォームの全フィールドの型を定義
+type RegisterFormFields = {
+    lastName: string;
+    firstName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    storeId: string;
+    role: string;
+    agreedToTerms: boolean;
+}
+
+// 初期値を生成する関数
+const createInitialFormState = (): RegisterFormFields => ({
+    lastName: "",
+    firstName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    storeId: "",
+    role: "",
+    agreedToTerms: false,
+});
 
 export default function RegisterForm() {
     const router = useRouter();
@@ -30,16 +54,7 @@ export default function RegisterForm() {
 
     const [form, fields] = useForm({
         id: "register-form",
-        defaultValue: {
-            lastName: "",
-            firstName: "",
-            email: "",
-            password: "",
-            confirmPassword: "",
-            storeId: "",
-            role: "",
-            agreedToTerms: false,
-        },
+        defaultValue: createInitialFormState(),
         onValidate: ({ formData }) => {
             // 現在のステップに応じてバリデーションスキーマを切り替え
             const schema = currentStep === RULES.steps.account
@@ -84,16 +99,11 @@ export default function RegisterForm() {
         router.push('/management/auth/login');
     };
 
-    const stepProps = {
-        lastName: fields.lastName,
-        firstName: fields.firstName,
-        email: fields.email,
-        password: fields.password,
-        confirmPassword: fields.confirmPassword,
-        storeId: fields.storeId,
-        role: fields.role,
-        agreedToTerms: fields.agreedToTerms
-    };
+    // fieldsからstepPropsを生成
+    const stepProps = Object.keys(fields).reduce((acc, key) => ({
+        ...acc,
+        [key]: fields[key as keyof typeof fields]
+    }), {}) as AccountInfoStepProps & StoreInfoStepProps;
 
     return (
         <Card className="w-full max-w-md border border-gray-200 shadow-sm">
