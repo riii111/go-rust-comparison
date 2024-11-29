@@ -15,7 +15,7 @@ jobs:
       github.event.pull_request.draft == false
       && !startsWith(github.head_ref, 'release')
       && !startsWith(github.head_ref, 'doc')
-    name: Run Test Code
+    name: Lint and Format
     runs-on: ubuntu-latest
     defaults:
       run:
