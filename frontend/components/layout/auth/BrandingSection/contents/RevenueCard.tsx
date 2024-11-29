@@ -1,14 +1,6 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-
-const ChartSection = dynamic(
-    () => import('@/components/layout/auth/BrandingSection/contents/ChartSection'),
-    {
-        ssr: false,
-        loading: () => <div className="h-16 animate-pulse rounded" />
-    }
-);
+import ChartSection from '@/components/layout/auth/BrandingSection/contents/ChartSection';
 
 export default function RevenueCard() {
     return (
