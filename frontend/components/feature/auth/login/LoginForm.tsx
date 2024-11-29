@@ -51,7 +51,6 @@ export default function LoginForm() {
                             formErrors: [result.error || MESSAGES.login.failed]
                         });
                     }
-                    router.push('/management/dashboard');
                 })();
             });
         }
