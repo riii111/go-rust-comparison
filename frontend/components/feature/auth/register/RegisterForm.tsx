@@ -112,6 +112,7 @@ export default function RegisterForm() {
                 onSubmit={form.onSubmit}
                 action={async (formData: FormData) => {
                     if (currentStep === RULES.steps.store) {
+                        // フォームデータから直接APIリクエストデータを作成
                         const payload: RegisterRequest = {
                             username: `${formData.get('lastName')} ${formData.get('firstName')}`,
                             email: formData.get('email') as string,
