@@ -1,14 +1,15 @@
 import { CardContent } from "@/components/ui/card";
 import FormField from "@/components/common/molecules/FormField";
-import { AccountInfo } from "@/config/types/auth/register";
+import { AccountInfoFormData } from "@/components/feature/auth/validation";
 
 interface AccountInfoStepProps {
-    formData: AccountInfo;
-    onChange: (data: AccountInfo) => void;
+    formData: AccountInfoFormData;
+    onChange: (data: AccountInfoFormData) => void;
     errors: Record<string, string>;
+    onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
-export function AccountInfoStep({ formData, onChange, errors }: AccountInfoStepProps) {
+export function AccountInfoStep({ formData, onChange, errors, onBlur }: AccountInfoStepProps) {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         onChange({ ...formData, [name]: value });
@@ -30,6 +31,7 @@ export function AccountInfoStep({ formData, onChange, errors }: AccountInfoStepP
                     value={formData.lastName}
                     onChange={handleChange}
                     error={errors.lastName}
+                    onBlur={onBlur}
                 />
                 <FormField
                     id="firstName"
@@ -44,6 +46,7 @@ export function AccountInfoStep({ formData, onChange, errors }: AccountInfoStepP
                     value={formData.firstName}
                     onChange={handleChange}
                     error={errors.firstName}
+                    onBlur={onBlur}
                 />
             </div>
 
@@ -60,6 +63,7 @@ export function AccountInfoStep({ formData, onChange, errors }: AccountInfoStepP
                 value={formData.email}
                 onChange={handleChange}
                 error={errors.email}
+                onBlur={onBlur}
             />
 
             <FormField
@@ -75,6 +79,7 @@ export function AccountInfoStep({ formData, onChange, errors }: AccountInfoStepP
                 value={formData.password}
                 onChange={handleChange}
                 error={errors.password}
+                onBlur={onBlur}
             />
 
             <FormField
@@ -89,6 +94,7 @@ export function AccountInfoStep({ formData, onChange, errors }: AccountInfoStepP
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 error={errors.confirmPassword}
+                onBlur={onBlur}
             />
         </CardContent>
     );

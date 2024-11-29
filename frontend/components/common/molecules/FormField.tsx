@@ -9,10 +9,7 @@ interface FormFieldProps {
     label: string;
     placeholder?: string;
     required?: boolean;
-    value?: string;
-    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
-    error?: string;
+    error?: string | string[] | null;
     className?: string;
     labelClassName?: string;
     autoComplete?: string;
@@ -26,9 +23,6 @@ const FormField: React.FC<FormFieldProps> = ({
     label,
     placeholder,
     required = false,
-    value,
-    onChange,
-    onBlur,
     error,
     className,
     labelClassName,
@@ -49,14 +43,11 @@ const FormField: React.FC<FormFieldProps> = ({
                 type={type}
                 placeholder={placeholder}
                 required={required}
-                value={value}
-                onChange={onChange}
-                onBlur={onBlur}
                 className={className}
                 autoComplete={autoComplete}
             />
             {description && <p className="text-gray-400 text-xs">{description}</p>}
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && <p className="text-red-500 text-sm">{Array.isArray(error) ? error[0] : error}</p>}
         </div>
     );
 };

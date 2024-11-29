@@ -21,6 +21,7 @@ interface SelectProps {
     value?: string;
     onChange?: (value: string) => void;
     className?: string;
+    onOpenChange?: (open: boolean) => void; // onBlurの代わり
 }
 
 export const Select = memo(function Select({
@@ -31,10 +32,11 @@ export const Select = memo(function Select({
     required,
     value,
     onChange,
-    className
+    className,
+    onOpenChange
 }: SelectProps) {
     return (
-        <UISelect name={name} value={value} onValueChange={onChange} required={required}>
+        <UISelect name={name} value={value} onValueChange={onChange} required={required} onOpenChange={onOpenChange}>
             <SelectTrigger id={id} className={className}>
                 <SelectValue placeholder={placeholder} />
             </SelectTrigger>

@@ -4,7 +4,7 @@ import { customFetch } from "@/lib/core";
 import { AuthTokenCreatedResponse } from "@/config/types/user";
 import { proxyServerCookies } from "@/lib/cookiesForServer";
 import { redirect } from "next/navigation";
-import { registerSchema } from "@/config/validations/register";
+import { registerSchema } from "@/components/feature/auth/validation";
 import { z } from "zod";
 
 const ENDPOINT = "/auth";
