@@ -104,11 +104,11 @@ export default {
         "dashboard-gradient": `
           linear-gradient(
             to bottom right,
-            hsl(0, 8%, 93%) 0%,    /* #f1eded */
-            hsl(0, 7%, 94%) 25%,   /* #f2eeee */
-            hsl(0, 8%, 95%) 50%,   /* #f4f1f1 */
-            hsl(0, 7%, 94%) 75%,   /* #f2eeee */
-            hsl(0, 8%, 93%) 100%   /* #f1eded */
+            hsl(350, 12%, 92%) 0%,    /* より濃いめの赤グレー #f0e6e6 */
+            hsl(348, 10%, 93%) 25%,   /* #f1e9e9 */
+            hsl(345, 9%, 96%) 50%,    /* #f4f1f1 */
+            hsl(348, 10%, 93%) 75%,   /* #f1e9e9 */
+            hsl(350, 12%, 92%) 100%   /* #f0e6e6 */
           )
         `,
       },
