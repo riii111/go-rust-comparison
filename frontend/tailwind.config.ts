@@ -13,14 +13,22 @@ export default {
         // メインカラー（重要なアクション、ブランドカラー）
         primary: {
           DEFAULT: "hsl(var(--primary))", // #E02060
-          light: "hsl(var(--primary-light))", // #E02060 with opacity
-          dark: "hsl(var(--primary-dark))", // darker shade of #E02060
-          foreground: "hsl(var(--primary-foreground))", // white text on primary
+          light: "hsl(var(--primary-light))", // #F0E0E0 - アクティブ状態の背景など
+          lighter: "hsl(var(--primary-lighter))", // #F0E0E0よりさらに薄い - ホバー状態など
+          foreground: "hsl(var(--primary-foreground))", // 白テキスト
+        },
+        // サイドナビのアクセントカラー
+        accent: {
+          DEFAULT: "hsl(var(--accent))", // #E0C0C0
+          pink: {
+            light: "hsl(var(--accent-pink-light))", // #F0E0E0
+            DEFAULT: "hsl(var(--accent-pink))", // #E0C0C0
+          },
         },
         // グレースケール
         gray: {
           50: "hsl(var(--gray-50))", // #FAFAFA - 背景色
-          100: "hsl(var(--gray-100))", // #F0F0F0 - より濃い背景色
+          100: "hsl(var(--gray-100))", // #F0F0F0
           200: "hsl(var(--gray-200))", // #E0E0E0 - ボーダー
           300: "hsl(var(--gray-300))", // #D0D0D0
           400: "hsl(var(--gray-400))", // #A0A0A0 - 補足テキスト
@@ -60,8 +68,8 @@ export default {
         },
         // 破壊的アクション
         destructive: {
-          DEFAULT: "hsl(var(--destructive))", // #FF4444
-          foreground: "hsl(var(--destructive-foreground))", // white
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
         },
         // フォーム要素
         border: "hsl(var(--border))", // #E0E0E0
@@ -75,6 +83,12 @@ export default {
           "4": "hsl(var(--chart-4))", // #34C759
           "5": "hsl(var(--chart-5))", // #FFB340
         },
+        dashboard: {
+          background: {
+            DEFAULT: "hsl(var(--dashboard-background))", // ベースカラー
+            subtle: "hsl(var(--dashboard-background-subtle))", // よりライトな色
+          },
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -85,6 +99,18 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      backgroundImage: {
+        "dashboard-gradient": `
+          linear-gradient(
+            to bottom right,
+            hsl(0, 8%, 93%) 0%,    /* #f1eded */
+            hsl(0, 7%, 94%) 25%,   /* #f2eeee */
+            hsl(0, 8%, 95%) 50%,   /* #f4f1f1 */
+            hsl(0, 7%, 94%) 75%,   /* #f2eeee */
+            hsl(0, 8%, 93%) 100%   /* #f1eded */
+          )
+        `,
       },
     },
   },
