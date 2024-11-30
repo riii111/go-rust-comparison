@@ -53,8 +53,8 @@ export function NavLinks() {
                         variant="ghost"
                         asChild
                         className={cn(
-                            'w-full justify-start text-gray-800 hover:bg-primary-lighter',
-                            isActive && 'bg-primary-light text-primary hover:bg-primary-light'
+                            'w-full justify-start text-gray-800 text-md font-semibold hover:bg-primary-lighter',
+                            isActive && 'text-primary hover:bg-primary-light'
                         )}
                     >
                         <Link href={item.href}>
