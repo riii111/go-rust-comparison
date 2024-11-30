@@ -15,15 +15,29 @@ export default function DashboardLayout({
     return (
         <div className="relative flex h-screen overflow-hidden">
             <div className="absolute inset-0 bg-dashboard-gradient">
+                {/* グラデーション背景 */}
                 <div className="absolute inset-0 dashboard-noise mix-blend-soft-light"></div>
             </div>
-            <div className="relative flex w-full">
-                <SideNav />
-                <div className="flex-1 flex flex-col overflow-hidden">
-                    <Header />
-                    <main className="flex-1 overflow-auto bg-[#FBFBFB] p-6">
-                        {children}
-                    </main>
+
+            <div className="relative flex w-full p-6">
+                <div className="rounded-2xl backdrop-blur-sm">
+                    <SideNav />
+                </div>
+
+                {/* メインエリア */}
+                <div className="flex-1 flex flex-col gap-6">
+                    <div className="rounded-2xl backdrop-blur-sm">
+                        <Header />
+                    </div>
+
+                    {/* メインコンテンツ */}
+                    <div className="flex-1 rounded-2xl bg-white/80 backdrop-blur-sm overflow-hidden">
+                        <main className="h-full overflow-auto">
+                            <div className="h-full bg-[#FBFBFB] p-6">
+                                {children}
+                            </div>
+                        </main>
+                    </div>
                 </div>
             </div>
         </div>
