@@ -10,9 +10,14 @@ body {
   :root {
     /* メインカラー */
     --primary: 342 85% 50%; /* #E02060 */
-    --primary-light: 342 85% 60%;
-    --primary-dark: 342 85% 40%;
+    --primary-light: 0 63% 91%; /* #F0E0E0 */
+    --primary-lighter: 0 33% 94%; /* より薄いピンク */
     --primary-foreground: 0 0% 100%;
+
+    /* アクセントカラー */
+    --accent: 0 33% 88%; /* #E0C0C0 */
+    --accent-pink: 0 33% 88%; /* #E0C0C0 */
+    --accent-pink-light: 0 63% 91%; /* #F0E0E0 */
 
     /* グレースケール */
     --gray-50: 0 0% 98%; /* #FAFAFA */
@@ -27,8 +32,8 @@ body {
     --gray-900: 0 0% 6%; /* #101010 */
 
     /* 背景色とフォアグラウンド */
-    --background: 0 0% 98%;
-    --foreground: 0 0% 13%;
+    --background: 0 0% 98%; /* #FAFAFA */
+    --foreground: 0 0% 13%; /* #202020 */
 
     /* カード関連 */
     --card: 0 0% 100%;
@@ -68,6 +73,10 @@ body {
 
     /* 角丸 */
     --radius: 0.5rem;
+
+    /* ダッシュボード背景用 */
+    --dashboard-background: 0 7% 94%; /* #f2eeee */
+    --dashboard-background-subtle: 0 8% 95%; /* #f4f1f1 */
   }
 
   .dark {
@@ -82,4 +91,10 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Noiseテクスチャのオーバーレイ */
+.dashboard-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.4;
 }
