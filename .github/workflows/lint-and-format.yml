@@ -30,9 +30,7 @@ jobs:
       - name: Format Code
         run: go fmt
       - name: Format Import
-        run: |
-          # go install golang.org/x/tools/cmd/goimports@latest
-          goimports -l -w .
+        run: goimports -l -w .
       - name: Lint Code
         uses: golangci/golangci-lint-action@v6
         with:
