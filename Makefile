@@ -17,7 +17,7 @@ down:
 	docker-compose down -v
 
 format:
-	$(RUN_APP) go fmt
+	$(RUN_APP) go fmt ./...
 	$(RUN_APP) goimports -l -w .
 
 lint:
@@ -25,3 +25,6 @@ lint:
 
 tidy:
 	$(RUN_APP) go mod tidy
+
+check: format lint tidy
+	@echo "All checks passed!"
