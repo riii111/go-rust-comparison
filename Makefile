@@ -14,7 +14,7 @@ up:
 	docker-compose up
 
 down:
-	docker-compose down
+	docker-compose down -v
 
 format:
 	$(RUN_APP) go fmt
