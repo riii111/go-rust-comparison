@@ -14,7 +14,7 @@ runs:
       - name: Setup Golang
         uses: actions/setup-go@v5
         with:
-          go-version-file: ${{ env.WORKING_DIRECTORY }}/go.mod
+          go-version-file: ${{ inputs.working-directory }}/go.mod
           cache: true
           cache-dependency-path: |
             **/go.sum
