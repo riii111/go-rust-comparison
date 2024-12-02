@@ -28,8 +28,15 @@ jobs:
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
       - name: Format Code
+        run: go fmt
+      - name: Format Import
         run: |
-          go fmt
+          go install golang.org/x/tools/cmd/goimports@latest
           goimports -l -w .
+      - name: Lint Code
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.60
+          working-directory: ${{ env.WORKING_DIRECTORY }}
       - name: Lint Code
         run: golangci-lint run
