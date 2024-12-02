@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  :root {
+    /* メインカラー */
+    --primary: 342 85% 50%; /* #E02060 */
+    --primary-light: 342 85% 60%;
+    --primary-dark: 342 85% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    /* グレースケール */
+    --gray-50: 0 0% 98%; /* #FAFAFA */
+    --gray-100: 0 0% 94%; /* #F0F0F0 */
+    --gray-200: 0 0% 88%; /* #E0E0E0 */
+    --gray-300: 0 0% 82%; /* #D0D0D0 */
+    --gray-400: 0 0% 63%; /* #A0A0A0 */
+    --gray-500: 0 0% 50%; /* #808080 */
+    --gray-600: 0 0% 38%; /* #606060 */
+    --gray-700: 0 0% 25%; /* #404040 */
+    --gray-800: 0 0% 13%; /* #202020 */
+    --gray-900: 0 0% 6%; /* #101010 */
+
+    /* 背景色とフォアグラウンド */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 13%;
+
+    /* カード関連 */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 13%;
+
+    /* ポップオーバー関連 */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 13%;
+
+    /* セカンダリーアクション */
+    --secondary: 0 0% 94%;
+    --secondary-foreground: 0 0% 13%;
+
+    /* ミュートカラー */
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 63%;
+
+    /* アクセントカラー */
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 13%;
+
+    /* 破壊的アクション */
+    --destructive: 0 85% 63%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* フォーム要素 */
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 342 85% 50%;
+
+    /* チャートカラー */
+    --chart-1: 342 85% 50%; /* #E02060 - プライマリー */
+    --chart-2: 351 100% 61%; /* #FF385C - 赤みのピンク */
+    --chart-3: 210 100% 62%; /* #40A0FF - 青 */
+    --chart-4: 142 65% 49%; /* #34C759 - 緑 */
+    --chart-5: 35 100% 62%; /* #FFB340 - オレンジ */
+
+    /* 角丸 */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* ダークモードのカラー定義（あとで） */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
