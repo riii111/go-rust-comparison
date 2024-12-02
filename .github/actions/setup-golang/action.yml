@@ -14,8 +14,12 @@ runs:
       - name: Setup Golang
         uses: actions/setup-go@v5
         with:
-          go-version-file: '${{ env.WORKING_DIRECTORY }}/go.mod'
+          go-version-file: ${{ env.WORKING_DIRECTORY }}/go.mod
           cache: true
           cache-dependency-path: |
             **/go.sum
             **/go.mod
+      - name: Install Dependencies
+        run: go mod install
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}
