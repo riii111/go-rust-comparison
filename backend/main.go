@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "log"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,8 +14,7 @@ func main() {
 			"msg": "pass",
 		})
 	})
-	// if err := r.Run(":8000"); err != nil {
-	// 	log.Fatalf("サーバの起動に失敗しました: %v", err)
-	// }
-	r.Run(":8000")
+	if err := r.Run(":8000"); err != nil {
+		log.Fatalf("サーバの起動に失敗しました: %v", err)
+	}
 }
