@@ -30,6 +30,6 @@ jobs:
       - name: Format Code
         run: |
           go fmt
-          goimports -l -w .
+          # goimports -l -w .
       - name: Lint Code
         run: golangci-lint run
