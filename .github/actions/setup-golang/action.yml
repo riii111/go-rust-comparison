@@ -8,7 +8,7 @@ inputs:
     required: true
 
 runs:
-  # Golangの環境設定を共通化するため、compositeが必須
+  # Golangの環境設定を共通化(compositeを使用)するため、compositeが必須
   using: 'composite'
   steps:
       - name: Setup Golang
