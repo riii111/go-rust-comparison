@@ -22,3 +22,6 @@ format:
 
 lint:
 	$(RUN_APP) golangci-lint run
+
+tidy:
+	$(RUN_APP) go mod tidy
