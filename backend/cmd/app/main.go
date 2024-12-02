@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"auth-system/internal/adapter/database"
+	"internal/adapter/database"
 
 	"github.com/gin-gonic/gin"
 )
