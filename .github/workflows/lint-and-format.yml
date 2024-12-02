@@ -25,7 +25,7 @@ jobs:
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
       - name: Format Code
-        run: go fmt
+        run: go fmt ./...
       - name: Format Import
         run: goimports -l -w .
       - name: Lint Code
