@@ -13,8 +13,8 @@ export default {
         // メインカラー（重要なアクション、ブランドカラー）
         primary: {
           DEFAULT: "hsl(var(--primary))", // #E02060
-          light: "hsl(var(--primary-light))", // #F0E0E0 - アクティブ状態の背景など
-          lighter: "hsl(var(--primary-lighter))", // #F0E0E0よりさらに薄い - ホバー状態など
+          light: "rgba(224, 32, 96, 0.12)", // より明確な背景色（アクティブ状態用）
+          lighter: "rgba(224, 32, 96, 0.08)", // より控えめな背景色（ホバー状態用）
           foreground: "hsl(var(--primary-foreground))", // 白テキスト
         },
         // サイドナビのアクセントカラー

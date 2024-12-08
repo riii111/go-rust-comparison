@@ -53,12 +53,18 @@ export function NavLinks() {
                         variant="ghost"
                         asChild
                         className={cn(
-                            'w-full justify-start text-gray-800 text-md font-semibold hover:bg-primary-lighter',
-                            isActive && 'text-primary hover:bg-primary-light'
+                            'w-full justify-start text-gray-800 text-md font-semibold',
+                            'transition-colors duration-200',
+                            'hover:bg-gray-100 hover:text-primary',
+                            isActive && 'bg-primary-lighter text-primary hover:bg-primary-light'
                         )}
                     >
                         <Link href={item.href}>
-                            <item.icon className="mr-3 h-5 w-5" />
+                            <item.icon className={cn(
+                                "mr-3 h-5 w-5",
+                                "transition-colors duration-200",
+                                isActive && "text-primary"
+                            )} />
                             {item.title}
                         </Link>
                     </Button>
