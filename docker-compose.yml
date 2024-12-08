@@ -1,3 +1,5 @@
+version: '3.9'
+
 services:
   app:
     container_name: app
@@ -5,8 +7,8 @@ services:
       context: .
       dockerfile: backend/containers/golang/Dockerfile
     volumes:
-      - ./backend:/app/backend
-    working_dir: /app/backend
+      - ./backend:/usr/local/go/src/go_rust_comparison/backend
+    working_dir: /usr/local/go/src/go_rust_comparison/backend
     ports:
       - "8000:8000"
     command: air -d
@@ -15,6 +17,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
   db:
     container_name: db
     build:
@@ -33,6 +36,7 @@ services:
       - POSTGRES_PASSWORD
     ports:
       - '5432:5432' # デバッグ用
+
   nginx:
     container_name: web
     build:
@@ -44,5 +48,6 @@ services:
       - app
     volumes:
       - ./backend/containers/nginx/nginx.conf:/etc/nginx/nginx.conf
+
 volumes:
   db_data:
