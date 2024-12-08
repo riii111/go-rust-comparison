@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export function SideNav() {
     return (
-        <div className="w-64 flex flex-col h-full">
+        <div className="w-56 flex flex-col h-full">
             {/* ロゴ部分 */}
             <div className="flex items-center px-4 py-4">
                 <div className="p-2 bg-primary/10 rounded-lg">
@@ -12,7 +12,7 @@ export function SideNav() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </div>
-                <span className="ml-3 text-xl font-bold text-gray-800">Store Analytics</span>
+                <span className="ml-3 text-[15px] font-semibold tracking-tight text-[hsl(var(--text-primary))]">Store Analytics</span>
             </div>
 
             {/* スクロール可能なナビゲーションエリア */}

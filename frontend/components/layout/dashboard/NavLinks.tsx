@@ -53,7 +53,7 @@ export function NavLinks() {
                         variant="ghost"
                         asChild
                         className={cn(
-                            'w-full justify-start text-gray-800 text-md font-semibold',
+                            'w-full justify-start text-gray-800 text-md',
                             'transition-colors duration-200',
                             'hover:bg-gray-100 hover:text-primary',
                             isActive && 'bg-primary-lighter text-primary hover:bg-primary-light'
