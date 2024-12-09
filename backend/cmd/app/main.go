@@ -1,14 +1,13 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	// データベースを初期化
-	// database.InitDB()
 
 	// ginのインスタンスを作成
 	r := gin.Default()
@@ -17,7 +16,7 @@ func main() {
 			"msg": "パス",
 		})
 	})
-	// if err := r.Run(":8000"); err != nil {
-	// 	log.Fatalf("サーバの起動に失敗しました: %v", err)
-	// }
+	if err := r.Run(":8000"); err != nil {
+		log.Fatalf("サーバの起動に失敗しました: %v", err)
+	}
 }

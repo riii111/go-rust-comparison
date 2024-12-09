@@ -4,11 +4,11 @@ services:
     build:
       context: .
       dockerfile: containers/golang/Dockerfile
+    command: sh -c "/usr/local/bin/entrypoint.sh"
     volumes:
       - ./backend:/usr/local/go/src/go_rust_comparison
     ports:
       - "8000:8000"
-    command: air -d
     env_file:
       - .env
     depends_on:
