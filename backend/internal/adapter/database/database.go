@@ -14,21 +14,14 @@ var DB *gorm.DB
 func buildDSN() string {
 	// 環境変数から値を取得
 	user := os.Getenv("POSTGRES_USER")
-	fmt.Printf("POSTGRES_USER: %s\n", user)
 	password := os.Getenv("POSTGRES_PASSWORD")
-	fmt.Printf("POSTGRES_PASSWORD: %s\n", password)
-	// host := os.Getenv("POSTGRES_HOST")
-	// fmt.Printf("POSTGRES_HOST: %s\n", host)
-	host := "db"
 	port := os.Getenv("POSTGRES_PORT")
-	fmt.Printf("POSTGRES_PORT: %s\n", port)
 	dbname := os.Getenv("POSTGRES_NAME")
-	fmt.Printf("POSTGRES_NAME: %s\n", dbname)
 
 	// DSN形式で結合
 	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		user, password, host, port, dbname,
+		"postgres://%s:%s@db:%s/%s?sslmode=disable",
+		user, password, port, dbname,
 	)
 }
 
@@ -44,4 +37,5 @@ func InitDB() {
 
 	// グローバル変数に設定
 	DB = db
+	log.Println("データベース接続に成功しました")
 }
