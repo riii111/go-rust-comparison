@@ -1,42 +1,46 @@
 package database
 
 import (
+	"fmt"
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
-	"auth-system/models"
 )
 
 var DB *gorm.DB
 
+func buildDSN() string {
+	// 環境変数から値を取得
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
+	host := os.Getenv("POSTGRES_HOST")
+	port := os.Getenv("POSTGRES_PORT")
+	dbname := os.Getenv("POSTGRES_NAME")
+
+	// DSN形式で結合
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		user, password, host, port, dbname,
+	)
+}
+
 func InitDB() {
-	// 環境変数をロード
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	// DSNを構築
+	dsn := buildDSN()
+
+	// 環境変数DATABASE_URLが設定されている場合はそちらを優先
+	if envDSN := os.Getenv("DATABASE_URL"); envDSN != "" {
+		dsn = envDSN
 	}
 
-	// PostgreSQLのDSN（データソース名）を取得
-	dsn := os.Getenv("DATABASE_URL")
-
-	// データベース接続
+	// Gormを使用してデータベースに接続
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		log.Fatalf("データベース接続失敗: %v", err)
 	}
 
-	// UUID拡張機能を有効化
-	db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
-
-	// マイグレーションを実行
-	err = db.AutoMigrate(&models.Operator{}, &models.Store{})
-	if err != nil {
-		log.Fatal("Migration failed:", err)
-	}
-
+	// グローバル変数に設定
 	DB = db
 }
