@@ -71,3 +71,7 @@ export interface ProductFilter {
   sortBy?: "name" | "price" | "createdAt";
   sortOrder?: "asc" | "desc";
 }
+
+export type ProductResponse = Product;
+
+export type ProductsResponse = Product[];
