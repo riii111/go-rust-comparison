@@ -19,7 +19,7 @@ import {
 } from "lucide-react"
 import { ProductDeleteDialog } from '@/components/feature/dashboard/products/dialog/ProductDeleteDialog'
 import { useState } from 'react'
-
+import { useRouter } from 'next/navigation'
 // 開発用のダミーデータ
 const DUMMY_PRODUCTS = [
     {
@@ -70,6 +70,7 @@ const DUMMY_PRODUCTS = [
 ]
 
 export function ProductList() {
+    const router = useRouter()
     const [deleteDialog, setDeleteDialog] = useState<{
         isOpen: boolean
         productId: string | null
@@ -135,7 +136,11 @@ export function ProductList() {
                     </TableHeader>
                     <TableBody>
                         {DUMMY_PRODUCTS.map((product) => (
-                            <TableRow key={product.id} className="hover:bg-gray-50/50">
+                            <TableRow
+                                key={product.id}
+                                className="hover:bg-gray-50/50 cursor-pointer"
+                                onClick={() => router.push(`/management/dashboard/products/${product.id}`)}
+                            >
                                 <TableCell className="p-2">
                                     <div className="relative w-20 h-20">
                                         <Image
