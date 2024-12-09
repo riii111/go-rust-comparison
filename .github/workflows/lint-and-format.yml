@@ -1,0 +1,40 @@
+name: Lint and Format Code
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches-ignore:
+      - 'release/**'
+      - 'doc/**'
+
+env:
+  WORKING_DIRECTORY: backend
+
+jobs:
+  lint-and-format:
+    if: |
+      github.event.pull_request.draft == false
+      && !startsWith(github.head_ref, 'release')
+      && !startsWith(github.head_ref, 'doc')
+    name: Lint and Format
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Golang
+        uses: ./.github/actions/setup-golang
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+      - name: Format Code
+        run: go fmt ./...
+      - name: Format Import
+        run: |
+          go install golang.org/x/tools/cmd/goimports@latest
+          goimports -l -w .
+      - name: Lint Code
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.60
+          working-directory: ${{ env.WORKING_DIRECTORY }}/cmd/app
