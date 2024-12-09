@@ -21,7 +21,7 @@ export function Header() {
 
                 {/* ユーザーアバター */}
                 <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder-avatar.jpg" />
+                    <AvatarImage src="https://github.com/shadcn.png" />
                     <AvatarFallback>UN</AvatarFallback>
                 </Avatar>
             </div>
