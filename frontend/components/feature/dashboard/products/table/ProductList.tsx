@@ -17,6 +17,8 @@ import {
     Pencil,
     Trash2,
 } from "lucide-react"
+import { ProductDeleteDialog } from '@/components/feature/dashboard/products/dialog/ProductDeleteDialog'
+import { useState } from 'react'
 
 // 開発用のダミーデータ
 const DUMMY_PRODUCTS = [
@@ -68,6 +70,55 @@ const DUMMY_PRODUCTS = [
 ]
 
 export function ProductList() {
+    const [deleteDialog, setDeleteDialog] = useState<{
+        isOpen: boolean
+        productId: string | null
+        productName: string
+    }>({
+        isOpen: false,
+        productId: null,
+        productName: ''
+    })
+
+    const handleDelete = async () => {
+        if (!deleteDialog.productId) return
+
+        try {
+            // TODO: API実装後に削除処理を追加
+            console.log('Deleting product:', deleteDialog.productId)
+
+            // 成功時の処理
+            setDeleteDialog({ isOpen: false, productId: null, productName: '' })
+        } catch (error) {
+            console.error('Failed to delete product:', error)
+            // TODO: エラー処理
+        }
+    }
+
+    const renderActionButtons = (product: typeof DUMMY_PRODUCTS[0]) => (
+        <div className="flex items-center justify-center gap-1">
+            <Button
+                variant="ghost"
+                size="icon"
+                className="hover:bg-gray-100"
+            >
+                <Pencil className="w-4 h-4 text-gray-600" />
+            </Button>
+            <Button
+                variant="ghost"
+                size="icon"
+                className="hover:bg-red-50 hover:text-red-600"
+                onClick={() => setDeleteDialog({
+                    isOpen: true,
+                    productId: product.id,
+                    productName: product.name
+                })}
+            >
+                <Trash2 className="w-4 h-4" />
+            </Button>
+        </div>
+    )
+
     return (
         <Card className="border-0 shadow-none">
             <div className="rounded-lg border">
@@ -80,7 +131,6 @@ export function ProductList() {
                             <TableHead className="text-right">価格</TableHead>
                             <TableHead>在庫状況</TableHead>
                             <TableHead className="text-center">操作</TableHead>
-
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -127,22 +177,7 @@ export function ProductList() {
                                     </span>
                                 </TableCell>
                                 <TableCell>
-                                    <div className="flex items-center justify-center gap-1">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="hover:bg-gray-100"
-                                        >
-                                            <Pencil className="w-4 h-4 text-gray-600" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="hover:bg-red-50 hover:text-red-600"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </div>
+                                    {renderActionButtons(product)}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -179,6 +214,14 @@ export function ProductList() {
                     </Button>
                 </div>
             </div>
+
+            {/* 削除ダイアログ */}
+            <ProductDeleteDialog
+                isOpen={deleteDialog.isOpen}
+                onClose={() => setDeleteDialog({ isOpen: false, productId: null, productName: '' })}
+                onConfirm={handleDelete}
+                productName={deleteDialog.productName}
+            />
         </Card>
     )
 }
