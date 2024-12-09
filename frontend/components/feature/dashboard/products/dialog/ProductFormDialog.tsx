@@ -7,8 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import Image from 'next/image'
-import { ImagePlus, Trash2 } from 'lucide-react'
+import { ProductImageUpload } from './ProductImageUpload'
 
 interface ProductFormDialogProps {
     isOpen: boolean
@@ -37,16 +36,16 @@ export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormD
     )
     const isEditing = !!initialData?.id
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        // TODO: 画像アップロード処理を実装
-        console.log('Image upload:', e.target.files)
-    }
-
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        // TODO: API実装後に送信処理を追加
-        console.log('Form submitted:', formData)
-        onClose()
+        try {
+            // TODO: API実装後に送信処理を追加
+            console.log('Form submitted:', formData)
+            onClose()
+        } catch (error) {
+            console.error('Failed to submit form:', error)
+            // TODO: エラー処理
+        }
     }
 
     return (
@@ -56,46 +55,15 @@ export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormD
                     <DialogTitle>{isEditing ? '商品を編集' : '新規商品登録'}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* 商品画像 */}
+                    {/* 商品画像アップロード */}
                     <div className="space-y-2">
                         <Label>商品画像</Label>
-                        <div className="flex flex-wrap gap-4">
-                            {formData.imageUrls.map((url, index) => (
-                                <div key={index} className="relative w-24 h-24 group">
-                                    <Image
-                                        src={url}
-                                        alt={`商品画像 ${index + 1}`}
-                                        fill
-                                        className="object-cover rounded-md"
-                                    />
-                                    <button
-                                        type="button"
-                                        className="absolute right-1 top-1 p-1 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity"
-                                        onClick={() => {
-                                            const newUrls = [...formData.imageUrls]
-                                            newUrls.splice(index, 1)
-                                            setFormData({ ...formData, imageUrls: newUrls })
-                                        }}
-                                    >
-                                        <Trash2 className="w-4 h-4 text-red-500" />
-                                    </button>
-                                </div>
-                            ))}
-                            <label className="w-24 h-24 flex items-center justify-center border-2 border-dashed rounded-md cursor-pointer hover:bg-gray-50">
-                                <div className="flex flex-col items-center gap-1">
-                                    <ImagePlus className="w-6 h-6 text-gray-400" />
-                                    <span className="text-sm text-gray-500">画像を追加</span>
-                                </div>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={handleImageUpload}
-                                    multiple
-                                />
-                            </label>
-                        </div>
-                        <p className="text-sm text-gray-500">※最大5枚まで登録できます</p>
+                        <ProductImageUpload
+                            images={formData.imageUrls}
+                            onChange={(images) => setFormData({ ...formData, imageUrls: images })}
+                            maxImages={5}
+                            maxSizeInMB={5}
+                        />
                     </div>
 
                     {/* 商品名 */}
@@ -176,7 +144,10 @@ export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormD
                         <Button type="button" variant="outline" onClick={onClose}>
                             キャンセル
                         </Button>
-                        <Button type="submit">
+                        <Button
+                            type="submit"
+                            disabled={formData.imageUrls.length === 0}
+                        >
                             {isEditing ? '更新する' : '登録する'}
                         </Button>
                     </div>
