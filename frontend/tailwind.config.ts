@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import animate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -61,11 +62,6 @@ export default {
           DEFAULT: "hsl(var(--muted))", // #F0F0F0
           foreground: "hsl(var(--muted-foreground))", // #A0A0A0
         },
-        // アクセントカラー
-        accent: {
-          DEFAULT: "hsl(var(--accent))", // #F0F0F0
-          foreground: "hsl(var(--accent-foreground))", // #202020
-        },
         // 破壊的アクション
         destructive: {
           DEFAULT: "hsl(var(--muted))",
@@ -114,5 +110,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [animate],
 } satisfies Config;

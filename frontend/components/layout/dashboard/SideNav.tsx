@@ -26,7 +26,7 @@ export function SideNav() {
             <div className="p-4 mt-auto border-t">
                 <div className="flex items-center gap-3">
                     <Avatar>
-                        <AvatarImage src="/placeholder-avatar.jpg" />
+                        <AvatarImage src="https://github.com/shadcn.png" />
                         <AvatarFallback>UN</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
