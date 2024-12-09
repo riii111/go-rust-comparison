@@ -1,6 +1,7 @@
-import { NavLinks } from '@/components/layout/dashboard/NavLinks'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { navItems, settingsItem } from '@/config/constants/nav-config'
+import { NavItem } from '@/components/layout/dashboard/NavItem'
 
 export function SideNav() {
     return (
@@ -17,10 +18,34 @@ export function SideNav() {
 
             {/* スクロール可能なナビゲーションエリア */}
             <ScrollArea className="flex-1">
+                {/* 共通セクション */}
                 <div className="px-2 py-4">
-                    <NavLinks />
+                    <nav className="space-y-1">
+                        {navItems.map((item) => (
+                            <NavItem
+                                key={item.href}
+                                title={item.title}
+                                href={item.href}
+                                iconName={item.iconName}
+                            />
+                        ))}
+                    </nav>
+                </div>
+
+                {/* システム設定セクション */}
+                <div className="px-2">
+                    <div className="h-px bg-gray-300" />
+                    <div className="py-4">
+                        <NavItem
+                            title={settingsItem.title}
+                            href={settingsItem.href}
+                            iconName={settingsItem.iconName}
+                            variant="system"
+                        />
+                    </div>
                 </div>
             </ScrollArea>
+
 
             {/* ユーザー情報 */}
             <div className="p-4 mt-auto border-t">
