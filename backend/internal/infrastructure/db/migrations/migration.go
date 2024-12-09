@@ -1,8 +1,8 @@
 package main
 
 import (
-	"go-rust-comparison/backend/internal/adapter/database"
-	"go-rust-comparison/backend/internal/domain/models"
+	"github.com/riii111/go-rust-comparison/internal/adapter/database"
+	"github.com/riii111/go-rust-comparison/internal/domain/models"
 )
 
 func main() {
