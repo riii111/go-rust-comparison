@@ -1,6 +1,6 @@
-import { ProductHeader } from "@/components/feature/dashboard/products/ProductHeader"
+import { ProductHeader } from "@/components/feature/dashboard/products/table/ProductHeader"
 import { Suspense } from "react"
-import { ProductList } from "@/components/feature/dashboard/products/ProductList"
+import { ProductList } from "@/components/feature/dashboard/products/table/ProductList"
 
 export default function ProductsPage() {
     return (
