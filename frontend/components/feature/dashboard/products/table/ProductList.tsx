@@ -20,57 +20,16 @@ import {
 import { ProductDeleteDialog } from '@/components/feature/dashboard/products/dialog/ProductDeleteDialog'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-// 開発用のダミーデータ
-const DUMMY_PRODUCTS = [
-    {
-        id: "1",
-        name: "ベーシックTシャツ",
-        category: "clothing",
-        basePrice: 2500,
-        imageUrl: "",
-        description: "シンプルで着やすい定番Tシャツ",
-        stockStatus: "在庫あり",
-    },
-    {
-        id: "2",
-        name: "デニムパンツ",
-        category: "clothing",
-        basePrice: 5900,
-        imageUrl: "",
-        description: "クラシックなストレートデニム",
-        stockStatus: "残りわずか",
-    },
-    {
-        id: "3",
-        name: "レザーベルト",
-        category: "accessories",
-        basePrice: 3900,
-        imageUrl: "",
-        description: "上質な本革を使用したカジュアルベルト",
-        stockStatus: "在庫あり",
-    },
-    {
-        id: "4",
-        name: "ランニングシューズ",
-        category: "shoes",
-        basePrice: 8900,
-        imageUrl: "",
-        description: "クッション性に優れた軽量ランニングシューズ",
-        stockStatus: "残りわずか",
-    },
-    {
-        id: "5",
-        name: "404エラーテスト用商品",
-        category: "other",
-        basePrice: 999,
-        imageUrl: "",
-        description: "このデータをクリックすると404エラーが表示されます",
-        stockStatus: "在庫なし",
-    },
-]
+import { Product } from "@/config/types/api/product"
+import { deleteProduct } from "@/lib/api/products"
 
-export function ProductList() {
+type ProductListProps = {
+    initialProducts: Product[]
+}
+
+export function ProductList({ initialProducts }: ProductListProps) {
     const router = useRouter()
+    const [products, setProducts] = useState(initialProducts)
     const [deleteDialog, setDeleteDialog] = useState<{
         isOpen: boolean
         productId: string | null
@@ -85,18 +44,17 @@ export function ProductList() {
         if (!deleteDialog.productId) return
 
         try {
-            // TODO: API実装後に削除処理を追加
-            console.log('Deleting product:', deleteDialog.productId)
-
-            // 成功時の処理
+            await deleteProduct(deleteDialog.productId)
+            // 成功時は商品リストから削除
+            setProducts(products.filter(p => p.id !== deleteDialog.productId))
             setDeleteDialog({ isOpen: false, productId: null, productName: '' })
         } catch (error) {
             console.error('Failed to delete product:', error)
-            // TODO: エラー処理
+            // TODO: エラー通知の実装
         }
     }
 
-    const renderActionButtons = (product: typeof DUMMY_PRODUCTS[0]) => (
+    const renderActionButtons = (product: Product) => (
         <div className="flex items-center justify-center gap-1">
             <Button
                 variant="ghost"
@@ -135,7 +93,7 @@ export function ProductList() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {DUMMY_PRODUCTS.map((product) => (
+                        {products.map((product) => (
                             <TableRow
                                 key={product.id}
                                 className="hover:bg-gray-50/50 cursor-pointer"
