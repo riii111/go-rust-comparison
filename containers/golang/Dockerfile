@@ -10,3 +10,5 @@ COPY containers/golang/entrypoint.sh /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh
 RUN go mod download
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
