@@ -28,3 +28,5 @@ backend/tmp/
 
 # Infrastructure backup files
 infrastructure/architectures/.$*
+
+tmp/
