@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: containers/golang/Dockerfile
-    command: sh -c "/usr/local/bin/entrypoint.sh"
+    command: sh -c "/usr/local/go/src/go_rust_comparison/entrypoint.sh"
     volumes:
       - ./backend:/usr/local/go/src/go_rust_comparison
     ports:
