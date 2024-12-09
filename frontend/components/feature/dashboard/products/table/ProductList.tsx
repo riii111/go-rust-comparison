@@ -60,12 +60,12 @@ const DUMMY_PRODUCTS = [
     },
     {
         id: "5",
-        name: "サングラス",
-        category: "accessories",
-        basePrice: 4500,
+        name: "404エラーテスト用商品",
+        category: "other",
+        basePrice: 999,
         imageUrl: "",
-        description: "UV400カット採用のスタイリッシュなサングラス",
-        stockStatus: "在庫あり",
+        description: "このデータをクリックすると404エラーが表示されます",
+        stockStatus: "在庫なし",
     },
 ]
 
