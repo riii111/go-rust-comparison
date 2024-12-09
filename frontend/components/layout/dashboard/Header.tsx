@@ -1,7 +1,7 @@
-import { Bell, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { NotificationPopover } from '@/components/layout/dashboard/NotificationPopover'
 
 export function Header() {
     return (
@@ -17,12 +17,7 @@ export function Header() {
 
             {/* 右側のアイコン群 */}
             <div className="flex items-center gap-2">
-                {/* 通知ベル */}
-                <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-5 w-5 text-gray-500" />
-                    {/* 未読通知がある場合に表示する赤い丸 */}
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-                </Button>
+                <NotificationPopover />
 
                 {/* ユーザーアバター */}
                 <Avatar className="h-8 w-8">

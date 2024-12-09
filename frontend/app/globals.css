@@ -107,7 +107,7 @@ h6 {
 
 @layer base {
   :root {
-    --background-start: 350 12% 93%; /* より淡いピンクグレー */
+    --background-start: 358 38% 93%; /* より淡いピンクグレー */
     --background-end: 348 10% 95%; /* さらに淡いピンクグレー */
     --component-background: 0 0% 100% / 0.92;
   }
