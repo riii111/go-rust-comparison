@@ -24,9 +24,4 @@ go.work.sum
 
 # env file
 .env
-backend/tmp/
-
-# Infrastructure backup files
-infrastructure/architectures/.$*
-
 tmp/
