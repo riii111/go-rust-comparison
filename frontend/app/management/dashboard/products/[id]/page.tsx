@@ -1,7 +1,6 @@
 import { getProductById } from '@/lib/api/products'
 import { ProductDetail } from './ProductDetail'
 import { NotFound } from '@/components/feature/dashboard/NotFound'
-import { Suspense } from 'react'
 
 type Props = {
     params: {
@@ -21,9 +20,7 @@ export default async function ProductDetailPage({ params }: Props) {
         }
 
         return (
-            <Suspense fallback={<div className="p-6">Loading...</div>}>
-                <ProductDetail product={product} />
-            </Suspense>
+            <ProductDetail product={product} />
         )
     } catch (error) {
         console.error('Failed to fetch product:', error)
