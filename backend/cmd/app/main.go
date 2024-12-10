@@ -13,7 +13,7 @@ func main() {
 	r := gin.Default()
 	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"msg": "こっちはパスって書いてますけどいかがです",
+			"msg": "pass",
 		})
 	})
 	if err := r.Run(":8000"); err != nil {
