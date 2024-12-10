@@ -3,12 +3,12 @@
 import { useTransition } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ProductImageUpload } from './ProductImageUpload'
 import { useForm } from "@conform-to/react"
 import { parseWithZod } from '@conform-to/zod'
 import { productSchema, MESSAGES } from '@/components/feature/dashboard/products/validation'
 import FormField from '@/components/common/molecules/FormField'
+import FormSelect from '@/components/common/molecules/FormSelect'
 
 interface ProductFormDialogProps {
     isOpen: boolean
@@ -141,36 +141,34 @@ export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormD
                     />
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Select
-                                value={formValue.category}
-                                onValueChange={(value) => {
-                                    form.update({
-                                        name: fields.category.name,
-                                        value: value
-                                    })
-                                }}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="カテゴリを選択" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="clothing">衣類</SelectItem>
-                                    <SelectItem value="accessories">アクセサリー</SelectItem>
-                                    <SelectItem value="shoes">靴</SelectItem>
-                                    <SelectItem value="other">その他</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            {fields.category.errors?.[0] && (
-                                <p className="text-red-500 text-sm">{fields.category.errors[0]}</p>
-                            )}
-                        </div>
+                        <FormSelect
+                            id={fields.category.id}
+                            name={fields.category.name}
+                            label="カテゴリ"
+                            options={[
+                                { value: "clothing", label: "衣類" },
+                                { value: "accessories", label: "アクセサリー" },
+                                { value: "shoes", label: "靴" },
+                                { value: "other", label: "その他" }
+                            ]}
+                            placeholder="カテゴリを選択"
+                            required
+                            value={formValue.category}
+                            onChange={(value) => {
+                                form.update({
+                                    name: fields.category.name,
+                                    value: value
+                                })
+                            }}
+                            error={fields.category.errors?.[0]}
+                        />
 
                         <FormField
                             id={fields.basePrice.id}
                             name={fields.basePrice.name}
                             type="number"
                             label="価格"
+                            placeholder="価格を入力してください"
                             required
                             error={fields.basePrice.errors?.[0]}
                         />
