@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { ImagePlus, X } from 'lucide-react'
 
 interface ProductImageUploadProps {
-    images: string[]
+    images?: string[]
     onChange: (images: string[]) => void
     maxImages?: number
     maxSizeInMB?: number
@@ -24,7 +24,7 @@ export function ProductImageUpload({
         setError(null)
 
         // バリデーション
-        if (images.length + acceptedFiles.length > maxImages) {
+        if (images && images.length + acceptedFiles.length > maxImages) {
             setError(`画像は最大${maxImages}枚までアップロードできます`)
             return
         }
@@ -53,8 +53,8 @@ export function ProductImageUpload({
         },
         maxSize: maxSizeInMB * 1024 * 1024
     })
-
     const removeImage = (index: number) => {
+        if (!images) return
         const newImages = [...images]
         newImages.splice(index, 1)
         onChange(newImages)
@@ -65,7 +65,7 @@ export function ProductImageUpload({
         <div className="space-y-4">
             <div className="flex flex-wrap gap-4">
                 {/* 既存の画像プレビュー */}
-                {images.map((image, index) => (
+                {images?.map((image, index) => (
                     <div key={index} className="relative group w-24 h-24">
                         <Image
                             src={image}
@@ -87,7 +87,7 @@ export function ProductImageUpload({
                 ))}
 
                 {/* ドラッグ&ドロップエリア */}
-                {images.length < maxImages && (
+                {images && images.length < maxImages && (
                     <div
                         {...getRootProps()}
                         className={`w-24 h-24 flex items-center justify-center rounded-lg cursor-pointer

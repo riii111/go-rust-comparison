@@ -28,15 +28,15 @@ export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormD
     const [isPending, startTransition] = useTransition()
     const isEditing = !!initialData?.id
 
-    const [form, { name, description, materialInfo, basePrice, category }] = useForm({
+    const [form, fields] = useForm({
         id: "product-form",
-        defaultValue: initialData ?? {
-            name: "",
-            description: "",
-            materialInfo: "",
-            basePrice: 0,
-            category: "",
-            imageUrls: [],
+        defaultValue: {
+            name: initialData?.name ?? "",
+            description: initialData?.description ?? "",
+            materialInfo: initialData?.materialInfo ?? "",
+            basePrice: initialData?.basePrice ?? 0,
+            category: initialData?.category ?? "",
+            imageUrls: initialData?.imageUrls ?? [],
         },
         onValidate: ({ formData }) => {
             return parseWithZod(formData, {
@@ -58,9 +58,13 @@ export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormD
             startTransition(() => {
                 void (async () => {
                     try {
-                        // TODO: API実装後に送信処理を追加
+                        // TODO: APIが実装されるまでダミーデータで対応
                         console.log('Form submitted:', submission.value)
-                        onClose()
+                        // ダミーの成功レスポンス
+                        setTimeout(() => {
+                            onClose()
+                        }, 1000)
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     } catch (error) {
                         return submission.reply({
                             formErrors: [isEditing ? MESSAGES.product.updateFailed : MESSAGES.product.createFailed]
@@ -70,6 +74,16 @@ export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormD
             })
         }
     })
+
+    // フォームの現在値を安全に取得
+    const formValue = form.value ?? {
+        name: "",
+        description: "",
+        materialInfo: "",
+        basePrice: 0,
+        category: "",
+        imageUrls: [],
+    }
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -81,55 +95,60 @@ export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormD
                     {/* 商品画像アップロード */}
                     <div className="space-y-2">
                         <ProductImageUpload
-                            images={form.value.imageUrls}
+                            images={formValue.imageUrls as string[]}
                             onChange={(images) => {
-                                const formData = new FormData()
-                                formData.set('imageUrls', JSON.stringify(images))
-                                form.onChange(formData)
+                                form.update({
+                                    name: fields.imageUrls.name,
+                                    value: images
+                                })
                             }}
                             maxImages={5}
                             maxSizeInMB={5}
                         />
+                        {fields.imageUrls.errors && (
+                            <p className="text-red-500 text-sm">{fields.imageUrls.errors}</p>
+                        )}
                     </div>
 
                     <FormField
-                        id={name.id}
-                        name={name.name}
+                        id={fields.name.id}
+                        name={fields.name.name}
                         type="text"
                         label="商品名"
                         placeholder="商品名を入力してください"
                         required
-                        error={name.errors?.[0]}
+                        error={fields.name.errors?.[0]}
                     />
 
                     <FormField
-                        id={description.id}
-                        name={description.name}
+                        id={fields.description.id}
+                        name={fields.description.name}
                         type="textarea"
                         label="商品説明"
                         placeholder="商品の説明を入力してください"
                         required
-                        error={description.errors?.[0]}
+                        error={fields.description.errors?.[0]}
                     />
 
                     <FormField
-                        id={materialInfo.id}
-                        name={materialInfo.name}
+                        id={fields.materialInfo.id}
+                        name={fields.materialInfo.name}
                         type="textarea"
                         label="素材・製品仕様"
                         placeholder="素材や製品仕様を入力してください"
                         required
-                        error={materialInfo.errors?.[0]}
+                        error={fields.materialInfo.errors?.[0]}
                     />
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Select
-                                value={form.value.category}
+                                value={formValue.category}
                                 onValueChange={(value) => {
-                                    const formData = new FormData()
-                                    formData.set('category', value)
-                                    form.onChange(formData)
+                                    form.update({
+                                        name: fields.category.name,
+                                        value: value
+                                    })
                                 }}
                             >
                                 <SelectTrigger>
@@ -142,18 +161,18 @@ export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormD
                                     <SelectItem value="other">その他</SelectItem>
                                 </SelectContent>
                             </Select>
-                            {category.errors?.[0] && (
-                                <p className="text-red-500 text-sm">{category.errors[0]}</p>
+                            {fields.category.errors?.[0] && (
+                                <p className="text-red-500 text-sm">{fields.category.errors[0]}</p>
                             )}
                         </div>
 
                         <FormField
-                            id={basePrice.id}
-                            name={basePrice.name}
+                            id={fields.basePrice.id}
+                            name={fields.basePrice.name}
                             type="number"
                             label="価格"
                             required
-                            error={basePrice.errors?.[0]}
+                            error={fields.basePrice.errors?.[0]}
                         />
                     </div>
 
