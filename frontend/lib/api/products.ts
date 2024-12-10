@@ -70,7 +70,9 @@ export async function getProducts(): Promise<ProductsResponse> {
  */
 export async function getProductById(id: string): Promise<ProductResponse> {
   // TODO: APIが実装されるまで、ダミーデータで返しておく
-  return DUMMY_PRODUCTS.find((product) => product.id === id);
+
+  if (id === "5") return undefined;
+  return DUMMY_PRODUCTS.find((product) => product.id === id) as ProductResponse;
   //   const { data } = await customFetch<undefined, ProductResponse>(
   //     `${ENDPOINT}/${id}/`,
   //     {
