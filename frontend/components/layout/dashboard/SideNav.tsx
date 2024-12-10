@@ -13,10 +13,9 @@ export function SideNav() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </div>
-                <span className="ml-3 text-[15px] font-semibold tracking-tight text-[hsl(var(--text-primary))]">Store Analytics</span>
+                <span className="ml-3 font-semibold tracking-tight text-[hsl(var(--text-primary))]">Store Analytics</span>
             </div>
 
-            {/* スクロール可能なナビゲーションエリア */}
             <ScrollArea className="flex-1">
                 {/* 共通セクション */}
                 <div className="px-2 py-4">
