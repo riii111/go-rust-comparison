@@ -5,7 +5,7 @@ import { NavItem } from '@/components/layout/dashboard/NavItem'
 
 export function SideNav() {
     return (
-        <div className="w-56 flex flex-col h-full">
+        <div className="w-52 flex flex-col h-full">
             {/* ロゴ部分 */}
             <div className="flex items-center px-4 py-4">
                 <div className="p-2 bg-primary/10 rounded-lg">

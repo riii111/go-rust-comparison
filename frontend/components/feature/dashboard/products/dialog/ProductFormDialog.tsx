@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useTransition } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { ProductImageUpload } from './ProductImageUpload'
+import { useForm } from "@conform-to/react"
+import { parseWithZod } from '@conform-to/zod'
+import { productSchema, MESSAGES } from '@/components/feature/dashboard/products/validation'
+import FormField from '@/components/common/molecules/FormField'
 
 interface ProductFormDialogProps {
     isOpen: boolean
@@ -24,29 +25,51 @@ interface ProductFormDialogProps {
 }
 
 export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormDialogProps) {
-    const [formData, setFormData] = useState(
-        initialData ?? {
-            name: '',
-            description: '',
-            materialInfo: '',
-            basePrice: 0,
-            category: '',
-            imageUrls: [],
-        }
-    )
+    const [isPending, startTransition] = useTransition()
     const isEditing = !!initialData?.id
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        try {
-            // TODO: API実装後に送信処理を追加
-            console.log('Form submitted:', formData)
-            onClose()
-        } catch (error) {
-            console.error('Failed to submit form:', error)
-            // TODO: エラー処理
+    const [form, { name, description, materialInfo, basePrice, category }] = useForm({
+        id: "product-form",
+        defaultValue: initialData ?? {
+            name: "",
+            description: "",
+            materialInfo: "",
+            basePrice: 0,
+            category: "",
+            imageUrls: [],
+        },
+        onValidate: ({ formData }) => {
+            return parseWithZod(formData, {
+                schema: productSchema
+            })
+        },
+        shouldValidate: "onBlur",
+        shouldRevalidate: "onInput",
+        onSubmit: async (event: React.FormEvent<HTMLFormElement>) => {
+            const formData = new FormData(event.currentTarget)
+            const submission = parseWithZod(formData, {
+                schema: productSchema
+            })
+
+            if (submission.status !== "success") {
+                return submission.reply()
+            }
+
+            startTransition(() => {
+                void (async () => {
+                    try {
+                        // TODO: API実装後に送信処理を追加
+                        console.log('Form submitted:', submission.value)
+                        onClose()
+                    } catch (error) {
+                        return submission.reply({
+                            formErrors: [isEditing ? MESSAGES.product.updateFailed : MESSAGES.product.createFailed]
+                        })
+                    }
+                })()
+            })
         }
-    }
+    })
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -54,61 +77,60 @@ export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormD
                 <DialogHeader>
                     <DialogTitle>{isEditing ? '商品を編集' : '新規商品登録'}</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form id={form.id} onSubmit={form.onSubmit} className="space-y-6" noValidate>
                     {/* 商品画像アップロード */}
                     <div className="space-y-2">
-                        <Label>商品画像</Label>
                         <ProductImageUpload
-                            images={formData.imageUrls}
-                            onChange={(images) => setFormData({ ...formData, imageUrls: images })}
+                            images={form.value.imageUrls}
+                            onChange={(images) => {
+                                const formData = new FormData()
+                                formData.set('imageUrls', JSON.stringify(images))
+                                form.onChange(formData)
+                            }}
                             maxImages={5}
                             maxSizeInMB={5}
                         />
                     </div>
 
-                    {/* 商品名 */}
-                    <div className="space-y-2">
-                        <Label htmlFor="name">商品名</Label>
-                        <Input
-                            id="name"
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            placeholder="商品名を入力してください"
-                            required
-                        />
-                    </div>
+                    <FormField
+                        id={name.id}
+                        name={name.name}
+                        type="text"
+                        label="商品名"
+                        placeholder="商品名を入力してください"
+                        required
+                        error={name.errors?.[0]}
+                    />
 
-                    {/* 商品説明 */}
-                    <div className="space-y-2">
-                        <Label htmlFor="description">商品説明</Label>
-                        <Textarea
-                            id="description"
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            placeholder="商品の説明を入力してください"
-                            required
-                        />
-                    </div>
+                    <FormField
+                        id={description.id}
+                        name={description.name}
+                        type="textarea"
+                        label="商品説明"
+                        placeholder="商品の説明を入力してください"
+                        required
+                        error={description.errors?.[0]}
+                    />
 
-                    {/* 素材・製品仕様 */}
-                    <div className="space-y-2">
-                        <Label htmlFor="materialInfo">素材・製品仕様</Label>
-                        <Textarea
-                            id="materialInfo"
-                            value={formData.materialInfo}
-                            onChange={(e) => setFormData({ ...formData, materialInfo: e.target.value })}
-                            placeholder="素材や製品仕様を入力してください"
-                            required
-                        />
-                    </div>
+                    <FormField
+                        id={materialInfo.id}
+                        name={materialInfo.name}
+                        type="textarea"
+                        label="素材・製品仕様"
+                        placeholder="素材や製品仕様を入力してください"
+                        required
+                        error={materialInfo.errors?.[0]}
+                    />
 
                     <div className="grid grid-cols-2 gap-4">
-                        {/* カテゴリ */}
                         <div className="space-y-2">
-                            <Label htmlFor="category">カテゴリ</Label>
                             <Select
-                                value={formData.category}
-                                onValueChange={(value) => setFormData({ ...formData, category: value })}
+                                value={form.value.category}
+                                onValueChange={(value) => {
+                                    const formData = new FormData()
+                                    formData.set('category', value)
+                                    form.onChange(formData)
+                                }}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="カテゴリを選択" />
@@ -120,35 +142,30 @@ export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormD
                                     <SelectItem value="other">その他</SelectItem>
                                 </SelectContent>
                             </Select>
+                            {category.errors?.[0] && (
+                                <p className="text-red-500 text-sm">{category.errors[0]}</p>
+                            )}
                         </div>
 
-                        {/* 価格 */}
-                        <div className="space-y-2">
-                            <Label htmlFor="basePrice">価格</Label>
-                            <Input
-                                id="basePrice"
-                                type="number"
-                                value={formData.basePrice}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, basePrice: Number(e.target.value) })
-                                }
-                                min="0"
-                                step="100"
-                                required
-                            />
-                        </div>
+                        <FormField
+                            id={basePrice.id}
+                            name={basePrice.name}
+                            type="number"
+                            label="価格"
+                            required
+                            error={basePrice.errors?.[0]}
+                        />
                     </div>
 
-                    {/* 送信ボタン */}
                     <div className="flex justify-end gap-3">
                         <Button type="button" variant="outline" onClick={onClose}>
                             キャンセル
                         </Button>
                         <Button
                             type="submit"
-                            disabled={formData.imageUrls.length === 0}
+                            disabled={isPending || form.status === 'error'}
                         >
-                            {isEditing ? '更新する' : '登録する'}
+                            {isPending ? '送信中...' : (isEditing ? '更新する' : '登録する')}
                         </Button>
                     </div>
                 </form>
