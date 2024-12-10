@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -eu
 
 go run ./internal/infrastructure/db/migrations/migration.go
 
