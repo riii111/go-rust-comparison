@@ -9,9 +9,10 @@ import (
 
 func main() {
 	r := gin.Default()
+	r.SetTrustedProxies([]string{"127.0.0.1"})	// TODO: あとでなおす
 	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"msg": "pass",
+			"msg": "pass_newwwww31",
 		})
 	})
 	if err := r.Run(":8000"); err != nil {
