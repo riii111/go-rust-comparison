@@ -3,22 +3,24 @@ services:
     container_name: app
     build:
       context: .
-      dockerfile: containers/golang/Dockerfile
+      dockerfile: backend/containers/golang/Dockerfile
     volumes:
-      - ./backend:/usr/local/go/src/go_rust_comparison
+      - ./backend:/usr/local/go/src/go_rust_comparison/backend
+    working_dir: /usr/local/go/src/go_rust_comparison/backend
     ports:
       - "8000:8000"
-    command: air -d
+    command: air
     env_file:
       - .env
     depends_on:
       db:
         condition: service_healthy
+
   db:
     container_name: db
     build:
       context: .
-      dockerfile: containers/postgres/Dockerfile
+      dockerfile: backend/containers/postgres/Dockerfile
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
@@ -31,15 +33,19 @@ services:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
     ports:
-      - '5432:5432' # デバッグ用
+      - "5432:5432" # デバッグ用
+
   nginx:
     container_name: web
     build:
       context: .
-      dockerfile: containers/nginx/Dockerfile
+      dockerfile: backend/containers/nginx/Dockerfile
     ports:
       - 80:80
     depends_on:
       - app
+    volumes:
+      - ./backend/containers/nginx/nginx.conf:/etc/nginx/nginx.conf
+
 volumes:
   db_data:
