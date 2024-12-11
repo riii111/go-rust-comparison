@@ -1,0 +1,5 @@
+# Infrastructure backup files
+architectures/.$*
+
+# misc
+.DS_Store
