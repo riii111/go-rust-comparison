@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import { SideNav } from '@/components/layout/dashboard/SideNav';
-import { Header } from '@/components/layout/dashboard/Header';
+import { SideNav } from '@/components/layout/dashboard/SideNav'
+import { DynamicHeader } from '@/components/layout/dashboard/DynamicHeader'
 
 export const metadata: Metadata = {
     title: '在庫管理システム',
@@ -28,7 +28,7 @@ export default function DashboardLayout({
                 {/* メインエリア */}
                 <div className="flex-1 flex flex-col gap-6 ml-6">
                     <div className="rounded-2xl backdrop-blur-[2px]">
-                        <Header />
+                        <DynamicHeader />
                     </div>
 
                     {/* メインコンテンツ */}
