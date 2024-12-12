@@ -46,7 +46,7 @@ export function ProductTableRow({ product }: ProductTableRowProps) {
                 <TableCell className="p-2">
                     <div className="relative w-20 h-20">
                         <Image
-                            src={product.imageUrl}
+                            src={product.imageUrls[0]}
                             alt={product.name}
                             fill
                             className="object-cover rounded-md"

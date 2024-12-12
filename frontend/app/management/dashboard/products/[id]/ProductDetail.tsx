@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronLeft, Pencil } from 'lucide-react'
 import Image from 'next/image'
 import { Product } from '@/config/types/api/product'
+import { useState } from 'react'
 
 type ProductDetailProps = {
     product: Product
@@ -13,6 +14,7 @@ type ProductDetailProps = {
 
 export function ProductDetail({ product }: ProductDetailProps) {
     const router = useRouter()
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
     return (
         <div className="p-6 space-y-6">
@@ -36,18 +38,44 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
             {/* 商品情報 */}
             <Card className="p-6">
-                {/* 既存の商品詳細表示部分 */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* 画像セクション */}
                     <div className="space-y-4">
+                        {/* メイン画像 */}
                         <div className="relative aspect-square w-full">
                             <Image
-                                src={product.imageUrl}
-                                alt={product.name}
+                                src={product.imageUrls[selectedImageIndex]}
+                                alt={`${product.name} - 画像 ${selectedImageIndex + 1}`}
                                 fill
                                 className="object-cover rounded-lg"
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                priority
                             />
                         </div>
+
+                        {/* サムネイル画像リスト */}
+                        {product.imageUrls.length > 1 && (
+                            <div className="flex gap-2 overflow-x-auto pb-2">
+                                {product.imageUrls.map((url, index) => (
+                                    <button
+                                        key={url}
+                                        onClick={() => setSelectedImageIndex(index)}
+                                        className={`relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden
+                                            ${selectedImageIndex === index
+                                                ? 'ring-2 ring-blue-500'
+                                                : 'ring-1 ring-gray-200'}`}
+                                    >
+                                        <Image
+                                            src={url}
+                                            alt={`${product.name} - サムネイル ${index + 1}`}
+                                            fill
+                                            className="object-cover"
+                                            sizes="80px"
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* 商品情報セクション */}

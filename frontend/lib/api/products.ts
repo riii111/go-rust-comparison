@@ -11,35 +11,52 @@ const DUMMY_PRODUCTS = [
     name: "ベーシックTシャツ",
     category: "clothing",
     basePrice: 2500,
-    imageUrl: "",
+    imageUrls: [
+      "https://picsum.photos/seed/fashion1/400/400", // ファッション系の画像
+      "https://picsum.photos/seed/fashion2/400/400",
+      "https://picsum.photos/seed/fashion3/400/400",
+      "https://picsum.photos/seed/fashion4/400/400",
+      "https://picsum.photos/seed/fashion5/400/400",
+    ],
     description: "シンプルで着やすい定番Tシャツ",
     stockStatus: "在庫あり",
   },
   {
     id: "2",
-    name: "デニムパンツ",
+    name: "Tシャツ",
     category: "clothing",
     basePrice: 5900,
-    imageUrl: "",
+    imageUrls: [
+      "https://picsum.photos/seed/casual1/400/400", // カジュアル系の画像
+      "https://picsum.photos/seed/casual2/400/400",
+      "https://picsum.photos/seed/casual3/400/400",
+    ],
     description: "クラシックなストレートデニム",
     stockStatus: "残りわずか",
   },
   {
     id: "3",
-    name: "レザーベルト",
+    name: "キャップ",
     category: "accessories",
     basePrice: 3900,
-    imageUrl: "",
-    description: "上質な本革を使用したカジュアルベルト",
+    imageUrls: [
+      "https://picsum.photos/seed/outdoor1/400/400", // アウトドア系の画像
+      "https://picsum.photos/seed/outdoor2/400/400", // 異なるシーン
+      "https://picsum.photos/seed/outdoor3/400/400", // 異なる角度
+    ],
+    description: "がきんちょ向けキャップ",
     stockStatus: "在庫あり",
   },
   {
     id: "4",
-    name: "ランニングシューズ",
-    category: "shoes",
+    name: "マグカップ",
+    category: "accessories",
     basePrice: 8900,
-    imageUrl: "",
-    description: "クッション性に優れた軽量ランニングシューズ",
+    imageUrls: [
+      "https://picsum.photos/seed/lifestyle1/400/400", // ライフスタイル系の画像
+      "https://picsum.photos/seed/lifestyle2/400/400",
+    ],
+    description: "サイズが大きいマグカップ",
     stockStatus: "残りわずか",
   },
   {
@@ -47,7 +64,7 @@ const DUMMY_PRODUCTS = [
     name: "404エラーテスト用商品",
     category: "other",
     basePrice: 999,
-    imageUrl: "",
+    imageUrls: ["https://picsum.photos/400/400"],
     description: "このデータをクリックすると404エラーが表示されます",
     stockStatus: "在庫なし",
   },
