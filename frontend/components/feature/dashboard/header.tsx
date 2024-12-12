@@ -2,20 +2,29 @@
 
 import { useState } from "react"
 import { DateRange } from "react-day-picker"
-import { DateRangePicker } from "@/components/feature/dashboard/date-range-picker"
+import { DateRangePicker } from "./date-range-picker"
 
 export function DashboardHeader() {
-    const [date, setDate] = useState<DateRange | undefined>({
+    const [dateRange, setDateRange] = useState<DateRange>({
         from: new Date(2024, 11, 1),
         to: new Date()
     })
 
+    const handleDateRangeChange = (range: DateRange | undefined) => {
+        if (range) {
+            setDateRange(range)
+            // 親コンポーネントにデータ更新を通知する？？
+            // onDateRangeChange(range) など
+        }
+    }
+
     return (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h1 className="text-2xl font-semibold text-gray-800">New report</h1>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <DateRangePicker date={date} onSelect={setDate} />
-            </div>
+        <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-semibold">Dashboard</h1>
+            <DateRangePicker
+                date={dateRange}
+                onSelect={handleDateRangeChange}
+            />
         </div>
     )
 }
