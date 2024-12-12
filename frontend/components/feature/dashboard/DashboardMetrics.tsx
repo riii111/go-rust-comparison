@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
 import { RevenueSection } from "./revenue-section"
@@ -43,6 +43,16 @@ export function DashboardMetrics({ metric: initialMetric, data }: DashboardMetri
         { id: "leads", label: "リード" },
         { id: "w-l", label: "Win/Loss" },
     ]
+
+    const [scrollPosition, setScrollPosition] = useState(0);
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        setScrollPosition(e.currentTarget.scrollTop);
+    };
+
+    useEffect(() => {
+        setScrollPosition(0);
+    }, [activeMetric]);
 
     const renderMetricContent = () => {
         switch (activeMetric) {
@@ -113,36 +123,43 @@ export function DashboardMetrics({ metric: initialMetric, data }: DashboardMetri
     }
 
     return (
-        <div className="space-y-8">
-            <div className="flex items-center justify-between">
-                <FilterTabs
-                    tabs={tabs}
-                    activeTab={activeMetric}
-                    onChange={setActiveMetric}
-                    variant="primary"
-                />
-                <DateRangePicker
-                    date={dateRange}
-                    onSelect={handleDateRangeChange}
-                    fromDate={new Date(2024, 11, 1)}
-                    toDate={new Date()}
-                    calendarClassName="bg-white"
-                    buttonClassName="bg-gray-100 hover:bg-gray-200"
-                />
+        <div className="h-full pl-6 flex flex-col overflow-hidden">
+            <div className="flex-none bg-white py-4 pr-6 border-b">
+                <div className="flex items-center justify-between">
+                    <FilterTabs
+                        tabs={tabs}
+                        activeTab={activeMetric}
+                        onChange={setActiveMetric}
+                        variant="primary"
+                    />
+                    <DateRangePicker
+                        date={dateRange}
+                        onSelect={handleDateRangeChange}
+                        fromDate={new Date(2024, 11, 1)}
+                        toDate={new Date()}
+                        calendarClassName="bg-white"
+                        buttonClassName="bg-white border shadow-sm hover:bg-gray-50"
+                    />
+                </div>
             </div>
 
-            <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                    key={activeMetric}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.2 }}
-                    className="grid gap-6"
-                >
-                    {renderMetricContent()}
-                </motion.div>
-            </AnimatePresence>
+            <div
+                className="flex-1 overflow-y-auto custom-scrollbar pt-6 pr-6"
+                onScroll={handleScroll}
+            >
+                <AnimatePresence mode="wait" initial={false}>
+                    <motion.div
+                        key={activeMetric}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.2 }}
+                        className="space-y-6 pb-6"
+                    >
+                        {renderMetricContent()}
+                    </motion.div>
+                </AnimatePresence>
+            </div>
         </div>
     )
 }
