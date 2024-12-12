@@ -27,7 +27,7 @@ export default async function DashboardPage() {
     const data = await fetchDashboardData()
 
     return (
-        <div className="space-y-6 p-6">
+        <div className="h-full">
             <Suspense fallback={<DashboardSkeleton />}>
                 <DashboardMetrics metric="revenue" data={data} />
             </Suspense>

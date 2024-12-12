@@ -20,21 +20,23 @@ export function FilterTabs({
 }: FilterTabsProps) {
     return (
         <div className={cn(
-            "inline-flex rounded-lg",
-            variant === "primary" ? "bg-gray-100" : "bg-white border"
+            "inline-flex rounded-lg p-1",
+            variant === "primary"
+                ? "bg-white border shadow-sm"
+                : "bg-white border"
         )}>
             {tabs.map((tab) => (
                 <button
                     key={tab.id}
                     onClick={() => onChange(tab.id)}
                     className={cn(
-                        "px-4 py-2 text-sm font-medium transition-colors",
-                        "first:rounded-l-lg last:rounded-r-lg",
+                        "px-4 py-2 text-sm font-medium transition-all duration-200",
+                        "rounded-md",
                         activeTab === tab.id
                             ? variant === "primary"
-                                ? "bg-white shadow-sm"
+                                ? "bg-primary text-white shadow-sm"
                                 : "bg-gray-900 text-white"
-                            : "text-gray-500 hover:text-gray-900"
+                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                     )}
                 >
                     {tab.label}
