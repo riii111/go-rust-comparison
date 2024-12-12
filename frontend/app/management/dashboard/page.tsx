@@ -23,13 +23,16 @@ export const metadata = {
     description: 'Store analytics dashboard showing revenue, leads, and performance metrics'
 }
 
-export default async function DashboardPage() {
+async function DashboardContent() {
     const data = await fetchDashboardData()
+    return <DashboardMetrics metric="revenue" data={data} />
+}
 
+export default function DashboardPage() {
     return (
         <div className="h-full">
             <Suspense fallback={<DashboardSkeleton />}>
-                <DashboardMetrics metric="revenue" data={data} />
+                <DashboardContent />
             </Suspense>
         </div>
     )
