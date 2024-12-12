@@ -44,7 +44,7 @@ const DUMMY_PRODUCTS = [
       "https://picsum.photos/seed/outdoor2/400/400", // 異なるシーン
       "https://picsum.photos/seed/outdoor3/400/400", // 異なる角度
     ],
-    description: "がきんちょ向けキャップ",
+    description: "誰でも着れるキャップ",
     stockStatus: "在庫あり",
   },
   {
