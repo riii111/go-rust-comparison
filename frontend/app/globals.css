@@ -95,6 +95,14 @@ h6 {
     /* 角丸 */
     --radius: 0.5rem;
 
+    /* カレンダー */
+    --calendar: 0 0% 100%; /* 純白の背景 */
+    --calendar-selected: 344 82% 48%; /* #E02060 メインのピンク */
+    --calendar-selected-light: 344 82% 96%; /* ピンクの薄い色（範囲選択用） */
+    --calendar-highlight: 0 0% 96%; /* ホバー時のライトグレー */
+    --calendar-muted: 0 0% 45%; /* 無効な日付のグレー */
+    --calendar-today: 344 82% 48%; /* 今日の日付も同じピンク */
+
     /* ダッシュボード背景用 */
     --dashboard-background: 0 7% 94%; /* #f2eeee */
     --dashboard-background-subtle: 0 8% 95%; /* #f4f1f1 */

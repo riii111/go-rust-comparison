@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, ChevronDownIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import {
@@ -63,7 +63,7 @@ export function DateRangePicker({
                 <Button
                     variant="outline"
                     className={cn(
-                        "justify-start text-left font-normal",
+                        "justify-start text-left font-semibold",
                         !date && "text-muted-foreground",
                         buttonClassName
                     )}
@@ -81,6 +81,7 @@ export function DateRangePicker({
                     ) : (
                         <span>{placeholder}</span>
                     )}
+                    <ChevronDownIcon className="h-4 w-4" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className={cn("w-auto p-0", calendarClassName)} align={align}>

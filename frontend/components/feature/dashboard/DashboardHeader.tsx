@@ -27,6 +27,7 @@ export function DashboardHeader() {
                 fromDate={new Date(2024, 11, 1)}
                 toDate={new Date()}
                 calendarClassName="bg-white"
+                buttonClassName="bg-gray-100 hover:bg-gray-200"
             />
         </div>
     )
