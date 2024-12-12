@@ -150,6 +150,18 @@ export const REVENUE_DATA = {
       name: "Product C",
       amount: 99976,
       percentage: 20
+    },
+    {
+      avatar: "https://github.com/shadcn.png",
+      name: "Product D",
+      amount: 78900,
+      percentage: 15
+    },
+    {
+      avatar: "https://github.com/shadcn.png",
+      name: "Product D",
+      amount: 70001,
+      percentage: 13
     }
   ]
 }
