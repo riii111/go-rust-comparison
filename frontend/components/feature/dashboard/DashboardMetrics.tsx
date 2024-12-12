@@ -1,11 +1,13 @@
 'use client'
 
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent } from "@/components/ui/card"
 import { RevenueSection } from "./revenue-section"
 import { PlatformAnalysis } from "./platform-analysis"
 import { SalesRankSection } from "./sales-rank-section"
 import { StatsCard } from "./stats-card"
+import { FilterTabs } from "@/components/common/molecules/FilterTabs"
 
 interface DashboardMetricsProps {
     metric: string;
@@ -28,9 +30,17 @@ interface DashboardMetricsProps {
     };
 }
 
-export function DashboardMetrics({ metric, data }: DashboardMetricsProps) {
+export function DashboardMetrics({ metric: initialMetric, data }: DashboardMetricsProps) {
+    const [activeMetric, setActiveMetric] = useState(initialMetric)
+
+    const tabs = [
+        { id: "revenue", label: "収益" },
+        { id: "leads", label: "リード" },
+        { id: "w-l", label: "Win/Loss" },
+    ]
+
     const renderMetricContent = () => {
-        switch (metric) {
+        switch (activeMetric) {
             case "revenue":
                 return (
                     <>
@@ -91,9 +101,16 @@ export function DashboardMetrics({ metric, data }: DashboardMetricsProps) {
 
     return (
         <div className="space-y-6">
+            <FilterTabs
+                tabs={tabs}
+                activeTab={activeMetric}
+                onChange={setActiveMetric}
+                variant="primary"
+            />
+
             <AnimatePresence mode="wait" initial={false}>
                 <motion.div
-                    key={metric}
+                    key={activeMetric}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
