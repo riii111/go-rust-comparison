@@ -49,13 +49,13 @@ function Calendar({
         day_range_start: "day-range-start",
         day_range_end: "day-range-end",
         day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+          "bg-calendar-selected text-white hover:bg-calendar-selected hover:text-white focus:bg-calendar-selected focus:text-white",
         day_today: "bg-accent text-accent-foreground",
         day_outside:
-          "day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
-        day_disabled: "text-muted-foreground opacity-50",
+          "text-calendar-muted opacity-50 aria-selected:bg-calendar-highlight aria-selected:text-calendar-muted",
+        day_disabled: "text-calendar-muted opacity-30",
         day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+          "aria-selected:bg-calendar-selected-light aria-selected:text-calendar-selected",
         day_hidden: "invisible",
         ...classNames,
       }}

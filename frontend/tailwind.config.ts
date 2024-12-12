@@ -85,6 +85,16 @@ export default {
             subtle: "hsl(var(--dashboard-background-subtle))", // よりライトな色
           },
         },
+        calendar: {
+          DEFAULT: "hsl(var(--calendar))",
+          selected: {
+            DEFAULT: "hsl(var(--calendar-selected))",
+            light: "hsl(var(--calendar-selected-light))",
+          },
+          highlight: "hsl(var(--calendar-highlight))",
+          muted: "hsl(var(--calendar-muted))",
+          today: "hsl(var(--calendar-today))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
