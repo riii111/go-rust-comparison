@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { CustomAvatar } from '@/components/common/atoms/CustomAvatar'
 import { NotificationPopover } from '@/components/layout/dashboard/NotificationPopover'
 
 export function Header() {
@@ -7,12 +7,12 @@ export function Header() {
             {/* 右側のアイコン群 */}
             <div className="flex items-center gap-2">
                 <NotificationPopover />
-
                 {/* ユーザーアバター */}
-                <Avatar className="h-8 w-8">
-                    <AvatarImage src="https://github.com/shadcn.png" />
-                    <AvatarFallback>UN</AvatarFallback>
-                </Avatar>
+                <CustomAvatar
+                    src="https://github.com/shadcn.png"
+                    alt="User Name"
+                    size="sm"
+                />
             </div>
         </header>
     )
