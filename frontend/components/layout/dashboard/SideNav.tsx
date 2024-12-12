@@ -2,19 +2,20 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { navItems, settingsItem } from '@/config/constants/nav-config'
 import { NavItem } from '@/components/layout/dashboard/NavItem'
 import { CustomAvatar } from '@/components/common/atoms/CustomAvatar'
+import Link from 'next/link'
 
 export function SideNav() {
     return (
         <div className="w-52 flex flex-col h-full">
             {/* ロゴ部分 */}
-            <div className="flex items-center px-4 py-4">
+            <Link href="/management/dashboard" className="flex items-center px-4 py-4 hover:opacity-80 transition-opacity">
                 <div className="p-2 bg-primary/10 rounded-lg">
                     <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </div>
                 <span className="ml-3 font-semibold tracking-tight text-[hsl(var(--text-primary))]">Store Analytics</span>
-            </div>
+            </Link>
 
             <ScrollArea className="flex-1">
                 {/* 共通セクション */}
