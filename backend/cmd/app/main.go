@@ -3,9 +3,7 @@ package main
 import (
     "log"
     "net/http"
-    "time"
 
-    "github.com/gin-contrib/cors"
     "github.com/gin-contrib/sessions"
     "github.com/gin-contrib/sessions/cookie"
     "github.com/gin-gonic/gin"
@@ -19,21 +17,10 @@ func main() {
     store := cookie.NewStore([]byte("secret"))
     r.Use(sessions.Sessions("mysession", store))
 
-	// corsの設定
-    // TODO: 別の場所で設定する？
-	r.Use(cors.New(cors.Config{
-		// TODO: 本番のurlも追加しようね
-        AllowOrigins:     []string{"http://localhost:3000"},
-        AllowMethods:     []string{"GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS"},
-        AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-        ExposeHeaders:    []string{"Content-Length", "X-CSRF-Token"},
-        AllowCredentials: true,
-        MaxAge:           12 * time.Hour,
-    }))
-
 	// CSRF設定をミドルウェアとして追加
     r.Use(csrf.Middleware(csrf.Options{
-        Secret: "secret123", // 適切なシークレットキーを設定
+		// TODO: 一旦ハードコードしてるのでenvから呼び出す形にする
+        Secret: "secret123", 
         ErrorFunc: func(c *gin.Context) {
             c.String(http.StatusForbidden, "CSRF token mismatch")
             c.Abort()
