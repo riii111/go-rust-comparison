@@ -49,6 +49,7 @@ export function ProductTableRow({ product }: ProductTableRowProps) {
                             src={product.imageUrls[0]}
                             alt={product.name}
                             fill
+                            priority
                             className="object-cover rounded-md"
                             sizes="80px"
                         />
