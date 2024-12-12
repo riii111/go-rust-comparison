@@ -3,8 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 export default function UsersPage() {
     return (
         <div className="space-y-4">
-            <h1 className="text-2xl font-bold">ユーザー一覧（システム管理者のみ閲覧可）</h1>
-
             <Card>
                 <CardHeader>
                     <CardTitle>概要</CardTitle>
