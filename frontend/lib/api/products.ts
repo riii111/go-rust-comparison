@@ -58,6 +58,7 @@ const DUMMY_PRODUCTS = [
  */
 export async function getProducts(): Promise<ProductsResponse> {
   // TODO: APIが実装されるまで、ダミーデータで返しておく
+  await new Promise((resolve) => setTimeout(resolve, 800)); // ローディング確認用
   return DUMMY_PRODUCTS;
   //   const { data } = await customFetch<undefined, ProductsResponse>(ENDPOINT, {
   //     method: "GET",

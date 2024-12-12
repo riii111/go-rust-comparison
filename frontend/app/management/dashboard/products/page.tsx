@@ -6,9 +6,12 @@ import { ProductTable } from "@/components/feature/dashboard/products/table/Prod
 import { ProductPagination } from "@/components/feature/dashboard/products/table/ProductPagenation"
 import { ProductTableSkeleton } from "@/components/feature/dashboard/products/table/ProductTableSkeleton"
 
-export default async function ProductsPage() {
+async function ProductTableContent() {
     const products = await getProducts()
+    return <ProductTable products={products} />
+}
 
+export default async function ProductsPage() {
     return (
         <div className="space-y-6 p-6">
             {/* ヘッダー部分（検索、新規作成ボタンなど） */}
@@ -17,7 +20,7 @@ export default async function ProductsPage() {
             {/* 商品一覧テーブル */}
             <Suspense fallback={<ProductTableSkeleton />}>
                 <Card className="border-0 shadow-none">
-                    <ProductTable products={products} />
+                    <ProductTableContent />
                     <ProductPagination />
                 </Card>
             </Suspense>
