@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { DashboardHeader } from "@/components/feature/dashboard/header"
+import { DashboardHeader } from "@/components/feature/dashboard/DashboardHeader"
 import { DashboardSkeleton } from "@/components/feature/dashboard/skeleton"
 import { DashboardMetrics } from "@/components/feature/dashboard/DashboardMetrics"
 import { STATS_CONFIG, PLATFORM_DATA, SALES_RANK_DATA, REVENUE_DATA } from "@/components/feature/dashboard/dummy_data"
