@@ -8,6 +8,8 @@ import { PlatformAnalysis } from "./platform-analysis"
 import { SalesRankSection } from "./sales-rank-section"
 import { StatsCard } from "./stats-card"
 import { FilterTabs } from "@/components/common/molecules/FilterTabs"
+import { DateRange } from "react-day-picker"
+import { DateRangePicker } from "@/components/common/molecules/DateRangePicker"
 
 interface DashboardMetricsProps {
     metric: string;
@@ -32,7 +34,10 @@ interface DashboardMetricsProps {
 
 export function DashboardMetrics({ metric: initialMetric, data }: DashboardMetricsProps) {
     const [activeMetric, setActiveMetric] = useState(initialMetric)
-
+    const [dateRange, setDateRange] = useState<DateRange>({
+        from: new Date(2024, 11, 1),
+        to: new Date()
+    })
     const tabs = [
         { id: "revenue", label: "収益" },
         { id: "leads", label: "リード" },
@@ -99,14 +104,32 @@ export function DashboardMetrics({ metric: initialMetric, data }: DashboardMetri
         }
     }
 
+    const handleDateRangeChange = (range: DateRange | undefined) => {
+        if (range) {
+            setDateRange(range)
+            // 親コンポーネントにデータ更新を通知する？？
+            // onDateRangeChange(range) など
+        }
+    }
+
     return (
-        <div className="space-y-6">
-            <FilterTabs
-                tabs={tabs}
-                activeTab={activeMetric}
-                onChange={setActiveMetric}
-                variant="primary"
-            />
+        <div className="space-y-8">
+            <div className="flex items-center justify-between">
+                <FilterTabs
+                    tabs={tabs}
+                    activeTab={activeMetric}
+                    onChange={setActiveMetric}
+                    variant="primary"
+                />
+                <DateRangePicker
+                    date={dateRange}
+                    onSelect={handleDateRangeChange}
+                    fromDate={new Date(2024, 11, 1)}
+                    toDate={new Date()}
+                    calendarClassName="bg-white"
+                    buttonClassName="bg-gray-100 hover:bg-gray-200"
+                />
+            </div>
 
             <AnimatePresence mode="wait" initial={false}>
                 <motion.div

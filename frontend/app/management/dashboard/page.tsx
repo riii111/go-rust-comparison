@@ -1,5 +1,4 @@
 import { Suspense } from "react"
-import { DashboardHeader } from "@/components/feature/dashboard/DashboardHeader"
 import { DashboardSkeleton } from "@/components/feature/dashboard/skeleton"
 import { DashboardMetrics } from "@/components/feature/dashboard/DashboardMetrics"
 import { STATS_CONFIG, PLATFORM_DATA, SALES_RANK_DATA, REVENUE_DATA } from "@/components/feature/dashboard/dummy_data"
@@ -29,7 +28,6 @@ export default async function DashboardPage() {
 
     return (
         <div className="space-y-6 p-6">
-            <DashboardHeader />
             <Suspense fallback={<DashboardSkeleton />}>
                 <DashboardMetrics metric="revenue" data={data} />
             </Suspense>
