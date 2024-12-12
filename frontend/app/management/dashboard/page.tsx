@@ -6,9 +6,8 @@ import { STATS_CONFIG, PLATFORM_DATA, SALES_RANK_DATA, REVENUE_DATA } from "@/co
 import { DashboardData } from "@/config/types/api/dashboard"
 
 // ダミー用のデータフェッチ
-// データフェッチング関数を分離
 async function fetchDashboardData(): Promise<DashboardData> {
-    // 実際のAPIが実装されたら、ここでServer Side Fetchingを行う
+    // TODO: 実際のAPIが実装されたら、ここでServer Side Fetchingを行う
     await new Promise(resolve => setTimeout(resolve, 800))  // ローディング確認用
 
     return {
