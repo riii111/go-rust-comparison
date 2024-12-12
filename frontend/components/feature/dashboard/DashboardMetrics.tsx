@@ -7,7 +7,7 @@ import { PlatformAnalysis } from "./platform-analysis"
 import { SalesRankSection } from "./sales-rank-section"
 import { StatsCard } from "./stats-card"
 
-interface DashboardMetricsClientProps {
+interface DashboardMetricsProps {
     metric: string;
     data: {
         stats: Record<string, any>;
@@ -28,7 +28,7 @@ interface DashboardMetricsClientProps {
     };
 }
 
-export function DashboardMetricsClient({ metric, data }: DashboardMetricsClientProps) {
+export function DashboardMetrics({ metric, data }: DashboardMetricsProps) {
     const renderMetricContent = () => {
         switch (metric) {
             case "revenue":
