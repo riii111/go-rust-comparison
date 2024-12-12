@@ -14,7 +14,7 @@ export function SideNav() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                 </div>
-                <span className="ml-3 font-semibold tracking-tight text-[hsl(var(--text-primary))]">Store Analytics</span>
+                <span className="ml-3 text-lg font-semibold tracking-tight text-[hsl(var(--text-primary))]">Store Analytics</span>
             </Link>
 
             <ScrollArea className="flex-1">
