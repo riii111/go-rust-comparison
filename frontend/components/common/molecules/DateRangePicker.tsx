@@ -9,33 +9,48 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { format, startOfMonth, isAfter, isBefore } from "date-fns"
+import { format, isAfter, isBefore } from "date-fns"
 import { ja } from "date-fns/locale"
 import { DateRange } from "react-day-picker"
 
 interface DateRangePickerProps {
     date: DateRange | undefined
     onSelect: (date: DateRange | undefined) => void
+    fromDate?: Date
+    toDate?: Date
+    buttonClassName?: string
+    calendarClassName?: string
+    placeholder?: string
+    numberOfMonths?: number
+    formatString?: string
+    align?: "start" | "center" | "end"
 }
 
-export function DateRangePicker({ date, onSelect }: DateRangePickerProps) {
-    // 選択可能な日付範囲を設定
-    const today = new Date()
-    const fromMonth = startOfMonth(new Date(2024, 11, 1))  // 2024年12月1日
-
+export function DateRangePicker({
+    date,
+    onSelect,
+    fromDate,
+    toDate = new Date(),
+    buttonClassName,
+    calendarClassName,
+    placeholder = "期間を選択",
+    numberOfMonths = 2,
+    formatString = "yyyy年MM月dd日",
+    align = "start"
+}: DateRangePickerProps) {
     // 日付選択の制限を設定
     const disabledDays = (day: Date) => {
-        return isBefore(day, fromMonth) || isAfter(day, today)
+        if (fromDate && isBefore(day, fromDate)) return true
+        if (toDate && isAfter(day, toDate)) return true
+        return false
     }
 
     // 日付選択時のハンドラー
     const handleSelect = (selectedDate: DateRange | undefined) => {
-        // 選択された日付が制限範囲内かチェック
-        if (selectedDate?.to && isAfter(selectedDate.to, today)) {
-            // 終了日が今日より後の場合、今日までに制限
+        if (selectedDate?.to && isAfter(selectedDate.to, toDate)) {
             onSelect({
                 from: selectedDate.from,
-                to: today
+                to: toDate
             })
             return
         }
@@ -49,32 +64,33 @@ export function DateRangePicker({ date, onSelect }: DateRangePickerProps) {
                     variant="outline"
                     className={cn(
                         "justify-start text-left font-normal",
-                        !date && "text-muted-foreground"
+                        !date && "text-muted-foreground",
+                        buttonClassName
                     )}
                 >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {date?.from ? (
                         date.to ? (
                             <>
-                                {format(date.from, "yyyy年MM月dd日", { locale: ja })} -{" "}
-                                {format(date.to, "yyyy年MM月dd日", { locale: ja })}
+                                {format(date.from, formatString, { locale: ja })} -{" "}
+                                {format(date.to, formatString, { locale: ja })}
                             </>
                         ) : (
-                            format(date.from, "yyyy年MM月dd日", { locale: ja })
+                            format(date.from, formatString, { locale: ja })
                         )
                     ) : (
-                        <span>期間を選択</span>
+                        <span>{placeholder}</span>
                     )}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className={cn("w-auto p-0", calendarClassName)} align={align}>
                 <Calendar
                     initialFocus
                     mode="range"
                     defaultMonth={date?.from}
                     selected={date}
                     onSelect={handleSelect}
-                    numberOfMonths={2}
+                    numberOfMonths={numberOfMonths}
                     locale={ja}
                     disabled={disabledDays}
                 />

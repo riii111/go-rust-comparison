@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { DateRange } from "react-day-picker"
-import { DateRangePicker } from "./date-range-picker"
+import { DateRangePicker } from "@/components/common/molecules/DateRangePicker"
 
 export function DashboardHeader() {
     const [dateRange, setDateRange] = useState<DateRange>({
@@ -24,6 +24,9 @@ export function DashboardHeader() {
             <DateRangePicker
                 date={dateRange}
                 onSelect={handleDateRangeChange}
+                fromDate={new Date(2024, 11, 1)}
+                toDate={new Date()}
+                calendarClassName="bg-white"
             />
         </div>
     )
