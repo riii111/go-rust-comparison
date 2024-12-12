@@ -1,7 +1,7 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { navItems, settingsItem } from '@/config/constants/nav-config'
 import { NavItem } from '@/components/layout/dashboard/NavItem'
+import { CustomAvatar } from '@/components/common/atoms/CustomAvatar'
 
 export function SideNav() {
     return (
@@ -49,10 +49,11 @@ export function SideNav() {
             {/* ユーザー情報 */}
             <div className="p-4 mt-auto border-t">
                 <div className="flex items-center gap-3">
-                    <Avatar>
-                        <AvatarImage src="https://github.com/shadcn.png" />
-                        <AvatarFallback>UN</AvatarFallback>
-                    </Avatar>
+                    <CustomAvatar
+                        src="https://github.com/shadcn.png"
+                        alt="User Name"
+                        size="sm"
+                    />
                     <div className="flex flex-col">
                         <span className="text-sm font-medium text-gray-900">ユーザー名</span>
                         <span className="text-xs text-gray-500">大阪店</span>
@@ -61,4 +62,4 @@ export function SideNav() {
             </div>
         </div>
     )
-}
+}   
