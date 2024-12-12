@@ -31,7 +31,7 @@ export function ProductIcon({
     return (
         <div
             className={cn(
-                "relative overflow-hidden rounded-lg bg-gray-100",
+                "relative overflow-hidden rounded-lg bg-transparent",
                 sizeMap[size],
                 className
             )}

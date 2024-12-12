@@ -47,7 +47,7 @@ export function RevenueSection({ data }: RevenueSectionProps) {
                         <ProductIcon
                             src={stat.avatar}
                             alt={stat.name}
-                            size="sm"
+                            size="md"
                         />
                         <div className="flex-1">
                             <div className="h-2 w-full rounded-full bg-gray-100">

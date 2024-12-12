@@ -134,32 +134,32 @@ export const REVENUE_DATA = {
   increaseAmount: 27335.09,
   stats: [
     {
-      avatar: "https://github.com/shadcn.png",
-      name: "Product A",
+      avatar: "/images/dashboard/t-shirt-1.avif",
+      name: "T-shirt",
       amount: 245000,
       percentage: 45
     },
     {
-      avatar: "https://github.com/shadcn.png",
-      name: "Product B",
+      avatar: "/images/dashboard/baby-cap-black.avif",
+      name: "Baby Cap Black",
       amount: 184000,
       percentage: 35
     },
     {
-      avatar: "https://github.com/shadcn.png",
-      name: "Product C",
+      avatar: "/images/dashboard/mug-1.avif",
+      name: "Mug",
       amount: 99976,
       percentage: 20
     },
     {
-      avatar: "https://github.com/shadcn.png",
-      name: "Product D",
+      avatar: "/images/dashboard/bag-1-dark.avif",
+      name: "Mug",
       amount: 78900,
       percentage: 15
     },
     {
-      avatar: "https://github.com/shadcn.png",
-      name: "Product D",
+      avatar: "/images/dashboard/sticker.avif",
+      name: "Sticker",
       amount: 70001,
       percentage: 13
     }
