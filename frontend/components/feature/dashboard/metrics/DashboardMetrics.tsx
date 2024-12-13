@@ -34,9 +34,12 @@ interface DashboardMetricsProps {
 
 export function DashboardMetrics({ metric: initialMetric, data }: DashboardMetricsProps) {
     const [activeMetric, setActiveMetric] = useState(initialMetric)
+    const fromDate = new Date(2024, 10, 1)  // 11月1日
+    const toDate = new Date()
+
     const [dateRange, setDateRange] = useState<DateRange>({
-        from: new Date(2024, 11, 1),
-        to: new Date()
+        from: fromDate,
+        to: toDate
     })
     const tabs = [
         { id: "revenue", label: "収益" },
