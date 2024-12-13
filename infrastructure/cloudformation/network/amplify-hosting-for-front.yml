@@ -23,10 +23,11 @@ Metadata:
           - AmplifyPlatform
           - AmplifyBasicUserName
           - AmplifyBasicPassword
-          # - APIURL バックエンド構築時に使用
-          - FetchCredential
-          - ALBHeaderAuthName
-          - ALBHeaderAuthValue
+          # バックエンド構築時に使用予定
+          # - APIURL
+          # - FetchCredential
+          # - ALBHeaderAuthName
+          # - ALBHeaderAuthValue
           - CICDPipelineTopicArn
 
 # -------------------------------------
@@ -81,22 +82,22 @@ Parameters:
     MinLength: 7
     MaxLength: 255
     ConstraintDescription: "AmplifyBasicPassword must be 7 to 225 characters"
-  # バックエンド構築時に使用
+  # バックエンド構築時に使用予定
   # APIURL:
   #   Description: "Enter the API URL for backend. (ex: https://<CloudFront domain>)"
   #   Type: String
-  FetchCredential:
-    Description: "Enter the auth settings for API fetch from frontend. (default: include)"
-    Type: String
-    Default: include
-  ALBHeaderAuthName:
-    Description: "Enter the ALB header auth name. (ex: X-Auth-ALB)"
-    Type: String
-    NoEcho: true
-  ALBHeaderAuthValue:
-    Description: "Enter the ALB header auth value."
-    Type: String
-    NoEcho: true
+  # FetchCredential:
+  #   Description: "Enter the auth settings for API fetch from frontend. (default: include)"
+  #   Type: String
+  #   Default: include
+  # ALBHeaderAuthName:
+  #   Description: "Enter the ALB header auth name. (ex: X-Auth-ALB)"
+  #   Type: String
+  #   NoEcho: true
+  # ALBHeaderAuthValue:
+  #   Description: "Enter the ALB header auth value."
+  #   Type: String
+  #   NoEcho: true
   CICDPipelineTopicArn:
     Description: "Enter the CI/CD SNS Topic ARN (ex: arn:aws:sns:<aws_region>:<aws_account_id>:ai-cicd-pipeline)"
     Type: String
@@ -129,17 +130,16 @@ Resources:
         Password: !Ref AmplifyBasicPassword
       IAMServiceRole: !Ref AmplifyServiceRole
       # 環境変数
-      EnvironmentVariables:
+      # バックエンド構築時に使用予定
+      # EnvironmentVariables:
       #   - Name: NEXT_PUBLIC_API_BASE_URL
       #     Value: !Ref APIURL
-        - Name: NEXT_PUBLIC_CREDENTIALS
-          Value: !Ref FetchCredential
-        - Name: NEXT_PUBLIC_AUTH_NAME
-          Value: !Ref ALBHeaderAuthName
-        - Name: NEXT_PUBLIC_AUTH_VALUE
-          Value: !Ref ALBHeaderAuthValue
-        - Name: _DISABLE_L2_CACHE
-          Value: true
+      #   - Name: NEXT_PUBLIC_CREDENTIALS
+      #     Value: !Ref FetchCredential
+      #   - Name: NEXT_PUBLIC_AUTH_NAME
+      #     Value: !Ref ALBHeaderAuthName
+      #   - Name: NEXT_PUBLIC_AUTH_VALUE
+      #     Value: !Ref ALBHeaderAuthValue
       BuildSpec: |
         version: 1
         applications:
