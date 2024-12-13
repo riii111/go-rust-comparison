@@ -31,44 +31,38 @@ export function PlatformAnalysis({ data }: PlatformAnalysisProps) {
                         transition={{ delay: index * 0.1 }}
                     >
                         <Card className="p-4 hover:bg-gray-50 transition-colors">
-                            <div className="flex items-center gap-4">
-                                <div className="text-gray-600 w-6">
+                            <div className="flex items-center gap-6">
+                                <div className="flex-shrink-0 w-6 text-gray-500">
                                     {platform.icon}
                                 </div>
 
-                                <div className="grid grid-cols-[1fr,140px] gap-4 flex-1 min-w-0">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-medium">{platform.name}</span>
-                                            <span className="text-sm text-muted-foreground">
-                                                {platform.percentage}%
-                                            </span>
-                                        </div>
-
-                                        <div className="relative h-2 w-full rounded-full bg-gray-100">
-                                            <motion.div
-                                                className="absolute inset-y-0 left-0 rounded-full bg-primary"
-                                                style={{
-                                                    width: `${platform.percentage}%`,
-                                                    backgroundColor: platform.color ? `var(--${platform.color})` : undefined
-                                                }}
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${platform.percentage}%` }}
-                                                transition={{ duration: 0.5, delay: index * 0.1 }}
-                                            />
-                                        </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-baseline justify-between mb-2">
+                                        <span className="font-medium">{platform.name}</span>
+                                        <span className="text-sm text-muted-foreground ml-2">
+                                            {platform.percentage}%
+                                        </span>
                                     </div>
 
-                                    <div className="text-right">
-                                        <div className="font-medium">
-                                            ¥{platform.revenue.toLocaleString()}
-                                        </div>
-                                        <div className={cn(
-                                            "text-sm",
-                                            platform.growth > 0 ? "text-green-600" : "text-red-600"
-                                        )}>
-                                            {platform.growth > 0 ? "+" : ""}{platform.growth}%
-                                        </div>
+                                    <div className="relative h-2 w-full rounded-full bg-gray-100">
+                                        <motion.div
+                                            className="absolute inset-y-0 left-0 rounded-full bg-[#E11D48]"
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${platform.percentage}%` }}
+                                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex-shrink-0 text-right w-20">
+                                    <div className="font-medium">
+                                        ¥{platform.revenue.toLocaleString()}
+                                    </div>
+                                    <div className={cn(
+                                        "text-sm",
+                                        platform.growth > 0 ? "text-green-600" : "text-red-600"
+                                    )}>
+                                        {platform.growth > 0 ? "+" : ""}{platform.growth}%
                                     </div>
                                 </div>
                             </div>
@@ -77,5 +71,5 @@ export function PlatformAnalysis({ data }: PlatformAnalysisProps) {
                 ))}
             </div>
         </div>
-    )
+    );
 }

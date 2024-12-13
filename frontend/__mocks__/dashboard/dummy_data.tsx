@@ -75,7 +75,7 @@ const generateRandomSales = (startDate: Date, endDate: Date, minAmount: number, 
 
 export const PLATFORM_DATA: PlatformData[] = [
   {
-    name: "X (Twitter)",
+    name: "Twitter",
     revenue: 227459,
     percentage: 43,
     icon: <Twitter className="w-6 h-6" />,
