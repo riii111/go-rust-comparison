@@ -16,8 +16,8 @@ import { DateRange } from "react-day-picker"
 interface DateRangePickerProps {
     date: DateRange | undefined
     onSelect: (date: DateRange | undefined) => void
-    fromDate?: Date
-    toDate?: Date
+    fromDate: Date
+    toDate: Date
     buttonClassName?: string
     calendarClassName?: string
     placeholder?: string
@@ -30,7 +30,7 @@ export function DateRangePicker({
     date,
     onSelect,
     fromDate,
-    toDate = new Date(),
+    toDate,
     buttonClassName,
     calendarClassName,
     placeholder = "期間を選択",

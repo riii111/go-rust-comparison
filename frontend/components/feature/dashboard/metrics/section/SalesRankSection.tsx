@@ -8,9 +8,10 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table"
+import { SalesRankData } from "@/config/types/api/dashboard"
 
 interface SalesRankSectionProps {
-    data: any[]; // TODO: 型定義を追加
+    data: SalesRankData[];
 }
 
 export function SalesRankSection({ data }: SalesRankSectionProps) {

@@ -6,11 +6,13 @@ import { ProductTable } from "@/components/feature/dashboard/products/table/Prod
 import { ProductPagination } from "@/components/feature/dashboard/products/table/ProductPagenation"
 import { ProductTableSkeleton } from "@/components/feature/dashboard/products/table/ProductTableSkeleton"
 
+// 商品テーブルのコンテンツ
 async function ProductTableContent() {
     const products = await getProducts()
     return <ProductTable products={products} />
 }
 
+// 商品ページ
 export default async function ProductsPage() {
     return (
         <div className="space-y-6 p-6">
