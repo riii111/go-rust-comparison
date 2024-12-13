@@ -1,6 +1,6 @@
 'use client'
 
-import { Product, ProductStock } from '@/config/types/api/product'
+import { ProductStock, ProductWithStock } from '@/config/types/api/product'
 import { Badge } from '@/components/ui/badge'
 
 // 在庫状態の型定義
@@ -11,9 +11,9 @@ const LOW_STOCK_THRESHOLD = 5;  // 在庫が5個以下の場合を低在庫と�
 // 在庫状態のラベル
 const stockStatusConfig = {
     in_stock: { label: '在庫あり', variant: 'default' as const },
-    low_stock: { label: '残りわずか', variant: 'warning' as const },
+    low_stock: { label: '残りわずか', variant: 'secondary' as const },
     out_of_stock: { label: '在庫なし', variant: 'destructive' as const },
-    unavailable: { label: '取り扱い終了', variant: 'secondary' as const },
+    unavailable: { label: '取り扱い終了', variant: 'outline' as const },
 };
 
 
@@ -30,7 +30,7 @@ const getStockStatus = (stocks: ProductStock[]): StockStatus => {
 };
 
 type EssentialInfoProps = {
-    product: Product
+    product: ProductWithStock
 }
 
 export function EssentialInfo({ product }: EssentialInfoProps) {
