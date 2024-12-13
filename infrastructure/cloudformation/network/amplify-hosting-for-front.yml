@@ -151,10 +151,11 @@ Resources:
                     - curl https://get.volta.sh | bash
                     - source ~/.bash_profile
                     - volta install node@20
-                    - npm ci
+                    - npm install -g pnpm
+                    - pnpm install
                 build:
                   commands:
-                    - npm run build
+                    - pnpm run build
               artifacts:
                 baseDirectory: .next
                 files:
