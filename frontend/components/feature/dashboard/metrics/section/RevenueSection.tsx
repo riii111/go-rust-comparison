@@ -1,25 +1,13 @@
 import { Badge } from "@/components/ui/badge"
 import { ProductIcon } from "@/components/common/atoms/ProductIcon"
+import { motion } from "framer-motion"
+import { RevenueData } from "@/config/types/api/dashboard"
 
 interface RevenueSectionProps {
-    data: {
-        revenue: {
-            revenue: number;
-            previousRevenue: number;
-            increase: number;
-            increaseAmount: number;
-            stats: Array<{
-                avatar: string;
-                name: string;
-                amount: number;
-                percentage: number;
-            }>;
-        };
-    };
+    data: RevenueData;
 }
-
 export function RevenueSection({ data }: RevenueSectionProps) {
-    const { revenue, previousRevenue, increase, increaseAmount, stats } = data.revenue
+    const { revenue, previousRevenue, increase, increaseAmount, stats } = data
 
     return (
         <div className="space-y-6">
@@ -43,25 +31,48 @@ export function RevenueSection({ data }: RevenueSectionProps) {
 
             <div className="space-y-2">
                 {stats.map((stat, index) => (
-                    <div key={index} className="flex items-center gap-4">
-                        <ProductIcon
-                            src={stat.avatar}
-                            alt={stat.name}
-                            size="md"
-                        />
-                        <div className="flex-1">
-                            <div className="h-2 w-full rounded-full bg-gray-100">
-                                <div
-                                    className="h-full rounded-full bg-primary"
-                                    style={{ width: `${stat.percentage}%` }}
-                                />
+                    <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                    >
+                        <div className="flex items-center gap-4">
+                            <ProductIcon
+                                src={stat.avatar}
+                                alt={stat.name}
+                                size="md"
+                            />
+                            <div className="flex-1">
+                                <div className="h-2 w-full rounded-full bg-gray-100">
+                                    <motion.div
+                                        className="h-full rounded-full bg-primary"
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${stat.percentage}%` }}
+                                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                                    />
+                                </div>
+                            </div>
+                            <div className="min-w-[100px] text-right">
+                                <motion.div
+                                    className="font-medium"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: index * 0.1 }}
+                                >
+                                    ¥{stat.amount.toLocaleString()}
+                                </motion.div>
+                                <motion.div
+                                    className="text-sm text-muted-foreground"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: index * 0.1 }}
+                                >
+                                    {stat.percentage}%
+                                </motion.div>
                             </div>
                         </div>
-                        <div className="min-w-[100px] text-right">
-                            <div className="font-medium">¥{stat.amount.toLocaleString()}</div>
-                            <div className="text-sm text-muted-foreground">{stat.percentage}%</div>
-                        </div>
-                    </div>
+                    </motion.div>
                 ))}
             </div>
         </div>
