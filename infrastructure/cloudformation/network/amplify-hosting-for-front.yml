@@ -148,6 +148,9 @@ Resources:
               phases:
                 preBuild:
                   commands:
+                    - curl https://get.volta.sh | bash
+                    - source ~/.bash_profile
+                    - volta install node@20
                     - npm ci
                 build:
                   commands:
