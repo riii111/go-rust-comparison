@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { MetricsSkeleton } from "@/components/feature/dashboard/metrics/MetricsSkeleton"
 import { DashboardMetrics } from "@/components/feature/dashboard/metrics/DashboardMetrics"
-import { STATS_CONFIG, PLATFORM_DATA, SALES_RANK_DATA, REVENUE_DATA } from "@/__mocks__/dashboard/dummy_data"
+import { STATS_CONFIG, PLATFORM_DATA, SALES_RANK_DATA, REVENUE_DATA } from "@/__mocks__/dashboard/metrics/dummy_data"
 import { DashboardData } from "@/config/types/api/dashboard"
 
 // ダミー用のデータフェッチ
