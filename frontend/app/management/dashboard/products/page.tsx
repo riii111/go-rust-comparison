@@ -12,6 +12,11 @@ async function ProductTableContent() {
     return <ProductTable products={products} />
 }
 
+// TODO: 検索機能の実装
+// - サーバーサイドでの検索処理の実装が必要
+// - getProducts関数にsearchQuery引数を追加し、APIエンドポイントに検索パラメータを渡す
+// - 検索結果に応じたページネーションの調整
+
 // 商品ページ
 export default async function ProductsPage() {
     return (
