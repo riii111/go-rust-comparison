@@ -17,14 +17,17 @@ interface SalesRankSectionProps {
 export function SalesRankSection({ data }: SalesRankSectionProps) {
     return (
         <div className="space-y-6">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Sales Ranking</h3>
+            </div>
             <Table>
                 <TableHeader>
-                    <TableRow>
-                        <TableHead>Sales</TableHead>
-                        <TableHead>Revenue</TableHead>
-                        <TableHead>Leads</TableHead>
-                        <TableHead>KPI</TableHead>
-                        <TableHead>W/L</TableHead>
+                    <TableRow className="hover:bg-transparent">
+                        <TableHead className="w-[300px]">Sales</TableHead>
+                        <TableHead className="text-center w-[100px]">Revenue</TableHead>
+                        <TableHead className="text-center w-[100px]">Leads</TableHead>
+                        <TableHead className="text-center w-[100px]">KPI</TableHead>
+                        <TableHead className="text-center w-[120px]">Win/Loss</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -45,21 +48,31 @@ export function SalesRankSection({ data }: SalesRankSectionProps) {
                                     </div>
                                 </div>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">
                                 <Badge variant="secondary" className="bg-gray-100">
-                                    {item.sales}
+                                    {item.sales.toLocaleString()}
                                 </Badge>
                             </TableCell>
-                            <TableCell>{item.leads}</TableCell>
-                            <TableCell>{item.kpi}</TableCell>
+                            <TableCell className="text-center">
+                                {item.leads.toLocaleString()}
+                            </TableCell>
+                            <TableCell className="text-center">
+                                <Badge
+                                    variant={item.kpi >= 0.8 ? "default" : "secondary"}
+                                    className={item.kpi >= 0.8 ? "bg-green-100 text-green-800" : "bg-gray-100"}
+                                >
+                                    {(item.kpi * 100).toFixed(0)}%
+                                </Badge>
+                            </TableCell>
                             <TableCell>
-                                <div className="flex items-center gap-1">
-                                    <Badge variant="secondary" className="bg-gray-900 text-white">
+                                <div className="flex items-center justify-center gap-2">
+                                    <Badge variant="secondary" className="bg-green-100 text-green-800">
                                         {item.winRate.wins}
                                     </Badge>
-                                    <span className="text-sm text-muted-foreground">
+                                    <span className="text-sm text-muted-foreground">/</span>
+                                    <Badge variant="secondary" className="bg-red-100 text-red-800">
                                         {item.winRate.total}
-                                    </span>
+                                    </Badge>
                                 </div>
                             </TableCell>
                         </TableRow>
