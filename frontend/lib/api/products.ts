@@ -1,5 +1,9 @@
 // import { customFetch } from "@/lib/api/core";
-import { ProductsResponse, ProductResponse } from "@/config/types/api/product";
+import {
+  ProductsResponse,
+  ProductResponse,
+  ProductWithStock,
+} from "@/config/types/api/product";
 // TODO: APIが実装されるまで、ダミーデータで返しておく
 import { DUMMY_PRODUCTS } from "@/__mocks__/dashboard/products/dummy_data";
 
@@ -21,7 +25,9 @@ export async function getProducts(): Promise<ProductsResponse> {
 /**
  * 指定した商品を取得する
  */
-export async function getProductById(id: string): Promise<ProductResponse> {
+export async function getProductById(
+  id: string
+): Promise<ProductWithStock | undefined> {
   // TODO: APIが実装されるまで、ダミーデータで返しておく
 
   if (id === "5") return undefined;

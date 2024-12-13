@@ -1,12 +1,12 @@
 import { Card } from '@/components/ui/card'
-import { Product } from '@/config/types/api/product'
+import { ProductWithStock } from '@/config/types/api/product'
 import { Suspense } from 'react'
 import { Header } from './Header'
 import { ProductInfo, ProductInfoSkeleton } from './ProductInfo'
 import { ImageSection, ImageSkeleton } from './ImageSection'
 
 type ProductDetailProps = {
-    product: Product
+    product: ProductWithStock
 }
 
 export function ProductDetail({ product }: ProductDetailProps) {

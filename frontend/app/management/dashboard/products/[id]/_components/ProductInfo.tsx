@@ -1,12 +1,12 @@
 'use client'
 
-import { Product } from '@/config/types/api/product'
+import { ProductWithStock } from '@/config/types/api/product'
 import { Suspense } from 'react'
 import { EssentialInfo } from '@/app/management/dashboard/products/[id]/_components/EssentialInfo'
 import { DetailInfo } from '@/app/management/dashboard/products/[id]/_components/DetailInfo'
 
 type ProductInformationProps = {
-    product: Product
+    product: ProductWithStock
 }
 
 export function ProductInfo({ product }: ProductInformationProps) {
