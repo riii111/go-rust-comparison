@@ -1,6 +1,6 @@
 import { getProductById } from '@/lib/api/products'
 import { ProductDetail } from './ProductDetail'
-import { NotFound } from '@/components/feature/dashboard/NotFound'
+import { NotFound } from '@/components/feature/dashboard/products/NotFound'
 
 type Props = {
     params: {

@@ -14,9 +14,9 @@ export interface Revenue {
 }
 
 export interface DashboardData {
-  stats: Record<string, any>; // 具体的な型に変更することを推奨
-  platforms: any[]; // 具体的な型に変更することを推奨
-  salesRank: any[]; // 具体的な型に変更することを推奨
+  stats: Record<string, any>;
+  platforms: any[];
+  salesRank: any[];
   revenue: Revenue;
 }
 

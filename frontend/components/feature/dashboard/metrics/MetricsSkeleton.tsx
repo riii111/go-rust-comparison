@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
-export function DashboardSkeleton() {
+export function MetricsSkeleton() {
     return (
         <div className="h-full pl-6 flex flex-col overflow-hidden">
             {/* ヘッダー部分 */}
