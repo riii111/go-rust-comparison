@@ -58,12 +58,16 @@ func TestStoreModel(t *testing.T) {
 			{
 				name: "有効なデータ",
 				store: &models.Store{
-					ID:          "550e8400-e29b-41d4-a716-446655440000",
-					Name:        "テスト店舗",
-					PhoneNumber: "09012345678",
-					IsActive:    true,
-					CreatedBy:   "550e8400-e29b-41d4-a716-446655440001",
-					UpdatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+					ID:            "550e8400-e29b-41d4-a716-446655440000",
+					Name:          "テスト店舗",
+					Address:       "東京都渋谷区",
+					PhoneNumber:   "09012345678",
+					BusinessHours: "9:00-18:00",
+					ZipCode:       "150-0001",
+					Description:   "テスト用の店舗です",
+					IsActive:      true,
+					CreatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:     "550e8400-e29b-41d4-a716-446655440001",
 				},
 				wantErr: false,
 			},
@@ -115,6 +119,86 @@ func TestStoreModel(t *testing.T) {
 				},
 				wantErr: true,
 			},
+			{
+				name: "必須フィールドが空（Name）",
+				store: &models.Store{
+					ID:            "550e8400-e29b-41d4-a716-446655440000",
+					Name:          "", // 空文字列
+					Address:       "東京都渋谷区",
+					PhoneNumber:   "09012345678",
+					BusinessHours: "9:00-18:00",
+					ZipCode:       "150-0001",
+					Description:   "テスト用の店舗です",
+					IsActive:      true,
+					CreatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+				},
+				wantErr: true,
+			},
+			{
+				name: "必須フィールドが空（Address）",
+				store: &models.Store{
+					ID:            "550e8400-e29b-41d4-a716-446655440000",
+					Name:          "テスト店舗",
+					Address:       "", // 空文字列
+					PhoneNumber:   "09012345678",
+					BusinessHours: "9:00-18:00",
+					ZipCode:       "150-0001",
+					Description:   "テスト用の店舗です",
+					IsActive:      true,
+					CreatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+				},
+				wantErr: true,
+			},
+			{
+				name: "必須フィールドが空（BusinessHours）",
+				store: &models.Store{
+					ID:            "550e8400-e29b-41d4-a716-446655440000",
+					Name:          "テスト店舗",
+					Address:       "東京都渋谷区",
+					PhoneNumber:   "09012345678",
+					BusinessHours: "", // 空文字列
+					ZipCode:       "150-0001",
+					Description:   "テスト用の店舗です",
+					IsActive:      true,
+					CreatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+				},
+				wantErr: true,
+			},
+			{
+				name: "必須フィールドが空（ZipCode）",
+				store: &models.Store{
+					ID:            "550e8400-e29b-41d4-a716-446655440000",
+					Name:          "テスト店舗",
+					Address:       "東京都渋谷区",
+					PhoneNumber:   "09012345678",
+					BusinessHours: "9:00-18:00",
+					ZipCode:       "", // 空文字列
+					Description:   "テスト用の店舗です",
+					IsActive:      true,
+					CreatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+				},
+				wantErr: true,
+			},
+			{
+				name: "必須フィールドが空（Description）",
+				store: &models.Store{
+					ID:            "550e8400-e29b-41d4-a716-446655440000",
+					Name:          "テスト店舗",
+					Address:       "東京都渋谷区",
+					PhoneNumber:   "09012345678",
+					BusinessHours: "9:00-18:00",
+					ZipCode:       "150-0001",
+					Description:   "", // 空文字列
+					IsActive:      true,
+					CreatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+				},
+				wantErr: true,
+			},
 		}
 
 		for _, tt := range tests {
@@ -143,12 +227,16 @@ func TestStoreModel(t *testing.T) {
 			{
 				name: "電話番号が11桁",
 				store: &models.Store{
-					ID:          "550e8400-e29b-41d4-a716-446655440000",
-					Name:        "テスト店舗",
-					PhoneNumber: "09012345678",
-					IsActive:    true,
-					CreatedBy:   "550e8400-e29b-41d4-a716-446655440001",
-					UpdatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+					ID:            "550e8400-e29b-41d4-a716-446655440000",
+					Name:          "テスト店舗",
+					Address:       "東京都渋谷区",
+					PhoneNumber:   "09012345678",
+					BusinessHours: "9:00-18:00",
+					ZipCode:       "150-0001",
+					Description:   "テスト用の店舗です",
+					IsActive:      true,
+					CreatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:     "550e8400-e29b-41d4-a716-446655440001",
 				},
 				wantErr: false,
 			},
@@ -182,12 +270,16 @@ func TestStoreModel(t *testing.T) {
 
 	t.Run("オプショナルフィールドの検証", func(t *testing.T) {
 		store := &models.Store{
-			ID:          "550e8400-e29b-41d4-a716-446655440000",
-			Name:        "テスト店舗",
-			PhoneNumber: "09012345678",
-			IsActive:    true,
-			CreatedBy:   "550e8400-e29b-41d4-a716-446655440001",
-			UpdatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+			ID:            "550e8400-e29b-41d4-a716-446655440000",
+			Name:          "テスト店舗",
+			Address:       "東京都渋谷区",
+			PhoneNumber:   "09012345678",
+			BusinessHours: "9:00-18:00",
+			ZipCode:       "150-0001",
+			Description:   "テスト用の店舗です",
+			IsActive:      true,
+			CreatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+			UpdatedBy:     "550e8400-e29b-41d4-a716-446655440001",
 		}
 
 		// オプショナルフィールドが空でもバリデーションが通ることを確認
