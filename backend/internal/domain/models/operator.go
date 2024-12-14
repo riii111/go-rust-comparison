@@ -9,7 +9,7 @@ import (
 )
 
 type Operator struct {
-	ID           string         `gorm:"type:uuid;primaryKey" json:"id"`
+	ID           string         `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
 	Email        string         `gorm:"unique;not null" json:"email" validate:"required,email"`
 	Username     string         `gorm:"not null" json:"username" validate:"required"`
 	PasswordHash string         `gorm:"not null" json:"password_hash" validate:"required,password"`
