@@ -14,6 +14,15 @@ func TestOperatorModel(t *testing.T) {
 	validate := validator.New()
 	models.RegisterCustomValidations(validate)
 
+	validStore := models.Store{
+		ID:          "550e8400-e29b-41d4-a716-446655440000",
+		Name:        "テスト店舗",
+		PhoneNumber: "09012345678",
+		IsActive:    true,
+		CreatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+		UpdatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+	}
+
 	t.Run("フィールド型と制約の検証", func(t *testing.T) {
 		operator := &models.Operator{
 			ID:           "550e8400-e29b-41d4-a716-446655440000",
@@ -26,6 +35,7 @@ func TestOperatorModel(t *testing.T) {
 			UpdatedBy:    "550e8400-e29b-41d4-a716-446655440002",
 			CreatedAt:    time.Now(),
 			UpdatedAt:    time.Now(),
+			Store:        validStore,
 		}
 
 		assert.IsType(t, "", operator.ID)
@@ -52,9 +62,7 @@ func TestOperatorModel(t *testing.T) {
 					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
 					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-					Store: models.Store{
-						PhoneNumber: "09012345678",
-					},
+					Store:        validStore,
 				},
 				wantErr: false,
 			},
@@ -68,9 +76,7 @@ func TestOperatorModel(t *testing.T) {
 					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
 					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-					Store: models.Store{
-						PhoneNumber: "09012345678",
-					},
+					Store:        validStore,
 				},
 				wantErr: true,
 			},
@@ -84,9 +90,7 @@ func TestOperatorModel(t *testing.T) {
 					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
 					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-					Store: models.Store{
-						PhoneNumber: "09012345678",
-					},
+					Store:        validStore,
 				},
 				wantErr: true,
 			},
@@ -100,9 +104,7 @@ func TestOperatorModel(t *testing.T) {
 					StoreID:      "invalid-uuid",
 					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-					Store: models.Store{
-						PhoneNumber: "09012345678",
-					},
+					Store:        validStore,
 				},
 				wantErr: true,
 			},
@@ -170,9 +172,7 @@ func TestOperatorModel(t *testing.T) {
 					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
 					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-					Store: models.Store{
-						PhoneNumber: "09012345678",
-					},
+					Store:        validStore,
 				}
 
 				err := validate.Struct(operator)
