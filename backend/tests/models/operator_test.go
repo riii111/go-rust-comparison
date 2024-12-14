@@ -2,6 +2,7 @@ package models_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
@@ -9,70 +10,180 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestPasswordValidation(t *testing.T) {
+func TestOperatorModel(t *testing.T) {
 	validate := validator.New()
 	models.RegisterCustomValidations(validate)
 
-	tests := []struct {
-		name     string
-		password string
-		wantErr  bool
-	}{
-		{
-			name:     "有効なパスワード",
-			password: "Password1!",
-			wantErr:  false,
-		},
-		{
-			name:     "8文字未満",
-			password: "Pass1!",
-			wantErr:  true,
-		},
-		{
-			name:     "大文字なし",
-			password: "password1!",
-			wantErr:  true,
-		},
-		{
-			name:     "小文字なし",
-			password: "PASSWORD1!",
-			wantErr:  true,
-		},
-		{
-			name:     "数字なし",
-			password: "Password!",
-			wantErr:  true,
-		},
-		{
-			name:     "記号なし",
-			password: "Password1",
-			wantErr:  true,
-		},
-	}
+	t.Run("フィールド型と制約の検証", func(t *testing.T) {
+		operator := &models.Operator{
+			ID:           "550e8400-e29b-41d4-a716-446655440000",
+			Email:        "test@example.com",
+			Username:     "testuser",
+			PasswordHash: "Password1!",
+			Role:         "operator",
+			StoreID:      "550e8400-e29b-41d4-a716-446655440001",
+			CreatedBy:    "550e8400-e29b-41d4-a716-446655440002",
+			UpdatedBy:    "550e8400-e29b-41d4-a716-446655440002",
+			CreatedAt:    time.Now(),
+			UpdatedAt:    time.Now(),
+		}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			operator := &models.Operator{
-				Email:        "test@example.com",
-				Username:     "testuser",
-				PasswordHash: tt.password,
-				Role:         "operator",
-				StoreID:      "550e8400-e29b-41d4-a716-446655440000",
-				CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-				UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-				Store: models.Store{
-					PhoneNumber: "09012345678",
+		assert.IsType(t, "", operator.ID)
+		assert.IsType(t, "", operator.Email)
+		assert.IsType(t, "", operator.Username)
+		assert.IsType(t, "", operator.PasswordHash)
+		assert.IsType(t, "", operator.Role)
+		assert.IsType(t, time.Time{}, operator.CreatedAt)
+	})
+
+	t.Run("必須フィールドのバリデーション", func(t *testing.T) {
+		tests := []struct {
+			name     string
+			operator *models.Operator
+			wantErr  bool
+		}{
+			{
+				name: "有効なデータ",
+				operator: &models.Operator{
+					Email:        "test@example.com",
+					Username:     "testuser",
+					PasswordHash: "Password1!",
+					Role:         "operator",
+					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
+					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+					Store: models.Store{
+						PhoneNumber: "09012345678",
+					},
 				},
-			}
+				wantErr: false,
+			},
+			{
+				name: "無効なメールアドレス",
+				operator: &models.Operator{
+					Email:        "invalid-email",
+					Username:     "testuser",
+					PasswordHash: "Password1!",
+					Role:         "operator",
+					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
+					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+					Store: models.Store{
+						PhoneNumber: "09012345678",
+					},
+				},
+				wantErr: true,
+			},
+			{
+				name: "無効なロール",
+				operator: &models.Operator{
+					Email:        "test@example.com",
+					Username:     "testuser",
+					PasswordHash: "Password1!",
+					Role:         "invalid-role",
+					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
+					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+					Store: models.Store{
+						PhoneNumber: "09012345678",
+					},
+				},
+				wantErr: true,
+			},
+			{
+				name: "無効なUUID",
+				operator: &models.Operator{
+					Email:        "test@example.com",
+					Username:     "testuser",
+					PasswordHash: "Password1!",
+					Role:         "operator",
+					StoreID:      "invalid-uuid",
+					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+					Store: models.Store{
+						PhoneNumber: "09012345678",
+					},
+				},
+				wantErr: true,
+			},
+		}
 
-			err := validate.Struct(operator)
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				err := validate.Struct(tt.operator)
 
-			if tt.wantErr {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), "password")
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
+				if tt.wantErr {
+					require.Error(t, err)
+					assert.Contains(t, err.Error(), "validation")
+				} else {
+					assert.NoError(t, err)
+				}
+			})
+		}
+	})
+
+	t.Run("パスワードバリデーション", func(t *testing.T) {
+		tests := []struct {
+			name     string
+			password string
+			wantErr  bool
+		}{
+			{
+				name:     "有効なパスワード",
+				password: "Password1!",
+				wantErr:  false,
+			},
+			{
+				name:     "8文字未満",
+				password: "Pass1!",
+				wantErr:  true,
+			},
+			{
+				name:     "大文字なし",
+				password: "password1!",
+				wantErr:  true,
+			},
+			{
+				name:     "小文字なし",
+				password: "PASSWORD1!",
+				wantErr:  true,
+			},
+			{
+				name:     "数字なし",
+				password: "Password!",
+				wantErr:  true,
+			},
+			{
+				name:     "記号なし",
+				password: "Password1",
+				wantErr:  true,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				operator := &models.Operator{
+					Email:        "test@example.com",
+					Username:     "testuser",
+					PasswordHash: tt.password,
+					Role:         "operator",
+					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
+					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+					Store: models.Store{
+						PhoneNumber: "09012345678",
+					},
+				}
+
+				err := validate.Struct(operator)
+
+				if tt.wantErr {
+					require.Error(t, err)
+					assert.Contains(t, err.Error(), "password")
+				} else {
+					assert.NoError(t, err)
+				}
+			})
+		}
+	})
 }
