@@ -10,6 +10,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestOperatorModel は Operator モデルの機能をテストします。
+// 以下の項目について検証を行います：
+//   - フィールドの型と制約
+//   - 必須フィールドのバリデーション
+//   - パスワードバリデーション（以下の要件を確認）：
+//   - 最小8文字
+//   - 大文字を含む
+//   - 小文字を含む
+//   - 数字を含む
+//   - 特殊文字を含む
 func TestOperatorModel(t *testing.T) {
 	validate := validator.New()
 	models.RegisterCustomValidations(validate)
