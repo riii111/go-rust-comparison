@@ -34,3 +34,11 @@ tidy:
 
 check: format lint tidy
 	@echo "All checks passed!"
+
+# 全てのテストを実行
+test:
+	docker exec -it $(APP_SERVICE_NAME) go test -v ./tests/...
+
+# シャッフルを有効にしてテストを実行
+test-shuffle:
+	docker exec -it $(APP_SERVICE_NAME) go test -v ./tests/... -shuffle=on
