@@ -15,12 +15,16 @@ func TestOperatorModel(t *testing.T) {
 	models.RegisterCustomValidations(validate)
 
 	validStore := models.Store{
-		ID:          "550e8400-e29b-41d4-a716-446655440000",
-		Name:        "テスト店舗",
-		PhoneNumber: "09012345678",
-		IsActive:    true,
-		CreatedBy:   "550e8400-e29b-41d4-a716-446655440001",
-		UpdatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+		ID:            "550e8400-e29b-41d4-a716-446655440000",
+		Name:          "テスト店舗",
+		Address:       "東京都渋谷区",
+		PhoneNumber:   "09012345678",
+		BusinessHours: "9:00-18:00",
+		ZipCode:       "150-0001",
+		Description:   "テスト用の店舗です",
+		IsActive:      true,
+		CreatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+		UpdatedBy:     "550e8400-e29b-41d4-a716-446655440001",
 	}
 
 	t.Run("フィールド型と制約の検証", func(t *testing.T) {
