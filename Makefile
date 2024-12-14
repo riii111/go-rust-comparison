@@ -1,5 +1,5 @@
 APP_SERVICE_NAME = app
-RUN_APP = docker-compose exec $(APP_SERVICE_NAME)
+RUN_APP = docker compose exec $(APP_SERVICE_NAME)
 
 prepare:
 	docker compose up -d --build
@@ -14,14 +14,14 @@ up:
 	docker compose up
 
 down:
-	docker-compose down -v
+	docker compose down -v
 
 app:
 	docker exec -it $(APP_SERVICE_NAME) bash
 
 db:
 	docker exec -it db bash
-	
+
 format:
 	$(RUN_APP) go fmt ./...
 	$(RUN_APP) goimports -l -w .
