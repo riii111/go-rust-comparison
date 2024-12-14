@@ -10,6 +10,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestStoreModel は Store モデルの機能をテストします。
+// 以下の項目について検証を行います：
+//   - フィールドの型と制約
+//   - 必須フィールドのバリデーション
+//   - フィールド長の検証
+//   - オプショナルフィールドの検証
 func TestStoreModel(t *testing.T) {
 	validate := validator.New()
 
@@ -225,7 +231,7 @@ func TestStoreModel(t *testing.T) {
 			wantErr bool
 		}{
 			{
-				name: "電話番号が11桁",
+				name: "話番号が11桁",
 				store: &models.Store{
 					ID:            "550e8400-e29b-41d4-a716-446655440000",
 					Name:          "テスト店舗",
