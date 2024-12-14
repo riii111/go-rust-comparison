@@ -11,6 +11,8 @@ import (
 )
 
 func TestStoreModel(t *testing.T) {
+	validate := validator.New()
+
 	t.Run("フィールド型と制約の検証", func(t *testing.T) {
 		store := &models.Store{
 			ID:            "550e8400-e29b-41d4-a716-446655440000",
@@ -27,17 +29,27 @@ func TestStoreModel(t *testing.T) {
 			UpdatedAt:     time.Now(),
 		}
 
-		// 構造体の基本的な検証
+		// 型の検証
 		assert.IsType(t, "", store.ID)
 		assert.IsType(t, "", store.Name)
+		assert.IsType(t, "", store.Address)
 		assert.IsType(t, "", store.PhoneNumber)
+		assert.IsType(t, "", store.BusinessHours)
+		assert.IsType(t, "", store.ZipCode)
+		assert.IsType(t, "", store.Description)
 		assert.IsType(t, true, store.IsActive)
+		assert.IsType(t, "", store.CreatedBy)
+		assert.IsType(t, "", store.UpdatedBy)
 		assert.IsType(t, time.Time{}, store.CreatedAt)
+		assert.IsType(t, time.Time{}, store.UpdatedAt)
+
+		// UUID形式の検証
+		assert.Regexp(t, "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", store.ID)
+		assert.Regexp(t, "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", store.CreatedBy)
+		assert.Regexp(t, "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", store.UpdatedBy)
 	})
 
 	t.Run("必須フィールドのバリデーション", func(t *testing.T) {
-		validate := validator.New()
-
 		tests := []struct {
 			name    string
 			store   *models.Store
@@ -46,36 +58,109 @@ func TestStoreModel(t *testing.T) {
 			{
 				name: "有効なデータ",
 				store: &models.Store{
+					ID:          "550e8400-e29b-41d4-a716-446655440000",
 					Name:        "テスト店舗",
 					PhoneNumber: "09012345678",
 					IsActive:    true,
+					CreatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:   "550e8400-e29b-41d4-a716-446655440001",
 				},
 				wantErr: false,
 			},
 			{
 				name: "無効な電話番号（空）",
 				store: &models.Store{
+					ID:          "550e8400-e29b-41d4-a716-446655440000",
 					Name:        "テスト店舗",
 					PhoneNumber: "",
 					IsActive:    true,
+					CreatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:   "550e8400-e29b-41d4-a716-446655440001",
 				},
 				wantErr: true,
 			},
 			{
 				name: "無効な電話番号（桁数不足）",
 				store: &models.Store{
+					ID:          "550e8400-e29b-41d4-a716-446655440000",
 					Name:        "テスト店舗",
-					PhoneNumber: "0901234567",
+					PhoneNumber: "090123456",
 					IsActive:    true,
+					CreatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:   "550e8400-e29b-41d4-a716-446655440001",
 				},
 				wantErr: true,
 			},
 			{
 				name: "無効な電話番号（数字以外）",
 				store: &models.Store{
+					ID:          "550e8400-e29b-41d4-a716-446655440000",
 					Name:        "テスト店舗",
-					PhoneNumber: "090-1234-567",
+					PhoneNumber: "090-1234-5678",
 					IsActive:    true,
+					CreatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+				},
+				wantErr: true,
+			},
+			{
+				name: "無効なUUID（CreatedBy）",
+				store: &models.Store{
+					ID:          "550e8400-e29b-41d4-a716-446655440000",
+					Name:        "テスト店舗",
+					PhoneNumber: "09012345678",
+					IsActive:    true,
+					CreatedBy:   "invalid-uuid",
+					UpdatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+				},
+				wantErr: true,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				err := validate.Struct(tt.store)
+
+				if tt.wantErr {
+					require.Error(t, err)
+					if tt.name == "無効なUUID（CreatedBy）" {
+						assert.Contains(t, err.Error(), "CreatedBy")
+						assert.Contains(t, err.Error(), "uuid")
+					}
+				} else {
+					assert.NoError(t, err)
+				}
+			})
+		}
+	})
+
+	t.Run("フィールド長の検証", func(t *testing.T) {
+		tests := []struct {
+			name    string
+			store   *models.Store
+			wantErr bool
+		}{
+			{
+				name: "電話番号が11桁",
+				store: &models.Store{
+					ID:          "550e8400-e29b-41d4-a716-446655440000",
+					Name:        "テスト店舗",
+					PhoneNumber: "09012345678",
+					IsActive:    true,
+					CreatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+				},
+				wantErr: false,
+			},
+			{
+				name: "電話番号が12桁（エラー）",
+				store: &models.Store{
+					ID:          "550e8400-e29b-41d4-a716-446655440000",
+					Name:        "テスト店舗",
+					PhoneNumber: "090123456789",
+					IsActive:    true,
+					CreatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:   "550e8400-e29b-41d4-a716-446655440001",
 				},
 				wantErr: true,
 			},
@@ -95,11 +180,28 @@ func TestStoreModel(t *testing.T) {
 		}
 	})
 
-	t.Run("フィールド長の検証", func(t *testing.T) {
+	t.Run("オプショナルフィールドの検証", func(t *testing.T) {
 		store := &models.Store{
+			ID:          "550e8400-e29b-41d4-a716-446655440000",
+			Name:        "テスト店舗",
 			PhoneNumber: "09012345678",
+			IsActive:    true,
+			CreatedBy:   "550e8400-e29b-41d4-a716-446655440001",
+			UpdatedBy:   "550e8400-e29b-41d4-a716-446655440001",
 		}
 
-		assert.Len(t, store.PhoneNumber, 11, "電話番号は11桁である必要があります")
+		// オプショナルフィールドが空でもバリデーションが通ることを確認
+		err := validate.Struct(store)
+		assert.NoError(t, err)
+
+		// オプショナルフィールドに値を設定
+		store.Address = "東京都渋谷区"
+		store.BusinessHours = "9:00-18:00"
+		store.ZipCode = "150-0001"
+		store.Description = "テスト用の店舗です"
+
+		// 値を設定しても問題ないことを確認
+		err = validate.Struct(store)
+		assert.NoError(t, err)
 	})
 }
