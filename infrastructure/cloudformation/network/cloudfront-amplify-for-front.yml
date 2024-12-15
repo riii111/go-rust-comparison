@@ -39,15 +39,9 @@ Metadata:
         Parameters:
           - ProjectName
           - Environment
-      # - Label:
-      #     default: "Route 53 Configuration"
-      #   Parameters:
-      #     - HostZoneID
-      #     - DomainName
       - Label:
           default: "CloudFront Configuration"
         Parameters:
-          # - ACMPublicCertificateArn
           - AmplifyURL
           - AuthHeaderValue
           - CachePolicy
@@ -63,7 +57,7 @@ Parameters:
     Type: String
     MinLength: 1
     ConstraintDescription: "ProjectName must be entered."
-    Default: next-ssr
+    Default: go-rust-comparison
   Environment:
     Description: "Select a environment name."
     Type: String
@@ -73,24 +67,13 @@ Parameters:
       - prd
     ConstraintDescription: "Environment name must be selected."
     Default: dev
-  # HostZoneID:
-  #   Description: "Select the Route 53 hosted zone ID."
-  #   Type: AWS::Route53::HostedZone::Id
-  # DomainName:
-  #   Description: "Enter the CloudFront domain name used for alias record. (ex: dev.inquiry-pro.lifecard.co.jp)"
-  #   Type: String
-  # ACMPublicCertificateArn:
-  #   Description: "Enter the ACM public certificate ARN for global region."
-  #   Type: String
   AmplifyURL:
     Description: "Enter the Amplify URL. (ex: develop.xxxxx.amplifyapp.com)"
     Type: String
-    Default: develop.d1gkqsdi8izhqg.amplifyapp.com
   AuthHeaderValue:
     Description: "Enter the base64 Amplify basic auth credentials.(ex: Basic xxxxxxxxxxxxxxx)"
     Type: String
     NoEcho: true
-    Default: Basic cm9vdDo4NTE1YWY4NTE1YWY=
   CachePolicy:
     Description: "Select the CloudFront cache policy."
     Type: String
@@ -129,19 +112,6 @@ Conditions:
 # -------------------------------------
 Resources:
   # -------------------------------------
-  # Route 53
-  # -------------------------------------
-  # CloudFrontAliasRecord:
-  #   Type: AWS::Route53::RecordSet
-  #   Properties:
-  #     HostedZoneId: !Ref HostZoneID
-  #     Name: !Ref DomainName
-  #     Type: A
-  #     AliasTarget:
-  #       # ref: https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/quickref-route53.html#w4ab1c23c21c84c11
-  #       HostedZoneId: Z2FDTNDATAQYW2
-  #       DNSName: !GetAtt CloudFrontDistribution.DomainName
-  # -------------------------------------
   # CloudFront Distribution
   # -------------------------------------
   CloudFrontDistribution:
@@ -176,12 +146,7 @@ Resources:
           ViewerProtocolPolicy: redirect-to-https
         HttpVersion: http2
         ViewerCertificate:
-          # AcmCertificateArn: !Ref ACMPublicCertificateArn
-          # MinimumProtocolVersion: TLSv1.2_2021
-          # SslSupportMethod: sni-only
           CloudFrontDefaultCertificate: true
-        # Aliases:
-        #   - !Ref DomainName
         IPV6Enabled: false
         WebACLId: !If
           - NotEmptyWebACLArn
