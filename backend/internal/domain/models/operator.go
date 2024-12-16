@@ -8,12 +8,18 @@ import (
 	"gorm.io/gorm"
 )
 
+// Operatorモデルの権限定数
+const (
+	RoleSystemAdmin = "system_admin" // システム管理者権限
+	RoleStoreAdmin  = "store_admin"  // 店舗管理者権限
+)
+
 type Operator struct {
 	ID           string         `gorm:"type:uuid;primaryKey;default:gen_random_uuid()" json:"id"`
 	Email        string         `gorm:"unique;not null" json:"email" validate:"required,email"`
 	Username     string         `gorm:"not null" json:"username" validate:"required"`
 	PasswordHash string         `gorm:"not null" json:"password_hash" validate:"required,password"`
-	Role         string         `gorm:"not null" json:"role" validate:"required,oneof=admin operator"`
+	Role         string         `gorm:"type:enum('system_admin','store_admin');not null" json:"role" validate:"required,oneof=system_admin store_admin"`
 	StoreID      string         `gorm:"type:uuid" json:"store_id" validate:"required,uuid"`
 	AvatarURL    string         `json:"avatar_url" validate:"omitempty,url"`
 	CreatedBy    string         `gorm:"type:uuid" json:"created_by" validate:"required,uuid"`
