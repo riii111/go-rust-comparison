@@ -10,6 +10,7 @@ import { useState } from "react"
 import { ProductDeleteDialog } from "@/components/feature/dashboard/products/dialog/ProductDeleteDialog"
 import { deleteProduct } from "@/lib/api/products"
 import { StockStatusBadge } from "@/components/feature/dashboard/products/badge/StockStatusBadge"
+import { CategoryBadge } from "@/components/feature/dashboard/products/badge/CategoryBadge"
 
 interface ProductTableRowProps {
     product: ProductWithStock
@@ -67,9 +68,7 @@ export function ProductTableRow({ product }: ProductTableRowProps) {
                     </div>
                 </TableCell>
                 <TableCell className="text-center">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                        {product.category}
-                    </span>
+                    <CategoryBadge category={product.category} />
                 </TableCell>
                 <TableCell className="text-center font-medium text-gray-900">
                     ¥{product.basePrice.toLocaleString()}

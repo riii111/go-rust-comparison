@@ -3,6 +3,7 @@
 import { ProductStock, ProductWithStock } from '@/config/types/api/product'
 import { Badge } from '@/components/ui/badge'
 import { stockStatusConfig, LOW_STOCK_THRESHOLD } from '@/config/constants/stock'
+import { CategoryBadge } from "@/components/feature/dashboard/products/badge/CategoryBadge"
 // 在庫状態の型定義
 type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock' | 'unavailable';
 
@@ -35,7 +36,7 @@ export function EssentialInfo({ product }: EssentialInfoProps) {
                 <p className="text-lg font-semibold mt-2">¥{product.basePrice.toLocaleString()}</p>
             </div>
             <div className="flex gap-2">
-                <Badge>{product.category}</Badge>
+                <CategoryBadge category={product.category} />
                 <Badge variant={variant}>{label}</Badge>
             </div>
         </div>
