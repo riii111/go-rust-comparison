@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Pencil, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import type { Product } from "@/config/types/api/product"
+import type { ProductWithStock } from "@/config/types/api/product"
 import { useState } from "react"
 import { ProductDeleteDialog } from "@/components/feature/dashboard/products/dialog/ProductDeleteDialog"
 import { deleteProduct } from "@/lib/api/products"
+import { StockStatusBadge } from "@/components/feature/dashboard/products/badge/StockStatusBadge"
 
 interface ProductTableRowProps {
-    product: Product
+    product: ProductWithStock
 }
 
 export function ProductTableRow({ product }: ProductTableRowProps) {
@@ -57,10 +58,10 @@ export function ProductTableRow({ product }: ProductTableRowProps) {
                 </TableCell>
                 <TableCell>
                     <div className="flex flex-col gap-1">
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-gray-900 line-clamp-1">
                             {product.name}
                         </span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-gray-500 line-clamp-2 max-w-[400px]">
                             {product.description}
                         </span>
                     </div>
@@ -70,19 +71,11 @@ export function ProductTableRow({ product }: ProductTableRowProps) {
                         {product.category}
                     </span>
                 </TableCell>
-                <TableCell className="text-right font-medium text-gray-900">
+                <TableCell className="text-center font-medium text-gray-900">
                     ¥{product.basePrice.toLocaleString()}
                 </TableCell>
-                <TableCell className="text-center">
-                    <span
-                        className={`inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-medium
-                        ${product.stockStatus === "在庫あり"
-                                ? "bg-green-50 text-green-700"
-                                : "bg-yellow-50 text-yellow-700"
-                            }`}
-                    >
-                        {product.stockStatus}
-                    </span>
+                <TableCell className="text-center w-32">
+                    <StockStatusBadge stocks={product.stocks} />
                 </TableCell>
                 <TableCell className="text-center">
                     <div className="flex items-center justify-center gap-1">
