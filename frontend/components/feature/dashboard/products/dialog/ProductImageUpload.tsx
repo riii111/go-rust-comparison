@@ -39,7 +39,7 @@ export function ProductImageUpload({
             const reader = new FileReader()
             reader.onload = (e) => {
                 if (e.target?.result && typeof e.target.result === 'string') {
-                    onChange([...images, e.target.result])
+                    onChange([...(images ?? []), e.target.result])
                 }
             }
             reader.readAsDataURL(file)
