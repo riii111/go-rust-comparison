@@ -126,22 +126,22 @@ export function DashboardMetrics({ metric: initialMetric, data }: DashboardMetri
                         </Card>
                     </>
                 )
-            case "leads":
+            case "products":
                 return (
                     <Card>
                         <CardContent className="p-6">
                             <div className="text-center py-8 text-muted-foreground">
-                                Leads metrics coming soon...
+                                Products metrics coming soon...
                             </div>
                         </CardContent>
                     </Card>
                 )
-            case "w-l":
+            case "stocks":
                 return (
                     <Card>
                         <CardContent className="p-6">
                             <div className="text-center py-8 text-muted-foreground">
-                                Win/Loss metrics coming soon...
+                                Stocks metrics coming soon...
                             </div>
                         </CardContent>
                     </Card>

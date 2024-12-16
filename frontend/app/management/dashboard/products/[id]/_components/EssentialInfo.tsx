@@ -1,6 +1,6 @@
 import { ProductWithStock } from '@/config/types/api/product'
 import { Badge } from '@/components/ui/badge'
-import { stockStatusConfig, LOW_STOCK_THRESHOLD } from '@/config/constants/stock'
+import { stockStatusConfig } from '@/config/constants/stock'
 import { CategoryBadge } from "@/components/feature/dashboard/products/badge/CategoryBadge"
 import { getStockStatus } from '@/lib/stock'
 
