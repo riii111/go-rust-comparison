@@ -1,8 +1,8 @@
-import { ProductStock } from "@/config/types/api/product";
+import { Stock } from "@/config/types/api/stock";
 import { LOW_STOCK_THRESHOLD } from "@/config/constants/stock";
 import type { StockStatus } from "@/config/types/ui/stock";
 
-export const getStockStatus = (stocks: ProductStock[]): StockStatus => {
+export const getStockStatus = (stocks: Stock[]): StockStatus => {
   if (!stocks || stocks.length === 0) return "unavailable";
 
   const totalQuantity = stocks.reduce(

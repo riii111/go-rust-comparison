@@ -1,10 +1,10 @@
 import { Badge } from "@/components/ui/badge"
-import { ProductStock } from "@/config/types/api/product"
 import { stockStatusConfig } from "@/config/constants/stock"
 import { getStockStatus } from "@/lib/stock"
+import { Stock } from "@/config/types/api/stock"
 
 type StockStatusBadgeProps = {
-    stocks: ProductStock[]
+    stocks: Stock[]
 }
 
 export function StockStatusBadge({ stocks }: StockStatusBadgeProps) {
