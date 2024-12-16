@@ -29,3 +29,6 @@ export const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
 // 画像の拡張子
 export const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png"];
+
+// 商品一覧のページネーション
+export const PRODUCT_PAGE_SIZE = 5;
