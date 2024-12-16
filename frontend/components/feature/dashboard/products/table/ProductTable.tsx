@@ -6,10 +6,10 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { ProductTableRow } from "@/components/feature/dashboard/products/table/ProductTableRow"
-import type { Product } from "@/config/types/api/product"
+import type { ProductWithStock } from "@/config/types/api/product"
 
 interface ProductTableProps {
-    products: Product[]
+    products: ProductWithStock[]
 }
 
 export function ProductTable({ products }: ProductTableProps) {
