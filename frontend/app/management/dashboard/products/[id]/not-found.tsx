@@ -8,7 +8,7 @@ interface NotFoundProps {
     description: string
 }
 
-export function NotFound({ title, description }: NotFoundProps) {
+function NotFound({ title, description }: NotFoundProps) {
     const router = useRouter()
 
     return (
@@ -35,5 +35,14 @@ export function NotFound({ title, description }: NotFoundProps) {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function ProductNotFound() {
+    return (
+        <NotFound
+            title="商品が見つかりません"
+            description="お探しの商品は削除されたか、URLが間違っている可能性があります。"
+        />
     )
 }

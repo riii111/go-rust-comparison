@@ -31,6 +31,8 @@ export async function getProductWithStockById(
   // TODO: APIが実装されるまで、ダミーデータで返しておく
 
   if (id === "5") return undefined;
+  await new Promise((resolve) => setTimeout(resolve, 600)); // ローディング確認用
+
   return DUMMY_PRODUCTS.find(
     (product) => product.id === id
   ) as ProductWithStockResponse;
