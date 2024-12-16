@@ -38,7 +38,7 @@ export function ProductTableSkeleton() {
                                     </div>
                                 </TableCell>
                                 <TableCell className="text-center">
-                                    <div className="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-200 w-16 h-6 mx-auto animate-pulse" />
+                                    <div className="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 w-24 h-6 mx-auto animate-pulse" />
                                 </TableCell>
                                 <TableCell className="text-center">
                                     <div className="h-5 bg-gray-200 rounded w-20 mx-auto animate-pulse" />
