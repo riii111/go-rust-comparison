@@ -9,6 +9,7 @@ import { parseWithZod } from '@conform-to/zod'
 import { productSchema, MESSAGES } from '@/components/feature/dashboard/products/validation'
 import FormField from '@/components/common/molecules/FormField'
 import FormSelect from '@/components/common/molecules/FormSelect'
+import { categoryConfig } from '@/config/constants/product'
 
 interface ProductFormDialogProps {
     isOpen: boolean
@@ -102,8 +103,6 @@ export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormD
                                     value: images
                                 })
                             }}
-                            maxImages={5}
-                            maxSizeInMB={5}
                         />
                         {fields.imageUrls.errors && (
                             <p className="text-red-500 text-sm">{fields.imageUrls.errors}</p>
@@ -145,12 +144,10 @@ export function ProductFormDialog({ isOpen, onClose, initialData }: ProductFormD
                             id={fields.category.id}
                             name={fields.category.name}
                             label="カテゴリ"
-                            options={[
-                                { value: "clothing", label: "衣類" },
-                                { value: "accessories", label: "アクセサリー" },
-                                { value: "shoes", label: "靴" },
-                                { value: "other", label: "その他" }
-                            ]}
+                            options={Object.entries(categoryConfig).map(([value, config]) => ({
+                                value,
+                                label: config.label
+                            }))}
                             placeholder="カテゴリを選択"
                             required
                             value={formValue.category}

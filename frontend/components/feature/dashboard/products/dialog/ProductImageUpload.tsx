@@ -4,19 +4,16 @@ import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Image from 'next/image'
 import { ImagePlus, X } from 'lucide-react'
+import { IMAGE_EXTENSIONS, MAX_IMAGE_SIZE, MAX_IMAGES } from '@/config/constants/product'
 
 interface ProductImageUploadProps {
     images?: string[]
     onChange: (images: string[]) => void
-    maxImages?: number
-    maxSizeInMB?: number
 }
 
 export function ProductImageUpload({
     images,
     onChange,
-    maxImages = 5,
-    maxSizeInMB = 5
 }: ProductImageUploadProps) {
     const [error, setError] = useState<string | null>(null)
 
@@ -24,15 +21,15 @@ export function ProductImageUpload({
         setError(null)
 
         // バリデーション
-        if (images && images.length + acceptedFiles.length > maxImages) {
-            setError(`画像は最大${maxImages}枚までアップロードできます`)
+        if (images && images.length + acceptedFiles.length > MAX_IMAGES) {
+            setError(`画像は最大${MAX_IMAGES}枚までアップロードできます`)
             return
         }
 
         // ファイルの処理
         acceptedFiles.forEach(file => {
-            if (file.size > maxSizeInMB * 1024 * 1024) {
-                setError(`ファイルサイズは${maxSizeInMB}MB以下にしてください`)
+            if (file.size > MAX_IMAGE_SIZE) {
+                setError(`ファイルサイズは${MAX_IMAGE_SIZE}MB以下にしてください`)
                 return
             }
 
@@ -44,14 +41,14 @@ export function ProductImageUpload({
             }
             reader.readAsDataURL(file)
         })
-    }, [images, onChange, maxImages, maxSizeInMB])
+    }, [images, onChange])
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         accept: {
-            'image/*': ['.jpeg', '.jpg', '.png']
+            'image/*': IMAGE_EXTENSIONS
         },
-        maxSize: maxSizeInMB * 1024 * 1024
+        maxSize: MAX_IMAGE_SIZE
     })
     const removeImage = (index: number) => {
         if (!images) return
@@ -87,7 +84,7 @@ export function ProductImageUpload({
                 ))}
 
                 {/* ドラッグ&ドロップエリア */}
-                {images && images.length < maxImages && (
+                {images && images.length < MAX_IMAGES && (
                     <div
                         {...getRootProps()}
                         className={`w-24 h-24 flex items-center justify-center rounded-lg cursor-pointer
@@ -114,7 +111,7 @@ export function ProductImageUpload({
                     <p className="text-red-500">{error}</p>
                 ) : (
                     <p className="text-gray-500">
-                        ※ JPEG/PNG形式、{maxSizeInMB}MB以下、最大{maxImages}枚まで
+                        ※ JPEG/PNG形式、{MAX_IMAGE_SIZE}MB以下、最大{MAX_IMAGES}枚まで
                     </p>
                 )}
             </div>
