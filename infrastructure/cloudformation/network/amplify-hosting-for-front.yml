@@ -216,7 +216,7 @@ Resources:
               - logs:CreateLogGroup
               - logs:DescribeLogGroups
               - logs:PutLogEvents
-            Resource: "*"
+            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
       Roles:
         - Ref: AmplifyServiceRole
 
