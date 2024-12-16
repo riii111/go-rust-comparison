@@ -42,7 +42,3 @@ test:
 # シャッフルを有効にしてテストを実行
 test-shuffle:
 	docker exec -it $(APP_SERVICE_NAME) go test -v ./tests/... -shuffle=on
-
-doc:
-	@echo "Starting godoc server on http://localhost:6060"
-	@docker exec -it app godoc -http=0.0.0.0:6060
