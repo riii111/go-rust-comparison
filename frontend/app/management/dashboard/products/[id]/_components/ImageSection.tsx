@@ -4,6 +4,7 @@ import { Product } from '@/config/types/api/product'
 import Image from 'next/image'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { Skeleton } from "@/components/ui/skeleton"
 
 type ImageSectionProps = {
     product: Product
@@ -60,14 +61,14 @@ export function ImageSkeleton() {
     return (
         <div className="space-y-4">
             {/* メイン画像のスケルトン */}
-            <div className="relative aspect-square w-full bg-gray-200 animate-pulse rounded-lg" />
+            <Skeleton className="relative aspect-square w-full rounded-lg" />
 
             {/* サムネイルのスケルトン */}
             <div className="flex gap-2">
                 {[1, 2, 3, 4, 5].map((i) => (
-                    <div
+                    <Skeleton
                         key={i}
-                        className="w-20 aspect-square bg-gray-200 animate-pulse rounded-md"
+                        className="w-20 aspect-square rounded-md"
                     />
                 ))}
             </div>

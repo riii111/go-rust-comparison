@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
     Table,
     TableBody,
@@ -29,26 +30,26 @@ export function ProductTableSkeleton() {
                         {[...Array(5)].map((_, index) => (
                             <TableRow key={index}>
                                 <TableCell className="p-2">
-                                    <div className="relative w-20 h-20 bg-gray-200 rounded-md animate-pulse" />
+                                    <Skeleton className="relative w-20 h-20 rounded-md" />
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex flex-col gap-1">
-                                        <div className="h-5 bg-gray-200 rounded w-4/5 animate-pulse" />
-                                        <div className="h-4 bg-gray-200 rounded w-3/5 animate-pulse" />
+                                        <Skeleton className="h-5 w-4/5" />
+                                        <Skeleton className="h-4 w-3/5" />
                                     </div>
                                 </TableCell>
                                 <TableCell className="text-center">
-                                    <div className="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 w-24 h-6 mx-auto animate-pulse" />
+                                    <Skeleton className="inline-flex items-center px-2.5 py-1 rounded-full w-24 h-6 mx-auto" />
                                 </TableCell>
                                 <TableCell className="text-center">
-                                    <div className="h-5 bg-gray-200 rounded w-20 mx-auto animate-pulse" />
+                                    <Skeleton className="h-5 w-20 mx-auto" />
                                 </TableCell>
                                 <TableCell className="text-center">
-                                    <div className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-gray-200 w-20 h-6 mx-auto animate-pulse" />
+                                    <Skeleton className="inline-flex items-center justify-center px-2.5 py-1 rounded-full w-20 h-6 mx-auto" />
                                 </TableCell>
                                 <TableCell className="text-center">
                                     <div className="flex items-center justify-center gap-1">
-                                        <div className="w-9 h-9 bg-gray-200 rounded animate-pulse" />
+                                        <Skeleton className="w-9 h-9 rounded" />
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -59,15 +60,15 @@ export function ProductTableSkeleton() {
 
             {/* ページネーションのスケルトン */}
             <div className="flex items-center justify-between p-4">
-                <div className="w-32 h-4 bg-gray-200 rounded animate-pulse" />
+                <Skeleton className="w-32 h-4" />
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gray-200 rounded animate-pulse" />
+                    <Skeleton className="w-8 h-8" />
                     <div className="flex gap-1">
                         {[...Array(5)].map((_, i) => (
-                            <div key={i} className="w-8 h-8 bg-gray-200 rounded animate-pulse" />
+                            <Skeleton key={i} className="w-8 h-8" />
                         ))}
                     </div>
-                    <div className="w-8 h-8 bg-gray-200 rounded animate-pulse" />
+                    <Skeleton className="w-8 h-8" />
                 </div>
             </div>
         </Card>

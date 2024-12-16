@@ -6,6 +6,7 @@ import { Header } from './_components/Header'
 import { ImageSection, ImageSkeleton } from './_components/ImageSection'
 import { EssentialInfo } from './_components/EssentialInfo'
 import { DetailInfo } from './_components/DetailInfo'
+import { Skeleton } from "@/components/ui/skeleton"
 
 type Props = {
     params: {
@@ -26,15 +27,15 @@ async function ProductInfoWrapper({ id }: { id: string }) {
 
 const ProductInfoSkeleton = () => {
     return (
-        <div className="space-y-4 animate-pulse">
+        <div className="space-y-4">
             <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-1/4" />
-                <div className="h-4 bg-gray-200 rounded w-full" />
-                <div className="h-4 bg-gray-200 rounded w-5/6" />
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
             </div>
             <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-1/4" />
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-4 w-3/4" />
             </div>
         </div>
     )
