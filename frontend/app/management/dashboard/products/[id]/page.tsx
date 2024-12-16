@@ -3,8 +3,9 @@ import { Card } from '@/components/ui/card'
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import { Header } from './_components/Header'
-import { ProductInfo, ProductInfoSkeleton } from './_components/ProductInfo'
 import { ImageSection, ImageSkeleton } from './_components/ImageSection'
+import { EssentialInfo } from './_components/EssentialInfo'
+import { DetailInfo } from './_components/DetailInfo'
 
 type Props = {
     params: {
@@ -13,13 +14,30 @@ type Props = {
 }
 
 async function ProductInfoWrapper({ id }: { id: string }) {
-    const product = await getProductWithStockById(id)
 
-    if (!product) {
-        notFound()
-    }
+    return (
+        <div className="space-y-6">
+            <EssentialInfo id={id} />
 
-    return <ProductInfo product={product} />
+            <DetailInfo id={id} />
+        </div>
+    )
+}
+
+const ProductInfoSkeleton = () => {
+    return (
+        <div className="space-y-4 animate-pulse">
+            <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/4" />
+                <div className="h-4 bg-gray-200 rounded w-full" />
+                <div className="h-4 bg-gray-200 rounded w-5/6" />
+            </div>
+            <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/4" />
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+            </div>
+        </div>
+    )
 }
 
 async function ImageSectionWrapper({ id }: { id: string }) {

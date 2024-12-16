@@ -1,11 +1,18 @@
-import { Product } from '@/config/types/api/product'
 import { Card } from '@/components/ui/card'
+import { getProductWithStockById } from '@/lib/api/products'
+import { notFound } from 'next/navigation'
 
 type DetailInfoProps = {
-    product: Product
+    id: string
 }
 
-export function DetailInfo({ product }: DetailInfoProps) {
+export async function DetailInfo({ id }: DetailInfoProps) {
+    const product = await getProductWithStockById(id)
+
+    if (!product) {
+        notFound()
+    }
+
     return (
         <div className="space-y-6">
             <Card className="p-4">

@@ -1,14 +1,21 @@
-import { ProductWithStock } from '@/config/types/api/product'
 import { Badge } from '@/components/ui/badge'
 import { stockStatusConfig } from '@/config/constants/stock'
 import { CategoryBadge } from "@/components/feature/dashboard/products/badge/CategoryBadge"
 import { getStockStatus } from '@/lib/stock'
+import { getProductWithStockById } from '@/lib/api/products'
+import { notFound } from 'next/navigation'
 
 type EssentialInfoProps = {
-    product: ProductWithStock
+    id: string
 }
 
-export function EssentialInfo({ product }: EssentialInfoProps) {
+export async function EssentialInfo({ id }: EssentialInfoProps) {
+    const product = await getProductWithStockById(id)
+
+    if (!product) {
+        notFound()
+    }
+
     const stockStatus = getStockStatus(product.stocks);
 
     const { label, variant } = stockStatusConfig[stockStatus];
