@@ -16,7 +16,7 @@ export function ProductTableSkeleton() {
             <div className="rounded-lg border">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-gray-50/50">
+                        <TableRow className="bg-gray-50/50 text-left">
                             <TableHead className="w-[100px]"></TableHead>
                             <TableHead>商品名</TableHead>
                             <TableHead className="text-center">カテゴリ</TableHead>
@@ -29,22 +29,22 @@ export function ProductTableSkeleton() {
                         {[...Array(5)].map((_, index) => (
                             <TableRow key={index}>
                                 <TableCell className="p-2">
-                                    <div className="w-20 h-20 bg-gray-200 rounded-md animate-pulse" />
+                                    <div className="relative w-20 h-20 bg-gray-200 rounded-md animate-pulse" />
                                 </TableCell>
                                 <TableCell>
-                                    <div className="space-y-2">
-                                        <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse" />
-                                        <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse" />
+                                    <div className="flex flex-col gap-1">
+                                        <div className="h-5 bg-gray-200 rounded w-4/5 animate-pulse" />
+                                        <div className="h-4 bg-gray-200 rounded w-3/5 animate-pulse" />
                                     </div>
                                 </TableCell>
                                 <TableCell className="text-center">
-                                    <div className="h-6 bg-gray-200 rounded w-20 mx-auto animate-pulse" />
+                                    <div className="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-200 w-16 h-6 mx-auto animate-pulse" />
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    <div className="h-4 bg-gray-200 rounded w-16 ml-auto animate-pulse" />
+                                    <div className="h-5 bg-gray-200 rounded w-20 ml-auto animate-pulse" />
                                 </TableCell>
                                 <TableCell className="text-center">
-                                    <div className="h-6 bg-gray-200 rounded w-16 mx-auto animate-pulse" />
+                                    <div className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-gray-200 w-20 h-6 mx-auto animate-pulse" />
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center justify-center gap-1">
