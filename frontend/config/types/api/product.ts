@@ -58,6 +58,7 @@ export interface ProductsApiResponse {
   limit: number;
 }
 
-export type ProductResponse = ProductWithStock;
+export type ProductResponse = Product;
+export type ProductWithStockResponse = ProductWithStock;
 
 export type ProductsResponse = ProductWithStock[];

@@ -1,4 +1,4 @@
-import { getProductById } from '@/lib/api/products'
+import { getProductWithStockById } from '@/lib/api/products'
 import { ProductDetail } from './_components/ProductDetail'
 import { NotFound } from '@/components/feature/dashboard/products/NotFound'
 
@@ -10,7 +10,7 @@ type Props = {
 
 export default async function ProductDetailPage({ params }: Props) {
     try {
-        const product = await getProductById(params.id)
+        const product = await getProductWithStockById(params.id)
 
         if (!product) {
             return <NotFound
