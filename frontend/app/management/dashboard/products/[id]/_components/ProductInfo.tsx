@@ -9,10 +9,8 @@ type ProductInformationProps = {
 export function ProductInfo({ product }: ProductInformationProps) {
     return (
         <div className="space-y-6">
-            {/* 重要な情報（名前、価格）を即時表示 */}
             <EssentialInfo product={product} />
 
-            {/* 詳細情報は遅延読み込み */}
             <DetailInfo product={product} />
         </div>
     )
