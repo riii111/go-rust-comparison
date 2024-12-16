@@ -1,5 +1,3 @@
-'use client'
-
 import { Product } from '@/config/types/api/product'
 import { Card } from '@/components/ui/card'
 

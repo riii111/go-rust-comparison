@@ -1,7 +1,4 @@
-'use client'
-
 import { ProductWithStock } from '@/config/types/api/product'
-import { Suspense } from 'react'
 import { EssentialInfo } from '@/app/management/dashboard/products/[id]/_components/EssentialInfo'
 import { DetailInfo } from '@/app/management/dashboard/products/[id]/_components/DetailInfo'
 
@@ -16,9 +13,7 @@ export function ProductInfo({ product }: ProductInformationProps) {
             <EssentialInfo product={product} />
 
             {/* 詳細情報は遅延読み込み */}
-            <Suspense fallback={<ProductInfoSkeleton />}>
-                <DetailInfo product={product} />
-            </Suspense>
+            <DetailInfo product={product} />
         </div>
     )
 }
