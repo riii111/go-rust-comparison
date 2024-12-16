@@ -12,7 +12,8 @@ export function ProductSearch() {
     const searchParams = useSearchParams()
     const [searchQuery, setSearchQuery] = useState(searchParams.get('q') ?? '')
 
-    const debouncedSearch = useDebounce((query: string) => {
+    const debouncedSearch = useDebounce((...args: unknown[]) => {
+        const query = args[0] as string
         const params = new URLSearchParams(searchParams)
         if (query) {
             params.set('q', query)
