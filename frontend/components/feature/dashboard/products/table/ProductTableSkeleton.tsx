@@ -8,6 +8,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import { PRODUCT_PAGE_SIZE } from '@/config/constants/product'
 
 // TODO: API実装後に動作しっかり確認
 // Skeletonコンポーネントは一度だけロードすれば良いので、サーバーコンポーネントとして実装
@@ -27,7 +28,7 @@ export function ProductTableSkeleton() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {[...Array(5)].map((_, index) => (
+                        {[...Array(PRODUCT_PAGE_SIZE)].map((_, index) => (
                             <TableRow key={index}>
                                 <TableCell className="p-2">
                                     <Skeleton className="relative w-20 h-20 rounded-md" />
@@ -64,7 +65,7 @@ export function ProductTableSkeleton() {
                 <div className="flex items-center gap-2">
                     <Skeleton className="w-8 h-8" />
                     <div className="flex gap-1">
-                        {[...Array(5)].map((_, i) => (
+                        {[...Array(PRODUCT_PAGE_SIZE)].map((_, i) => (
                             <Skeleton key={i} className="w-8 h-8" />
                         ))}
                     </div>
