@@ -23,7 +23,7 @@ export function ProductTable({ products }: ProductTableProps) {
                         <TableHead className="w-28 text-center">カテゴリ</TableHead>
                         <TableHead className="w-32 text-center">価格</TableHead>
                         <TableHead className="w-32 text-center">在庫状況</TableHead>
-                        <TableHead className="w-24 text-center">操作</TableHead>
+                        <TableHead className="w-20 text-center">操作</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
