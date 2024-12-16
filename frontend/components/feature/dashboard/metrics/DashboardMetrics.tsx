@@ -28,8 +28,8 @@ export function DashboardMetrics({ metric: initialMetric, data }: DashboardMetri
     })
     const tabs = [
         { id: "revenue", label: "収益" },
-        { id: "leads", label: "リード" },
-        { id: "w-l", label: "Win/Loss" },
+        { id: "products", label: "商品数" },
+        { id: "stocks", label: "在庫" },
     ]
 
 
