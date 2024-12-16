@@ -3,16 +3,38 @@
 @tailwind utilities;
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  /* Mac利用の日本人ユーザ向けのフォント設定にしとく */
+  font-family: "SF Pro JP", "SF Pro Text", "SF Pro Icons",
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+  font-feature-settings: "palt";
+}
+
+/* 見出し用 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-feature-settings: "palt";
+  letter-spacing: -0.02em;
 }
 
 @layer base {
   :root {
     /* メインカラー */
     --primary: 342 85% 50%; /* #E02060 */
-    --primary-light: 342 85% 60%;
-    --primary-dark: 342 85% 40%;
+    --primary-light: 0 63% 91%; /* #F0E0E0 */
+    --primary-lighter: 0 33% 94%; /* より薄いピンク */
     --primary-foreground: 0 0% 100%;
+
+    /* アクセントカラー */
+    --accent: 0 33% 88%; /* #E0C0C0 */
+    --accent-pink: 0 33% 88%; /* #E0C0C0 */
+    --accent-pink-light: 0 63% 91%; /* #F0E0E0 */
 
     /* グレースケール */
     --gray-50: 0 0% 98%; /* #FAFAFA */
@@ -26,9 +48,13 @@ body {
     --gray-800: 0 0% 13%; /* #202020 */
     --gray-900: 0 0% 6%; /* #101010 */
 
+    /* テキストカラー */
+    --text-primary: 220 10% 20%; /* 濃いグレー（メインテキスト） */
+    --text-secondary: 220 5% 40%; /* やや薄いグレー（補足テキスト） */
+
     /* 背景色とフォアグラウンド */
-    --background: 0 0% 98%;
-    --foreground: 0 0% 13%;
+    --background: 0 0% 98%; /* #FAFAFA */
+    --foreground: 0 0% 13%; /* #202020 */
 
     /* カード関連 */
     --card: 0 0% 100%;
@@ -68,6 +94,18 @@ body {
 
     /* 角丸 */
     --radius: 0.5rem;
+
+    /* カレンダー */
+    --calendar: 0 0% 100%; /* 純白の背景 */
+    --calendar-selected: 344 82% 48%; /* #E02060 メインのピンク */
+    --calendar-selected-light: 344 82% 96%; /* ピンクの薄い色（範囲選択用） */
+    --calendar-highlight: 0 0% 96%; /* ホバー時のライトグレー */
+    --calendar-muted: 0 0% 45%; /* 無効な日付のグレー */
+    --calendar-today: 344 82% 48%; /* 今日の日付も同じピンク */
+
+    /* ダッシュボード背景用 */
+    --dashboard-background: 0 7% 94%; /* #f2eeee */
+    --dashboard-background-subtle: 0 8% 95%; /* #f4f1f1 */
   }
 
   .dark {
@@ -76,10 +114,38 @@ body {
 }
 
 @layer base {
-  * {
-    @apply border-border;
+  :root {
+    --background-start: 358 38% 93%; /* より淡いピンクグレー */
+    --background-end: 348 10% 95%; /* さらに淡いピンクグレー */
+    --component-background: 0 0% 100% / 0.92;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
+}
+
+/* Noiseテクスチャのオーバーレイ */
+.dashboard-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.2;
+}
+
+/* スクロールバーのカスタマイズ */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #e5e7eb transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #e5e7eb;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #d1d5db;
 }
