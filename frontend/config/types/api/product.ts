@@ -1,3 +1,5 @@
+import { Stock } from "@/config/types/api/stock";
+
 export type ProductStatus = "active" | "inactive" | "deleted";
 export type ProductCategory = "clothing" | "accessories" | "shoes" | "other"; // 仮で設定
 
@@ -16,33 +18,9 @@ export interface Product {
   updatedAt: string;
 }
 
-// 商品の在庫
-export interface ProductStock {
-  id: string;
-  productId: string;
-  storeId: string;
-  size: string;
-  color: string;
-  quantity: number;
-  price: number;
-  isAvailable: boolean;
-  createdBy: string;
-  updatedBy: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 // 商品と在庫を結合した型
 export interface ProductWithStock extends Product {
-  stocks: ProductStock[];
-}
-
-// APIレスポンス用
-export interface ProductsApiResponse {
-  products: Product[];
-  total: number;
-  page: number;
-  limit: number;
+  stocks: Stock[];
 }
 
 // 商品作成・更新時のリクエスト型
@@ -72,6 +50,14 @@ export interface ProductFilter {
   sortOrder?: "asc" | "desc";
 }
 
-export type ProductResponse = Product;
+// APIレスポンス用
+export interface ProductsApiResponse {
+  products: Product[];
+  total: number;
+  page: number;
+  limit: number;
+}
 
-export type ProductsResponse = Product[];
+export type ProductResponse = ProductWithStock;
+
+export type ProductsResponse = ProductWithStock[];

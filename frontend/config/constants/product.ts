@@ -1,10 +1,7 @@
-import { ProductCategory } from "@/config/types/api/product";
-
 export const categoryConfig = {
   clothing: {
     label: "衣類",
     variant: "secondary" as const,
-    // または独自のスタイルを定義
     className: "bg-gray-100 text-gray-700 hover:bg-gray-200",
   },
   accessories: {

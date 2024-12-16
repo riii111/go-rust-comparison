@@ -1,6 +1,7 @@
 'use client'
 
-import { ProductStock, ProductWithStock } from '@/config/types/api/product'
+import { ProductWithStock } from '@/config/types/api/product'
+import { Stock } from '@/config/types/api/stock'
 import { Badge } from '@/components/ui/badge'
 import { stockStatusConfig, LOW_STOCK_THRESHOLD } from '@/config/constants/stock'
 import { CategoryBadge } from "@/components/feature/dashboard/products/badge/CategoryBadge"
@@ -9,7 +10,7 @@ type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock' | 'unavailable';
 
 
 // 在庫状態の判定ロジック
-const getStockStatus = (stocks: ProductStock[]): StockStatus => {
+const getStockStatus = (stocks: Stock[]): StockStatus => {
     if (!stocks || stocks.length === 0) return 'unavailable';
 
     const totalQuantity = stocks.reduce((sum, stock) =>
