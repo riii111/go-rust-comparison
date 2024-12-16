@@ -102,12 +102,6 @@ Parameters:
     Description: "Enter the CI/CD SNS Topic ARN (ex: arn:aws:sns:<aws_region>:<aws_account_id>:ai-cicd-pipeline)"
     Type: String
 
-# -------------------------------------
-# Conditions
-# -------------------------------------
-Conditions:
-  # Prd 環境時のみ適用
-  IsPrdEnv: !Equals [!Ref Environment, prd]
 
 # -------------------------------------
 # Resources
@@ -163,6 +157,7 @@ Resources:
               cache:
                 paths:
                   - "node_modules/**/*"
+                  - ".next/cache/**/*"
       Tags:
         - Key: Name
           Value: !Sub ${ProjectName}-${Environment}-front-amplify
@@ -179,14 +174,8 @@ Resources:
     Properties:
       AppId: !GetAtt AmplifyFrontHosting.AppId
       BranchName: !Ref SourceBranchName
-      EnableAutoBuild: !If
-        - IsPrdEnv
-        - false
-        - true
-      Stage: !If
-        - IsPrdEnv
-        - PRODUCTION
-        - DEVELOPMENT
+      EnableAutoBuild: true
+      Stage: DEVELOPMENT
       EnablePullRequestPreview: false
       Framework: Next.js - SSR
       Tags:
