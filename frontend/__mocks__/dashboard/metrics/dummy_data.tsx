@@ -33,7 +33,7 @@ export const STATS_CONFIG: Record<string, StatsConfig> = {
     trend: "↑ 7.9%",
     highlight: true,
   },
-  "Win rate": {
+  "Stock": {
     value: "44%",
     trend: "↑ 1.2%",
   },
@@ -216,20 +216,6 @@ export const REVENUE_DATA = {
       amount: 70001,
       percentage: 13,
       purchased_at: "2024-12-05T10:00:00Z",
-    },
-    {
-      avatar: "/images/dashboard/baby-cap-gray.avif",
-      name: "Baby Cap Gray",
-      amount: 6690,
-      percentage: 13,
-      purchased_at: "2024-12-05T10:00:00Z",
-    },
-    {
-      avatar: "/images/dashboard/t-shirt-2.avif",
-      name: "T-shirt-white",
-      amount: 30000,
-      percentage: 6,
-      purchased_at: "2024-12-10T10:00:00Z",
     },
     {
       avatar: "/images/dashboard/t-shirt-color-pink.avif",
