@@ -63,7 +63,7 @@ erDiagram
         timestamp deleted_at
     }
 
-    stores ||--o{ product_stocks : "has"
+    stores ||--o{ stocks : "has"
     stores ||--o{ purchase_histories : "fulfills"
     stores {
         uuid id PK
@@ -80,7 +80,7 @@ erDiagram
         timestamp updated_at
     }
 
-    products ||--|{ product_stocks : "has"
+    products ||--|{ stocks : "has"
     products {
         uuid id PK
         string name
@@ -95,7 +95,7 @@ erDiagram
         timestamp updated_at
     }
 
-    product_stocks {
+    stocks {
         uuid id PK
         uuid product_id FK
         uuid store_id FK
@@ -149,7 +149,7 @@ erDiagram
 
 ### 2. **商品管理機能**
 
-- 関連テーブル：`products`テーブルを構築（`product_stocks`を参照）
+- 関連テーブル：`products`テーブルを構築（`stocks`を参照）
 - 主な操作：
   - 商品情報のCRUD
   - 画像が必要なので注意
@@ -162,7 +162,7 @@ erDiagram
 
 ### 3. **在庫管理機能**
 
-- 関連テーブル：`product_stocks`テーブルを構築（`products`, `stores`を参照）
+- 関連テーブル：`stocks`テーブルを構築（`products`, `stores`を参照）
 - 主な操作：
   - 在庫数の更新
   - 店舗別在庫管理
