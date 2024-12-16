@@ -2,7 +2,7 @@
 
 import { TableRow, TableCell } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Pencil, Trash2 } from "lucide-react"
+import { Trash2 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import type { ProductWithStock } from "@/config/types/api/product"
@@ -78,17 +78,6 @@ export function ProductTableRow({ product }: ProductTableRowProps) {
                 </TableCell>
                 <TableCell className="text-center">
                     <div className="flex items-center justify-center gap-1">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="hover:bg-gray-100"
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                router.push(`/management/dashboard/products/${product.id}/edit`)
-                            }}
-                        >
-                            <Pencil className="w-4 h-4 text-gray-600" />
-                        </Button>
                         <Button
                             variant="ghost"
                             size="icon"
