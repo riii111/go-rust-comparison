@@ -231,7 +231,7 @@ func TestStoreModel(t *testing.T) {
 			wantErr bool
 		}{
 			{
-				name: "話番号が11桁",
+				name: "電話番号が11桁",
 				store: &models.Store{
 					ID:            "550e8400-e29b-41d4-a716-446655440000",
 					Name:          "テスト店舗",
