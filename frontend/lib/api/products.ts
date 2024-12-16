@@ -1,7 +1,7 @@
 // import { customFetch } from "@/lib/api/core";
 import {
   ProductsResponse,
-  ProductResponse,
+  ProductWithStockResponse,
   ProductWithStock,
 } from "@/config/types/api/product";
 // TODO: APIが実装されるまで、ダミーデータで返しておく
@@ -23,16 +23,18 @@ export async function getProducts(): Promise<ProductsResponse> {
 }
 
 /**
- * 指定した商品を取得する
+ * 指定した商品と在庫の情報を取得する
  */
-export async function getProductById(
+export async function getProductWithStockById(
   id: string
 ): Promise<ProductWithStock | undefined> {
   // TODO: APIが実装されるまで、ダミーデータで返しておく
 
   if (id === "5") return undefined;
-  return DUMMY_PRODUCTS.find((product) => product.id === id) as ProductResponse;
-  //   const { data } = await customFetch<undefined, ProductResponse>(
+  return DUMMY_PRODUCTS.find(
+    (product) => product.id === id
+  ) as ProductWithStockResponse;
+  //   const { data } = await customFetch<undefined, ProductWithStockResponse>(
   //     `${ENDPOINT}/${id}/`,
   //     {
   //       method: "GET",
