@@ -17,7 +17,6 @@ async function fetchDashboardData(): Promise<DashboardData> {
     }
 }
 
-// メタデータの追加
 export const metadata = {
     title: 'Dashboard | Store Analytics',
     description: 'Store analytics dashboard showing revenue, leads, and performance metrics'
