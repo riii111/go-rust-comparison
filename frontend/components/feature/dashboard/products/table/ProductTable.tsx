@@ -20,7 +20,7 @@ export function ProductTable({ products }: ProductTableProps) {
                     <TableRow className="bg-gray-50/50 text-left">
                         <TableHead className="w-[100px]"></TableHead>
                         <TableHead className="w-[400px]">商品名</TableHead>
-                        <TableHead className="w-32 text-center">カテゴリ</TableHead>
+                        <TableHead className="w-28 text-center">カテゴリ</TableHead>
                         <TableHead className="w-32 text-center">価格</TableHead>
                         <TableHead className="w-32 text-center">在庫状況</TableHead>
                         <TableHead className="w-24 text-center">操作</TableHead>

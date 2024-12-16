@@ -18,11 +18,11 @@ export function ProductTableSkeleton() {
                     <TableHeader>
                         <TableRow className="bg-gray-50/50 text-left">
                             <TableHead className="w-[100px]"></TableHead>
-                            <TableHead>商品名</TableHead>
-                            <TableHead className="text-center">カテゴリ</TableHead>
-                            <TableHead className="text-right">価格</TableHead>
-                            <TableHead className="text-center">在庫状況</TableHead>
-                            <TableHead className="text-center">操作</TableHead>
+                            <TableHead className="w-[400px]">商品名</TableHead>
+                            <TableHead className="w-28 text-center">カテゴリ</TableHead>
+                            <TableHead className="w-32 text-center">価格</TableHead>
+                            <TableHead className="w-32 text-center">在庫状況</TableHead>
+                            <TableHead className="w-24 text-center">操作</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -40,16 +40,16 @@ export function ProductTableSkeleton() {
                                 <TableCell className="text-center">
                                     <div className="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-200 w-16 h-6 mx-auto animate-pulse" />
                                 </TableCell>
-                                <TableCell className="text-right">
-                                    <div className="h-5 bg-gray-200 rounded w-20 ml-auto animate-pulse" />
+                                <TableCell className="text-center">
+                                    <div className="h-5 bg-gray-200 rounded w-20 mx-auto animate-pulse" />
                                 </TableCell>
                                 <TableCell className="text-center">
                                     <div className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-gray-200 w-20 h-6 mx-auto animate-pulse" />
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="text-center">
                                     <div className="flex items-center justify-center gap-1">
-                                        <div className="w-8 h-8 bg-gray-200 rounded animate-pulse" />
-                                        <div className="w-8 h-8 bg-gray-200 rounded animate-pulse" />
+                                        <div className="w-9 h-9 bg-gray-200 rounded animate-pulse" />
+                                        <div className="w-9 h-9 bg-gray-200 rounded animate-pulse" />
                                     </div>
                                 </TableCell>
                             </TableRow>
