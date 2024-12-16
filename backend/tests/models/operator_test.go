@@ -43,7 +43,7 @@ func TestOperatorModel(t *testing.T) {
 			Email:        "test@example.com",
 			Username:     "testuser",
 			PasswordHash: "Password1!",
-			Role:         "operator",
+			Role:         models.RoleStoreAdmin,
 			StoreID:      "550e8400-e29b-41d4-a716-446655440001",
 			CreatedBy:    "550e8400-e29b-41d4-a716-446655440002",
 			UpdatedBy:    "550e8400-e29b-41d4-a716-446655440002",
@@ -67,12 +67,12 @@ func TestOperatorModel(t *testing.T) {
 			wantErr  bool
 		}{
 			{
-				name: "有効なデータ",
+				name: "有効なシステム管理者",
 				operator: &models.Operator{
 					Email:        "test@example.com",
 					Username:     "testuser",
 					PasswordHash: "Password1!",
-					Role:         "operator",
+					Role:         models.RoleSystemAdmin,
 					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
 					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
@@ -81,12 +81,26 @@ func TestOperatorModel(t *testing.T) {
 				wantErr: false,
 			},
 			{
-				name: "無効なメールアドレス",
+				name: "有効な店舗管理者",
 				operator: &models.Operator{
-					Email:        "invalid-email",
+					Email:        "store@example.com",
+					Username:     "storeuser",
+					PasswordHash: "Password1!",
+					Role:         models.RoleStoreAdmin,
+					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
+					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+					Store:        validStore,
+				},
+				wantErr: false,
+			},
+			{
+				name: "無効なメール",
+				operator: &models.Operator{
+					Email:        "test@example.com",
 					Username:     "testuser",
 					PasswordHash: "Password1!",
-					Role:         "operator",
+					Role:         "invalid_role",
 					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
 					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
@@ -95,12 +109,12 @@ func TestOperatorModel(t *testing.T) {
 				wantErr: true,
 			},
 			{
-				name: "無効なロール",
+				name: "無効なメールアドレス",
 				operator: &models.Operator{
-					Email:        "test@example.com",
+					Email:        "invalid-email",
 					Username:     "testuser",
 					PasswordHash: "Password1!",
-					Role:         "invalid-role",
+					Role:         "operator",
 					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
 					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
@@ -130,7 +144,10 @@ func TestOperatorModel(t *testing.T) {
 
 				if tt.wantErr {
 					require.Error(t, err)
-					assert.Contains(t, err.Error(), "validation")
+					if tt.name == "無効なロール" {
+						assert.Contains(t, err.Error(), "Role")
+						assert.Contains(t, err.Error(), "oneof")
+					}
 				} else {
 					assert.NoError(t, err)
 				}
@@ -182,7 +199,7 @@ func TestOperatorModel(t *testing.T) {
 					Email:        "test@example.com",
 					Username:     "testuser",
 					PasswordHash: tt.password,
-					Role:         "operator",
+					Role:         models.RoleSystemAdmin,
 					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
 					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
@@ -200,4 +217,16 @@ func TestOperatorModel(t *testing.T) {
 			})
 		}
 	})
+}
+
+// テストヘルパー関数として切り出すことを推奨
+func createValidOperator() *models.Operator {
+	return &models.Operator{
+		Email:     "test@example.com",
+		Username:  "testuser",
+		Role:      models.RoleSystemAdmin,
+		StoreID:   "550e8400-e29b-41d4-a716-446655440000",
+		CreatedBy: "550e8400-e29b-41d4-a716-446655440001",
+		UpdatedBy: "550e8400-e29b-41d4-a716-446655440001",
+	}
 }
