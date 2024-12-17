@@ -42,3 +42,6 @@ test:
 # シャッフルを有効にしてテストを実行
 test-shuffle:
 	docker exec -it $(APP_SERVICE_NAME) go test -v ./tests/... -shuffle=on
+
+migrate:
+	docker exec -it $(APP_SERVICE_NAME) go run ./internal/infrastructure/db/migrations/migration.go
