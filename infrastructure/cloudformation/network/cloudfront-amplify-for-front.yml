@@ -104,8 +104,6 @@ Parameters:
 Conditions:
   # WAFv2 の指定有無による条件
   NotEmptyWebACLArn: !Not [!Equals [!Ref WebACLArn, ""]]
-  # デプロイ環境に応じた条件
-  IsPrdEnv: !Equals [!Ref Environment, prd]
 
 # -------------------------------------
 # Resources
@@ -135,13 +133,9 @@ Resources:
           CachePolicyId: !FindInMap [CachePolicyIds, !Ref CachePolicy , Id]
           # SecurityHeadersPolicy
           ResponseHeadersPolicyId: !FindInMap [ResponseHeadersPolicyIds, !Ref ResponseHeadersPolicy, Id]
-          # Prd 環境の場合は CF2 (CloudFront Function) を使用しない (Basic 認証)
           FunctionAssociations:
-            - !If
-              - IsPrdEnv
-              - !Ref AWS::NoValue
-              - EventType: viewer-request
-                FunctionARN: !Ref CloudFrontFunctionForBasicAuth
+            - EventType: viewer-request
+              FunctionARN: !Ref CloudFrontFunctionForBasicAuth
           TargetOriginId: Amplify
           ViewerProtocolPolicy: redirect-to-https
         HttpVersion: http2
