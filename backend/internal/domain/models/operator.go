@@ -32,10 +32,18 @@ type Operator struct {
 	Store        Store          `gorm:"foreignKey:StoreID" json:"store"`
 }
 
+// レコード作成前にUUID v7を自動生成する
 func (o *Operator) BeforeCreate(tx *gorm.DB) error {
-	if o.ID == "" {
-		o.ID = uuid.New().String()
+	if o.ID != "" {
+		return nil
 	}
+
+	id, err := uuid.NewV7()
+	if err != nil {
+		return err
+	}
+
+	o.ID = id.String()
 	return nil
 }
 
