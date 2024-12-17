@@ -11,7 +11,7 @@ services:
       - "8000:8000"
     command: air
     env_file:
-      - .env
+      - backend/.env
     depends_on:
       db:
         condition: service_healthy
@@ -28,10 +28,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    environment:
-      - POSTGRES_NAME
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
+    env_file:
+      - backend/.env
     ports:
       - "5432:5432" # デバッグ用
 
