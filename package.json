@@ -1,0 +1,15 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Amplifyクローン用package.json <https://zenn.dev/makoto00000/articles/4cbfe554ff8837#--root%E3%83%87%E3%82%A3%E3%83%AC%E3%82%AF%E3%83%88%E3%83%AA%E3%81%ABpackage.json%E3%82%92%E7%BD%AE%E3%81%8F>",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "15.0.3"
+  }
+}
