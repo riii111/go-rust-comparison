@@ -47,24 +47,35 @@ func (o *Operator) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
+// パスワードの最小文字数
+const minPasswordLength = 8
+
 // カスタムバリデーション関数を登録
 func RegisterCustomValidations(v *validator.Validate) {
 	v.RegisterValidation("password", validatePassword)
 }
 
 // パスワードバリデーション関数
+// パスワードは以下の条件を満たす必要があります:
+// - 8文字以上であること
+// - 大文字を1文字以上含むこと
+// - 小文字を1文字以上含むこと
+// - 数字を1文字以上含むこと
+// - 記号を1文字以上含むこと
 func validatePassword(fl validator.FieldLevel) bool {
 	password := fl.Field().String()
 
-	if len(password) < 8 {
+	if len(password) < minPasswordLength {
 		return false
 	}
 
+	return hasRequiredCharacterTypes(password)
+}
+
+// パスワードに必要な文字種が含まれているかチェックする
+func hasRequiredCharacterTypes(password string) bool {
 	var (
-		hasUpper   bool
-		hasLower   bool
-		hasNumber  bool
-		hasSpecial bool
+		hasUpper, hasLower, hasNumber, hasSymbol bool
 	)
 
 	for _, char := range password {
@@ -76,9 +87,13 @@ func validatePassword(fl validator.FieldLevel) bool {
 		case unicode.IsNumber(char):
 			hasNumber = true
 		case unicode.IsPunct(char) || unicode.IsSymbol(char):
-			hasSpecial = true
+			hasSymbol = true
+		}
+
+		if hasUpper && hasLower && hasNumber && hasSymbol {
+			return true
 		}
 	}
 
-	return hasUpper && hasLower && hasNumber && hasSpecial
+	return false
 }
