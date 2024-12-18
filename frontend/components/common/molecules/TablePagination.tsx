@@ -8,6 +8,7 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination'
+import { cn } from '@/lib/utils'
 
 interface TablePaginationProps {
     totalItems: number
@@ -45,7 +46,11 @@ export function TablePagination({
                     <PaginationItem>
                         <PaginationPrevious
                             onClick={() => handlePageChange(currentPage - 1)}
-                            isActive={currentPage !== 1}
+                            className={cn(
+                                'transition-colors',
+                                currentPage === 1 && 'pointer-events-none opacity-50'
+                            )}
+                            aria-disabled={currentPage === 1}
                         />
                     </PaginationItem>
                     <PaginationItem>
@@ -56,7 +61,11 @@ export function TablePagination({
                     <PaginationItem>
                         <PaginationNext
                             onClick={() => handlePageChange(currentPage + 1)}
-                            isActive={currentPage !== totalPages}
+                            className={cn(
+                                'transition-colors',
+                                currentPage === totalPages && 'pointer-events-none opacity-50'
+                            )}
+                            aria-disabled={currentPage === totalPages}
                         />
                     </PaginationItem>
                 </PaginationContent>
