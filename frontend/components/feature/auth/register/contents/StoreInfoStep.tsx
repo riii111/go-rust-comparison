@@ -1,7 +1,7 @@
 import { CardContent } from "@/components/ui/card";
 import FormSelect from "@/components/common/molecules/FormSelect";
 import { type FieldMetadata } from "@conform-to/react";
-import { STORE_OPTIONS } from "@/config/constants/stores";
+import { STORE_OPTIONS } from "@/config/constants/store";
 import { TermsCheckbox } from "@/components/feature/auth/register/contents/TermsCheckBox";
 
 interface StoreInfoStepProps {
