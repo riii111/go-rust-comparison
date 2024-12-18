@@ -47,7 +47,7 @@ export function TablePagination({
                         <PaginationPrevious
                             onClick={() => handlePageChange(currentPage - 1)}
                             className={cn(
-                                'transition-colors',
+                                'cursor-pointer hover:bg-accent transition-colors',
                                 currentPage === 1 && 'pointer-events-none opacity-50'
                             )}
                             aria-disabled={currentPage === 1}
@@ -62,7 +62,7 @@ export function TablePagination({
                         <PaginationNext
                             onClick={() => handlePageChange(currentPage + 1)}
                             className={cn(
-                                'transition-colors',
+                                'cursor-pointer hover:bg-accent transition-colors',
                                 currentPage === totalPages && 'pointer-events-none opacity-50'
                             )}
                             aria-disabled={currentPage === totalPages}

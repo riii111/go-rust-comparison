@@ -14,18 +14,18 @@ interface StoreTableRowProps {
 
 export function StoreTableRow({ store }: StoreTableRowProps) {
     return (
-        <TableRow>
-            <TableCell className="font-medium">{store.name}</TableCell>
-            <TableCell>{store.address}</TableCell>
-            <TableCell>{store.phoneNumber}</TableCell>
-            <TableCell>{store.businessHours}</TableCell>
-            <TableCell>
+        <TableRow className="h-16">
+            <TableCell className="font-medium w-[180px]">{store.name}</TableCell>
+            <TableCell className="w-[280px]">{store.address}</TableCell>
+            <TableCell className="w-[140px]">{store.phoneNumber}</TableCell>
+            <TableCell className="w-[140px]">{store.businessHours}</TableCell>
+            <TableCell className="w-[100px]">
                 <Badge variant={store.isActive ? 'default' : 'secondary'}>
                     {store.isActive ? '営業中' : '休業中'}
                 </Badge>
             </TableCell>
-            <TableCell>{store.createdAt}</TableCell>
-            <TableCell>
+            <TableCell className="w-[120px]">{store.createdAt}</TableCell>
+            <TableCell className="w-[100px]">
                 <StoreOperations store={store} />
             </TableCell>
         </TableRow>
