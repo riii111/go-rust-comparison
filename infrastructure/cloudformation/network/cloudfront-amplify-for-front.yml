@@ -53,7 +53,7 @@ Metadata:
 # -------------------------------------
 Parameters:
   ProjectName:
-    Description: "Enter the project name. (ex: lc-inquiry-pro)"
+    Description: "Enter the project name. (ex: go-rust-comparison)"
     Type: String
     MinLength: 1
     ConstraintDescription: "ProjectName must be entered."
