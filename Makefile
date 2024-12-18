@@ -1,20 +1,26 @@
 APP_SERVICE_NAME = app
-RUN_APP = docker-compose exec $(APP_SERVICE_NAME)
+RUN_APP = docker compose exec $(APP_SERVICE_NAME)
 
 prepare:
-	docker-compose up -d --build
+	docker compose up -d --build
 
 build:
-	docker-compose build
+	docker compose build
 
 up-d:
-	docker-compose up -d
+	docker compose up -d
 
 up:
-	docker-compose up
+	docker compose up
 
 down:
-	docker-compose down -v
+	docker compose down -v
+
+app:
+	docker exec -it $(APP_SERVICE_NAME) bash
+
+db:
+	docker exec -it db bash
 
 format:
 	$(RUN_APP) go fmt ./...
@@ -28,3 +34,14 @@ tidy:
 
 check: format lint tidy
 	@echo "All checks passed!"
+
+# 全てのテストを実行
+test:
+	docker exec -it $(APP_SERVICE_NAME) go test -v ./tests/...
+
+# シャッフルを有効にしてテストを実行
+test-shuffle:
+	docker exec -it $(APP_SERVICE_NAME) go test -v ./tests/... -shuffle=on
+
+migrate:
+	docker exec -it $(APP_SERVICE_NAME) go run ./internal/infrastructure/db/migrations/migration.go

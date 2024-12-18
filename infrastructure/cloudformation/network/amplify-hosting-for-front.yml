@@ -1,0 +1,277 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Amplify Frontend Hosting Stack"
+
+# -------------------------------------
+# Metadata
+# -------------------------------------
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Project Configuration"
+        Parameters:
+          - ProjectName
+          - Environment
+      - Label:
+          default: "Amplify Configuration"
+        Parameters:
+          # For Github
+          - GitHubOrgFGPAT
+          - GitHubRepoURL
+          - SourceBranchName
+          # For Amplify
+          - AmplifyPlatform
+          - AmplifyBasicUserName
+          - AmplifyBasicPassword
+          # バックエンド構築時に使用予定
+          # - APIURL
+          # - FetchCredential
+          # - ALBHeaderAuthName
+          # - ALBHeaderAuthValue
+          - CICDPipelineTopicArn
+
+# -------------------------------------
+# Parameters
+# -------------------------------------
+Parameters:
+  ProjectName:
+    Description: "Enter the project name. (ex: go-rust-comparison)"
+    Type: String
+    MinLength: 1
+    ConstraintDescription: "ProjectName must be entered."
+    Default: go-rust-comparison
+  Environment:
+    Description: "Select a environment name."
+    Type: String
+    AllowedValues:
+      - dev
+      - stg
+      - prd
+    ConstraintDescription: "Environment name must be selected."
+    Default: dev
+  GitHubOrgFGPAT:
+    Description: "Enter the Github organization's fine-grained personal access token. (ex: github_pat_xxxxxxxxxx)"
+    Type: String
+    NoEcho: true
+  GitHubRepoURL:
+    Description: "Enter the Github repository URL."
+    Type: String
+  SourceBranchName:
+    Description: "Enter the source branch name in GitHub frontend repository. (ex: develop)"
+    Type: String
+    Default: develop
+  AmplifyPlatform:
+    Description: "Select the Amplify app platform. (when using SSR: WEB_COMPUTE)"
+    Type: String
+    Default: WEB_COMPUTE
+    AllowedValues:
+      - WEB
+      - WEB_COMPUTE
+      - WEB_DYNAMIC
+  AmplifyBasicUserName:
+    Description: "Enter the Amplify basic auth username."
+    Type: String
+    NoEcho: true
+    MinLength: 1
+    MaxLength: 255
+    ConstraintDescription: "AmplifyBasicUserName must be 1 to 225 characters."
+  AmplifyBasicPassword:
+    Description: "Enter the Amplify basic auth password."
+    Type: String
+    NoEcho: true
+    MinLength: 7
+    MaxLength: 255
+    ConstraintDescription: "AmplifyBasicPassword must be 7 to 225 characters"
+  # バックエンド構築時に使用予定
+  # APIURL:
+  #   Description: "Enter the API URL for backend. (ex: https://<CloudFront domain>)"
+  #   Type: String
+  # FetchCredential:
+  #   Description: "Enter the auth settings for API fetch from frontend. (default: include)"
+  #   Type: String
+  #   Default: include
+  # ALBHeaderAuthName:
+  #   Description: "Enter the ALB header auth name. (ex: X-Auth-ALB)"
+  #   Type: String
+  #   NoEcho: true
+  # ALBHeaderAuthValue:
+  #   Description: "Enter the ALB header auth value."
+  #   Type: String
+  #   NoEcho: true
+  CICDPipelineTopicArn:
+    Description: "Enter the CI/CD SNS Topic ARN (ex: arn:aws:sns:<aws_region>:<aws_account_id>:ai-cicd-pipeline)"
+    Type: String
+
+
+# -------------------------------------
+# Resources
+# -------------------------------------
+Resources:
+  # -------------------------------------
+  # Amplify Hosting
+  # -------------------------------------
+  AmplifyFrontHosting:
+    Type: AWS::Amplify::App
+    Properties:
+      Name: !Sub ${ProjectName}-${Environment}-front-amplify
+      AccessToken: !Ref GitHubOrgFGPAT
+      Repository: !Ref GitHubRepoURL
+      Platform: !Ref AmplifyPlatform
+      EnableBranchAutoDeletion: true
+      BasicAuthConfig:
+        EnableBasicAuth: true
+        Username: !Ref AmplifyBasicUserName
+        Password: !Ref AmplifyBasicPassword
+      IAMServiceRole: !Ref AmplifyServiceRole
+      # 環境変数
+      # バックエンド構築時に使用予定
+      # EnvironmentVariables:
+      #   - Name: NEXT_PUBLIC_API_BASE_URL
+      #     Value: !Ref APIURL
+      #   - Name: NEXT_PUBLIC_CREDENTIALS
+      #     Value: !Ref FetchCredential
+      #   - Name: NEXT_PUBLIC_AUTH_NAME
+      #     Value: !Ref ALBHeaderAuthName
+      #   - Name: NEXT_PUBLIC_AUTH_VALUE
+      #     Value: !Ref ALBHeaderAuthValue
+      BuildSpec: |
+        version: 1
+        applications:
+          - appRoot: frontend
+            frontend:
+              phases:
+                preBuild:
+                  commands:
+                    - curl https://get.volta.sh | bash
+                    - source ~/.bash_profile
+                    - volta install node@20
+                    - npm install -g pnpm
+                    - pnpm install
+                build:
+                  commands:
+                    - pnpm run build
+              artifacts:
+                baseDirectory: .next
+                files:
+                  - "**/*"
+              cache:
+                paths:
+                  - "node_modules/**/*"
+                  - ".next/cache/**/*"
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-front-amplify
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # -------------------------------------
+  # Amplify Branch
+  # -------------------------------------
+  AmplifyBranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      AppId: !GetAtt AmplifyFrontHosting.AppId
+      BranchName: !Ref SourceBranchName
+      EnableAutoBuild: true
+      Stage: DEVELOPMENT
+      EnablePullRequestPreview: false
+      Framework: Next.js - SSR
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: BranchName
+          Value: !Ref SourceBranchName
+
+
+  # -------------------------------------
+  # Amplify ServiceRole
+  # -------------------------------------
+  AmplifyServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub AmplifyServiceRole-${ProjectName}-${Environment}
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - amplify.amazonaws.com
+            Action:
+              - sts:AssumeRole
+  AmplifyServiceRolePolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub AmplifyServiceRoleAccess-${ProjectName}-${Environment}
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogStream
+              - logs:CreateLogGroup
+              - logs:DescribeLogGroups
+              - logs:PutLogEvents
+            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+      Roles:
+        - Ref: AmplifyServiceRole
+
+  # -------------------------------------
+  # EventBridge
+  # -------------------------------------
+  AmplifyBuildEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub notice-build-status-${ProjectName}-${Environment}-front-amplify
+      Description: "Amplify のビルドステータスを検知するルール"
+      EventPattern:
+        detail:
+          appId:
+            - !GetAtt AmplifyFrontHosting.AppId
+          jobStatus:
+            - SUCCEED
+            - FAILED
+        detail-type:
+          - Amplify Deployment Status Change
+        source:
+          - aws.amplify
+      State: ENABLED
+      Targets:
+        - Id: AmplifyDeploySNSTopic
+          Arn: !Ref CICDPipelineTopicArn
+          InputTransformer:
+            InputPathsMap:
+              branch: $.detail.branchName
+              status: $.detail.jobStatus
+            InputTemplate: !Sub
+              - |
+                {
+                  "version": "1.0",
+                  "source": "custom",
+                  "content": {
+                    "textType": "client-markdown",
+                    "title": "<status>",
+                    "description": "Amplify build result",
+                    "nextSteps": [
+                      "Amplify : ${AmplifyName}",
+                      "Branch : <branch>"
+                    ]
+                  }
+                }
+              - AmplifyName: !Sub ${ProjectName}-${Environment}-front-amplify
+
+# -------------------------------------
+# Outputs
+# -------------------------------------
+Outputs:
+  AmplifyAppID:
+    Value: !GetAtt AmplifyFrontHosting.AppId
+  AmplifyBasicAuthCredentials:
+    Value: !Join
+      - " "
+      - - Basic
+        - Fn::Base64: !Sub ${AmplifyBasicUserName}:${AmplifyBasicPassword}
