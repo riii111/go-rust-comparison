@@ -9,9 +9,9 @@ import { DetailInfo } from './_components/DetailInfo'
 import { Skeleton } from "@/components/ui/skeleton"
 
 type Props = {
-    params: Promise<{
+    params: {
         id: string
-    }>
+    }
 }
 
 async function ProductInfoWrapper({ id }: { id: string }) {
