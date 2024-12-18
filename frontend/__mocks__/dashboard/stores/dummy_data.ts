@@ -4,7 +4,7 @@ export const DUMMY_STORES: StoresResponse = [
   {
     id: "1",
     name: "東京本店",
-    address: "東京都渋谷区...",
+    address: "東京都渋谷区宇田川町13-17",
     phoneNumber: "03-1234-5678",
     businessHours: "10:00-19:00",
     isActive: true,
@@ -16,7 +16,7 @@ export const DUMMY_STORES: StoresResponse = [
   {
     id: "2",
     name: "大阪支店",
-    address: "大阪府大阪市...",
+    address: "大阪府大阪市北区堂山町1-5",
     phoneNumber: "06-1234-5678",
     businessHours: "10:00-19:00",
     isActive: true,
@@ -28,7 +28,7 @@ export const DUMMY_STORES: StoresResponse = [
   {
     id: "3",
     name: "名古屋支店",
-    address: "愛知県名古屋市...",
+    address: "愛知県名古屋市あああああ",
     phoneNumber: "052-1234-5678",
     businessHours: "10:00-19:00",
     isActive: true,
@@ -40,7 +40,7 @@ export const DUMMY_STORES: StoresResponse = [
   {
     id: "4",
     name: "福岡支店",
-    address: "福岡県福岡市...",
+    address: "福岡県福岡市あああああ",
     phoneNumber: "092-1234-5678",
     businessHours: "10:00-19:00",
     isActive: true,
@@ -52,10 +52,10 @@ export const DUMMY_STORES: StoresResponse = [
   {
     id: "5",
     name: "札幌支店",
-    address: "北海道札幌市...",
+    address: "北海道札幌市あああああ",
     phoneNumber: "011-1234-5678",
     businessHours: "10:00-19:00",
-    isActive: true,
+    isActive: false,
     createdAt: "2024-11-25",
     createdBy: "admin",
     updatedBy: "admin",
@@ -64,7 +64,7 @@ export const DUMMY_STORES: StoresResponse = [
   {
     id: "6",
     name: "仙台支店",
-    address: "宮城県仙台市...",
+    address: "宮城県仙台市あああああ",
     phoneNumber: "022-1234-5678",
     businessHours: "10:00-19:00",
     isActive: true,
@@ -76,7 +76,7 @@ export const DUMMY_STORES: StoresResponse = [
   {
     id: "7",
     name: "京都支店",
-    address: "京都府京都市...",
+    address: "京都府京都市あああああ",
     phoneNumber: "075-1234-5678",
     businessHours: "10:00-19:00",
     isActive: true,
