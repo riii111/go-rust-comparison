@@ -17,8 +17,8 @@ type Stock struct {
 	Quantity    uint            `gorm:"not null" json:"quantity" validate:"required"`
 	Price       decimal.Decimal `gorm:"type:decimal;not null" json:"price" validate:"required"`
 	IsAvailable bool            `gorm:"not null" json:"is_available" validate:"required"`
+	CreatedBy   string          `gorm:"type:uuid" json:"created_by" validate:"required,uuid"`
 	UpdatedBy   string          `gorm:"type:uuid" json:"updated_by" validate:"required,uuid"`
-	DeletedBy   string          `gorm:"type:uuid" json:"deleted_by" validate:"omitempty,uuid"`
 	CreatedAt   time.Time       `json:"created_at"`
 	UpdatedAt   time.Time       `json:"updated_at"`
 }
