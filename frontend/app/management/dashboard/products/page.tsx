@@ -39,7 +39,10 @@ async function ProductTableContent({ searchParams }: { searchParams: ProductsPag
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
     return (
         <div className="space-y-6 p-6">
+            {/* ヘッダー部分 */}
             <ProductHeader />
+
+            {/* 商品一覧テーブル */}
             <Suspense fallback={<ProductTableSkeleton />}>
                 <Card className="border-0 shadow-none">
                     <ProductTableContent searchParams={searchParams} />

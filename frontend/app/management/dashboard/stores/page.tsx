@@ -44,7 +44,7 @@ export default async function StoresPage({
 
     return (
         <div className="space-y-6 p-6">
-            {/* ヘッダー部分（検索、新規作成ボタンなど） */}
+            {/* ヘッダー部分 */}
             <StoreHeader />
 
             {/* 店舗一覧テーブル */}
