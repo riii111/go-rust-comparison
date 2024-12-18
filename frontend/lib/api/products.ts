@@ -1,25 +1,47 @@
-// import { customFetch } from "@/lib/api/core";
 import {
-  ProductsResponse,
-  ProductWithStockResponse,
+  ProductsApiResponse,
+  ProductFilter,
   ProductWithStock,
+  ProductWithStockResponse,
 } from "@/config/types/api/product";
-// TODO: APIが実装されるまで、ダミーデータで返しておく
 import { DUMMY_PRODUCTS } from "@/__mocks__/dashboard/products/dummy_data";
+import { ITEMS_PER_PAGE } from "@/config/constants/product";
 
 // const ENDPOINT = "/products";
 
 /**
  * 商品一覧を取得する
  */
-export async function getProducts(): Promise<ProductsResponse> {
+export async function getProducts(
+  filters?: ProductFilter
+): Promise<ProductsApiResponse> {
   // TODO: APIが実装されるまで、ダミーデータで返しておく
   await new Promise((resolve) => setTimeout(resolve, 600)); // ローディング確認用
-  return DUMMY_PRODUCTS;
-  //   const { data } = await customFetch<undefined, ProductsResponse>(ENDPOINT, {
-  //     method: "GET",
-  //   });
-  //   return data;
+
+  let filteredProducts: ProductWithStock[] = DUMMY_PRODUCTS;
+
+  // 検索フィルタリング
+  if (filters?.search) {
+    const searchLower = filters.search.toLowerCase();
+    filteredProducts = filteredProducts.filter(
+      (product) =>
+        product.name.toLowerCase().includes(searchLower) ||
+        product.description.toLowerCase().includes(searchLower)
+    );
+  }
+
+  // ページネーション
+  const page = filters?.page || 1;
+  const limit = filters?.limit || ITEMS_PER_PAGE;
+  const start = (page - 1) * limit;
+  const end = start + limit;
+
+  return {
+    products: filteredProducts.slice(start, end),
+    total: filteredProducts.length,
+    page: page,
+    limit: limit,
+  };
 }
 
 /**
