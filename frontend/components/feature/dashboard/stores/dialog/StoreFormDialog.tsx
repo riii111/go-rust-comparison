@@ -9,6 +9,7 @@ import { storeSchema, MESSAGES } from '@/components/feature/dashboard/stores/val
 import FormField from '@/components/common/molecules/FormField'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
+import { useCallback } from 'react'
 
 interface StoreFormDialogProps {
     isOpen: boolean
@@ -28,6 +29,12 @@ interface StoreFormDialogProps {
 export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialogProps) {
     const [isPending, startTransition] = useTransition()
     const isEditing = !!initialData?.id
+
+    const handleClose = useCallback(() => {
+        if (!isPending) {
+            onClose()
+        }
+    }, [isPending, onClose])
 
     const [form, fields] = useForm({
         id: "store-form",
@@ -89,7 +96,7 @@ export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialo
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen} onOpenChange={handleClose}>
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>{isEditing ? '店舗を編集' : '新規店舗登録'}</DialogTitle>
@@ -160,7 +167,7 @@ export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialo
                         <Switch
                             id={fields.isActive.id}
                             name={fields.isActive.name}
-                            checked={formValue.isActive === true}
+                            checked={Boolean(formValue.isActive)}
                             onCheckedChange={(checked) => {
                                 form.update({
                                     name: fields.isActive.name,
