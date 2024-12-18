@@ -20,6 +20,7 @@ type Store struct {
 	UpdatedBy     string    `gorm:"type:uuid" json:"updated_by" validate:"required,uuid"`
 	CreatedAt     time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt     time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+	Stocks        []Stock   `gorm:"constraint:OnDelete:SET NULL" json:"stocks"`
 }
 
 // レコード作成前にUUID v7を自動生成する
