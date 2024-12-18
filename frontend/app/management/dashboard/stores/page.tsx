@@ -6,19 +6,29 @@ import { StoreTable } from '@/components/feature/dashboard/stores/table/StoreTab
 import { TablePagination } from '@/components/common/molecules/TablePagination'
 import { ITEMS_PER_PAGE } from '@/config/constants/store'
 import { StoreTableSkeleton } from '@/components/feature/dashboard/stores/table/StoreTableSkeleton'
-// 店舗テーブルのコンテンツ
+
+interface StoresPageProps {
+    searchParams: Promise<{
+        page?: string
+        search?: string
+    }>
+}
+
 async function StoreTableContent({
-    page = 1,
-    limit = ITEMS_PER_PAGE,
-    search = '',
+    searchParams,
 }: {
-    page?: number
-    limit?: number
-    search?: string
+    searchParams: Promise<{
+        page?: string
+        search?: string
+    }>
 }) {
+    const resolvedParams = await searchParams
+    const page = Number(resolvedParams.page) || 1
+    const search = resolvedParams.search || ''
+
     const { stores, total } = await getStores({
         page,
-        limit,
+        limit: ITEMS_PER_PAGE,
         search: search || undefined,
     })
 
@@ -34,27 +44,17 @@ async function StoreTableContent({
     )
 }
 
-export default async function StoresPage({
-    searchParams,
-}: {
-    searchParams?: { page?: string; search?: string }
-}) {
-    const currentPage = Number(searchParams?.page) || 1
-    const search = searchParams?.search || ''
-
+// Next.js 15系では、クライアントサイドのナビゲーション関連は必ずSuspenseでラップする必要あり??
+export default async function StoresPage({ searchParams }: StoresPageProps) {
     return (
         <div className="space-y-6 p-6">
-            {/* ヘッダー部分 */}
-            <StoreHeader />
+            <Suspense>
+                <StoreHeader />
+            </Suspense>
 
-            {/* 店舗一覧テーブル */}
             <Suspense fallback={<StoreTableSkeleton />}>
                 <Card className="border-0 shadow-none">
-                    <StoreTableContent
-                        page={currentPage}
-                        limit={ITEMS_PER_PAGE}
-                        search={search}
-                    />
+                    <StoreTableContent searchParams={searchParams} />
                 </Card>
             </Suspense>
         </div>

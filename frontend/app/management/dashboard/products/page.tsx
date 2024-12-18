@@ -8,18 +8,19 @@ import { ITEMS_PER_PAGE } from "@/config/constants/product"
 import { ProductTableSkeleton } from "@/components/feature/dashboard/products/table/ProductTableSkeleton"
 
 interface ProductsPageProps {
-    searchParams: {
+    searchParams: Promise<{
         search?: string
         page?: string
-    }
+    }>
 }
 
-async function ProductTableContent({ searchParams }: { searchParams: ProductsPageProps['searchParams'] }) {
-    const currentPage = Number(searchParams.page) || 1;
+async function ProductTableContent({ searchParams }: { searchParams: Promise<{ search?: string, page?: string }> }) {
+    const resolvedParams = await searchParams
+    const currentPage = Number(resolvedParams.page) || 1;
 
     // 検索パラメータを正しく渡す
     const response = await getProducts({
-        search: searchParams.search,
+        search: resolvedParams.search,
         page: currentPage,
         limit: ITEMS_PER_PAGE
     });
@@ -40,7 +41,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     return (
         <div className="space-y-6 p-6">
             {/* ヘッダー部分 */}
-            <ProductHeader />
+            <Suspense>
+                <ProductHeader />
+            </Suspense>
 
             {/* 商品一覧テーブル */}
             <Suspense fallback={<ProductTableSkeleton />}>
