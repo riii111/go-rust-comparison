@@ -8,18 +8,15 @@ import { EssentialInfo } from './_components/EssentialInfo'
 import { DetailInfo } from './_components/DetailInfo'
 import { Skeleton } from "@/components/ui/skeleton"
 
-type Props = {
-    params: {
-        id: string
-    }
+type PageProps = {
+    params: Promise<{ id: string }>
+    searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 async function ProductInfoWrapper({ id }: { id: string }) {
-
     return (
         <div className="space-y-6">
             <EssentialInfo id={id} />
-
             <DetailInfo id={id} />
         </div>
     )
@@ -43,26 +40,24 @@ const ProductInfoSkeleton = () => {
 
 async function ImageSectionWrapper({ id }: { id: string }) {
     const product = await getProductWithStockById(id)
-
     if (!product) {
         notFound()
     }
     return <ImageSection product={product} />
 }
 
-export default async function ProductDetailPage({ params }: Props) {
+export default async function ProductDetailPage({ params }: PageProps) {
+    const resolvedParams = await params
     return (
         <div className="p-6 space-y-6">
             <Header />
-
             <Card className="p-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <Suspense fallback={<ProductInfoSkeleton />}>
-                        <ProductInfoWrapper id={params.id} />
+                        <ProductInfoWrapper id={resolvedParams.id} />
                     </Suspense>
-
                     <Suspense fallback={<ImageSkeleton />}>
-                        <ImageSectionWrapper id={params.id} />
+                        <ImageSectionWrapper id={resolvedParams.id} />
                     </Suspense>
                 </div>
             </Card>

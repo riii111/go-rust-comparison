@@ -70,8 +70,9 @@ export async function getProductWithStockById(
 /**
  * 指定した商品を削除する
  */
-export async function deleteProduct(_: string): Promise<boolean> {
+export async function deleteProduct(id: string): Promise<boolean> {
   // TODO: APIが実装されるまで、ダミーデータで返しておく
+  console.log("deleteProduct", id);
   return true;
   //   const { data } = await customFetch<undefined, void>(
   //     `${ENDPOINT}/${id}/`,
