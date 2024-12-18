@@ -12,7 +12,6 @@ interface StoreTableProps {
     stores: Store[]
 }
 
-
 function StoreTableHeader() {
     return (
         <TableHeader>
