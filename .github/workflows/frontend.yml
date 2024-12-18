@@ -1,0 +1,57 @@
+name: Frontend CI
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    paths:
+      - "frontend/**"
+    branches-ignore:
+      - "release/**"
+      - "doc/**"
+
+env:
+  WORKING_DIRECTORY: frontend
+
+jobs:
+  lint:
+    if: github.event.pull_request.draft == false
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ${{ env.WORKING_DIRECTORY }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Run lint
+        run: npm run lint
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+  build:
+    if: github.event.pull_request.draft == false
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ${{ env.WORKING_DIRECTORY }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Build
+        run: npm run build
+        working-directory: ${{ env.WORKING_DIRECTORY }}
