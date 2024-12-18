@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { PRODUCT_PAGE_SIZE } from '@/config/constants/product'
+import { ITEMS_PER_PAGE } from '@/config/constants/product'
 
 interface ProductPaginationProps {
     totalPages?: number
@@ -45,8 +45,8 @@ export function ProductPagination({
         return acc
     }, [])
 
-    const startItem = (currentPage - 1) * PRODUCT_PAGE_SIZE + 1
-    const endItem = Math.min(currentPage * PRODUCT_PAGE_SIZE, totalItems)
+    const startItem = (currentPage - 1) * ITEMS_PER_PAGE + 1
+    const endItem = Math.min(currentPage * ITEMS_PER_PAGE, totalItems)
 
     return (
         <div className="flex items-center justify-between p-4">

@@ -6,13 +6,14 @@ import { useCallback, useState, useEffect, useTransition } from 'react'
 import { useSearchParams, usePathname, useRouter } from 'next/navigation'
 import { useDebounce } from '@/hooks/ui/useDebounce'
 
-export function ProductSearch() {
+export function StoreSearch() {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const [searchQuery, setSearchQuery] = useState('')
     const [isPending, startTransition] = useTransition()
 
+    // 初期値の設定
     useEffect(() => {
         setSearchQuery(searchParams.get('search') ?? '')
     }, [searchParams])
@@ -29,7 +30,7 @@ export function ProductSearch() {
             params.delete('page')
             router.push(`${pathname}?${params.toString()}`)
         })
-    }, 600)
+    }, 600) // デバウンス時間を600ms
 
     const handleSearch = useCallback((query: string) => {
         setSearchQuery(query)
@@ -41,7 +42,7 @@ export function ProductSearch() {
             <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 ${isPending ? 'animate-pulse' : ''}`} />
             <Input
                 type="search"
-                placeholder="商品名、説明文で検索..."
+                placeholder="店舗名、住所で検索..."
                 className="pl-10 w-full"
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
