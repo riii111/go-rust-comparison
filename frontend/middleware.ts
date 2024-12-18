@@ -12,6 +12,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // TODO 一時的に許可する（API実装されたら削除！！）
+  if (pathname.startsWith("/management")) {
+    return NextResponse.next();
+  }
+
   // 公開ルートは常に許可
   if (publicRoutes.some((route) => pathname.startsWith(route))) {
     return NextResponse.next();
