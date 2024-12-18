@@ -58,20 +58,6 @@ export function ProductTableSkeleton() {
                     </TableBody>
                 </Table>
             </div>
-
-            {/* ページネーションのスケルトン */}
-            <div className="flex items-center justify-between p-4">
-                <Skeleton className="w-32 h-4" />
-                <div className="flex items-center gap-2">
-                    <Skeleton className="w-8 h-8" />
-                    <div className="flex gap-1">
-                        {[...Array(PRODUCT_PAGE_SIZE)].map((_, i) => (
-                            <Skeleton key={i} className="w-8 h-8" />
-                        ))}
-                    </div>
-                    <Skeleton className="w-8 h-8" />
-                </div>
-            </div>
         </Card>
     )
 }
