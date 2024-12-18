@@ -3,27 +3,15 @@ package main
 import (
 	"log"
 	"net/http"
-	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/riii111/go-rust-comparison/configs"
 )
 
 func main() {
 	r := gin.Default()
 
-	// corsの設定
-	// TODO: 別の場所で設定する？
-	r.Use(cors.New(cors.Config{
-		// TODO: 本番のurlも追加しようね
-		AllowOrigins: []string{"http://localhost:3000"},
-		AllowMethods: []string{"GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders: []string{"Origin", "Content-Type", "Authorization"},
-		// TODO: csrf導入時に, "X-CSRF-Token"を追記？
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
+	config.CORSConfig()
 
 	// ヘルスチェックエンドポイント
 	r.GET("/api/health", func(c *gin.Context) {
