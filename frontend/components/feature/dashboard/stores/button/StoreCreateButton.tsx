@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { PlusCircle } from 'lucide-react'
 import { useState } from 'react'
-import { StoreFormDialog } from '@/components/feature/dashboard/stores/dialog/StoreFormDialog'
+import { StoreFormDialog } from '@/components/feature/dashboard/stores/dialog/create/StoreFormDialog'
 
 export function StoreCreateButton() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)

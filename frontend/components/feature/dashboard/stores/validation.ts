@@ -74,13 +74,6 @@ const phoneNumberSchema = z
     message: MESSAGES.store.phoneNumber.invalid,
   });
 
-// 営業時間の型定義
-export interface BusinessHours {
-  start: string; // HH:mm形式
-  end: string; // HH:mm形式
-  regularHoliday: string[]; // 定休日（曜日）
-}
-
 // バリデーションスキーマ
 const timePattern = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
 
@@ -110,6 +103,7 @@ const businessHoursSchema = z.object({
     }),
   regularHoliday: z
     .array(z.enum(["月", "火", "水", "木", "金", "土", "日"]))
+    .optional()
     .default([]),
 });
 
