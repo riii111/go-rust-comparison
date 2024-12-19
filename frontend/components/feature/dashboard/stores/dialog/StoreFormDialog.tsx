@@ -1,10 +1,10 @@
 'use client'
 
-import { useTransition, useCallback, memo } from 'react'
+import { useTransition, useCallback, memo, useMemo } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useForm } from "@conform-to/react"
 import { parseWithZod } from '@conform-to/zod'
-import { storeSchema, MESSAGES } from '@/components/feature/dashboard/stores/validation'
+import { storeSchema, MESSAGES, formatZipCode } from '@/components/feature/dashboard/stores/validation'
 import FormField from '@/components/common/molecules/FormField'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -26,7 +26,11 @@ interface StoreFormDialogProps {
         name: string
         address: string
         phoneNumber: string
-        businessHours: string
+        businessHours: {
+            start: string
+            end: string
+            regularHoliday: string[]
+        }
         zipCode: string
         description?: string
         isActive: boolean
@@ -49,7 +53,11 @@ export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialo
             name: initialData?.name ?? "",
             address: initialData?.address ?? "",
             phoneNumber: initialData?.phoneNumber ?? "",
-            businessHours: initialData?.businessHours ?? "",
+            businessHours: {
+                start: initialData?.businessHours?.start ?? "09:00",
+                end: initialData?.businessHours?.end ?? "18:00",
+                regularHoliday: initialData?.businessHours?.regularHoliday ?? [],
+            },
             zipCode: initialData?.zipCode ?? "",
             description: initialData?.description ?? "",
             isActive: initialData?.isActive ?? true,
@@ -91,12 +99,81 @@ export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialo
         }
     })
 
+    const handleUpdateZipCode = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const formattedValue = formatZipCode(e.target.value);
+        form.update({
+            name: fields.zipCode.name,
+            value: formattedValue
+        })
+    }, [form, fields.zipCode.name])
+
+    const handleUpdateAddress = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        form.update({
+            name: fields.address.name,
+            value: e.target.value
+        })
+    }, [form, fields.address.name])
+
+    const handleUpdatePhone = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        form.update({
+            name: fields.phoneNumber.name,
+            value: e.target.value
+        })
+    }, [form, fields.phoneNumber.name])
+
+    const AddressFields = useMemo(() => (
+        <>
+            <div className="grid grid-cols-2 gap-4">
+                <FormField
+                    id={fields.zipCode.id}
+                    name={fields.zipCode.name}
+                    type="text"
+                    label="郵便番号"
+                    placeholder="例: 123-4567"
+                    required
+                    error={fields.zipCode.errors?.[0]}
+                    onChange={handleUpdateZipCode}
+                    value={fields.zipCode.value || ''}
+                />
+                <FormField
+                    id={fields.phoneNumber.id}
+                    name={fields.phoneNumber.name}
+                    type="tel"
+                    label="電話番号"
+                    placeholder="例: 03-1234-5678"
+                    required
+                    error={fields.phoneNumber.errors?.[0]}
+                    onChange={handleUpdatePhone}
+                    value={fields.phoneNumber.value || ''}
+                />
+            </div>
+            <FormField
+                id={fields.address.id}
+                name={fields.address.name}
+                type="text"
+                label="住所"
+                placeholder="例: 東京都渋谷区..."
+                required
+                error={fields.address.errors?.[0]}
+                onChange={handleUpdateAddress}
+                value={fields.address.value || ''}
+            />
+        </>
+    ), [
+        fields.zipCode, fields.phoneNumber, fields.address,
+        handleUpdateZipCode, handleUpdatePhone, handleUpdateAddress
+    ])
+
     // フォームの現在値を安全に取得
     const formValue = form.value ?? {
         name: "",
         address: "",
         phoneNumber: "",
-        businessHours: "",
+        businessHours: {
+            start: "09:00",
+            end: "18:00",
+            regularHoliday: [],
+        },
         zipCode: "",
         description: "",
         isActive: true,
@@ -117,47 +194,45 @@ export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialo
                         error={fields.name.errors?.[0]}
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                            id={fields.zipCode.id}
-                            name={fields.zipCode.name}
-                            type="text"
-                            label="郵便番号"
-                            placeholder="例: 123-4567"
-                            required
-                            error={fields.zipCode.errors?.[0]}
-                        />
+                    {AddressFields}
 
-                        <FormField
-                            id={fields.phoneNumber.id}
-                            name={fields.phoneNumber.name}
-                            type="tel"
-                            label="電話番号"
-                            placeholder="例: 03-1234-5678"
-                            required
-                            error={fields.phoneNumber.errors?.[0]}
-                        />
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                id={`${fields.businessHours.id}.start`}
+                                name={`${fields.businessHours.name}.start`}
+                                type="time"
+                                label="営業開始時間"
+                                required
+                                error={fields.businessHours.errors?.[0]}
+                            />
+                            <FormField
+                                id={`${fields.businessHours.id}.end`}
+                                name={`${fields.businessHours.name}.end`}
+                                type="time"
+                                label="営業終了時間"
+                                required
+                                error={fields.businessHours.errors?.[0]}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>定休日</Label>
+                            <div className="flex flex-wrap gap-2">
+                                {["月", "火", "水", "木", "金", "土", "日"].map((day) => (
+                                    <label key={day} className="flex items-center space-x-2">
+                                        <input
+                                            type="checkbox"
+                                            name={`${fields.businessHours.name}.regularHoliday`}
+                                            value={day}
+                                            defaultChecked={initialData?.businessHours?.regularHoliday?.includes(day)}
+                                        />
+                                        <span>{day}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
                     </div>
-
-                    <FormField
-                        id={fields.address.id}
-                        name={fields.address.name}
-                        type="text"
-                        label="住所"
-                        placeholder="住所を入力してください"
-                        required
-                        error={fields.address.errors?.[0]}
-                    />
-
-                    <FormField
-                        id={fields.businessHours.id}
-                        name={fields.businessHours.name}
-                        type="text"
-                        label="営業時間"
-                        placeholder="例: 10:00-19:00"
-                        required
-                        error={fields.businessHours.errors?.[0]}
-                    />
 
                     <FormField
                         id={fields.description.id}
