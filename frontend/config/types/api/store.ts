@@ -6,7 +6,7 @@ export interface Store {
   name: string;
   address: string;
   phoneNumber: string;
-  businessHours: string;
+  businessHours: BusinessHours;
   isActive: boolean;
   description?: string;
   imageUrl?: string;
@@ -16,12 +16,19 @@ export interface Store {
   updatedAt: string;
 }
 
+// 営業時間の型定義
+export interface BusinessHours {
+  start: string; // HH:mm形式
+  end: string; // HH:mm形式
+  regularHoliday?: string[]; // 定休日（曜日）
+}
+
 // 店舗作成・更新時のリクエスト型
 export interface CreateStoreRequest {
   name: string;
   address: string;
   phoneNumber: string;
-  businessHours: string;
+  businessHours: BusinessHours;
   description?: string;
   imageUrl?: string;
 }
@@ -38,6 +45,11 @@ export interface StoreFilter {
   limit?: number;
   sortBy?: "name" | "createdAt";
   sortOrder?: "asc" | "desc";
+}
+
+// フォーム用の型
+export interface StoreFormData extends Omit<Store, "id"> {
+  id?: string;
 }
 
 // APIレスポンス用

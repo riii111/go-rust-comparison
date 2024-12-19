@@ -29,7 +29,7 @@ interface StoreFormDialogProps {
         businessHours: {
             start: string
             end: string
-            regularHoliday: string[]
+            regularHoliday?: string[]
         }
         zipCode: string
         description?: string
