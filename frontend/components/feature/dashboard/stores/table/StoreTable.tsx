@@ -15,13 +15,14 @@ interface StoreTableProps {
 function StoreTableHeader() {
     return (
         <TableHeader>
-            <TableRow>
-                <TableHead>店舗名</TableHead>
-                <TableHead>住所</TableHead>
-                <TableHead>電話番号</TableHead>
-                <TableHead>営業時間</TableHead>
-                <TableHead>ステータス</TableHead>
-                <TableHead>登録日</TableHead>
+            <TableRow className="h-16">
+                <TableHead className="w-[150px]">店舗名</TableHead>
+                <TableHead className="w-[280px]">住所</TableHead>
+                <TableHead className="w-[140px]">電話番号</TableHead>
+                <TableHead className="w-[140px]">営業時間</TableHead>
+                <TableHead className="w-[140px]">定休日</TableHead>
+                <TableHead className="w-[100px]">ステータス</TableHead>
+                <TableHead className="w-[120px]">登録日</TableHead>
                 <TableHead className="w-[80px]">操作</TableHead>
             </TableRow>
         </TableHeader>
