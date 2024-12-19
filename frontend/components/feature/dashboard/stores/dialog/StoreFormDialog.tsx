@@ -1,15 +1,22 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useTransition, useCallback, memo } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
 import { useForm } from "@conform-to/react"
 import { parseWithZod } from '@conform-to/zod'
 import { storeSchema, MESSAGES } from '@/components/feature/dashboard/stores/validation'
 import FormField from '@/components/common/molecules/FormField'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { useCallback } from 'react'
+import StoreFormActions from './contents/StoreFormActions'
+
+const DialogTitleMemo = memo(function DialogTitleComponent({ isEditing }: { isEditing: boolean }) {
+    return (
+        <DialogHeader>
+            <DialogTitle>{isEditing ? '店舗を編集' : '新規店舗登録'}</DialogTitle>
+        </DialogHeader>
+    )
+})
 
 interface StoreFormDialogProps {
     isOpen: boolean
@@ -98,9 +105,7 @@ export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialo
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
             <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                    <DialogTitle>{isEditing ? '店舗を編集' : '新規店舗登録'}</DialogTitle>
-                </DialogHeader>
+                <DialogTitleMemo isEditing={isEditing} />
                 <form id={form.id} onSubmit={form.onSubmit} className="space-y-6" noValidate>
                     <FormField
                         id={fields.name.id}
@@ -178,17 +183,12 @@ export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialo
                         <Label htmlFor={fields.isActive.id}>営業中</Label>
                     </div>
 
-                    <div className="flex justify-end gap-3">
-                        <Button type="button" variant="outline" onClick={onClose}>
-                            キャンセル
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={isPending || form.status === 'error'}
-                        >
-                            {isPending ? '送信中...' : (isEditing ? '更新する' : '登録する')}
-                        </Button>
-                    </div>
+                    <StoreFormActions
+                        isEditing={isEditing}
+                        isPending={isPending}
+                        formStatus={form.status ?? ''}
+                        onClose={onClose}
+                    />
                 </form>
             </DialogContent>
         </Dialog>
