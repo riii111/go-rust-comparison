@@ -1,5 +1,6 @@
 'use client'
 
+import { useTransition } from 'react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -9,43 +10,52 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from '@/components/ui/alert-dialog'
+import { Product } from '@/config/types/api/product'
 
 interface ProductDeleteDialogProps {
     isOpen: boolean
     onClose: () => void
-    onConfirm: () => void
-    productName: string
+    product: Product
 }
 
-export function ProductDeleteDialog({
-    isOpen,
-    onClose,
-    onConfirm,
-    productName,
-}: ProductDeleteDialogProps) {
+export function ProductDeleteDialog({ isOpen, onClose, product }: ProductDeleteDialogProps) {
+    const [isPending, startTransition] = useTransition()
+
+    const handleDelete = () => {
+        startTransition(async () => {
+            try {
+                // TODO: APIが実装されるまでダミーデータで対応
+                await new Promise(resolve => setTimeout(resolve, 1000))
+                console.log('Delete product:', product.id)
+                onClose()
+            } catch (error) {
+                console.error('Failed to delete product:', error)
+            }
+        })
+    }
+
     return (
         <AlertDialog open={isOpen} onOpenChange={onClose}>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>商品を削除しますか？</AlertDialogTitle>
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                        <AlertDialogDescription>
-                            以下の商品を削除しようとしています：
-                        </AlertDialogDescription>
-                        <div className="font-medium text-gray-900">{productName}</div>
-                        <div className="text-sm text-red-600">
-                            ※この操作は取り消せません。削除すると、この商品に関連するすべてのデータが完全に削除されます。
-                        </div>
-                    </div>
+                    <AlertDialogDescription>
+                        この操作は取り消せません。商品「{product.name}」を削除してもよろしいですか？
+                        <br />
+                        ※在庫データが存在する場合は削除できません。
+                    </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel onClick={onClose}>キャンセル</AlertDialogCancel>
+                    <AlertDialogCancel disabled={isPending}>
+                        キャンセル
+                    </AlertDialogCancel>
                     <AlertDialogAction
-                        onClick={onConfirm}
-                        className="bg-red-600 hover:bg-red-700"
+                        onClick={handleDelete}
+                        disabled={isPending}
+                        className="bg-destructive hover:bg-destructive/90"
                     >
-                        削除する
+                        {isPending ? '削除中...' : '削除する'}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

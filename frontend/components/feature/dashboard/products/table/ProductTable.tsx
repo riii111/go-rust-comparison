@@ -15,13 +15,13 @@ interface ProductTableProps {
 function ProductTableHeader() {
     return (
         <TableHeader>
-            <TableRow className="bg-gray-50/50">
-                <TableHead className="w-[100px]"></TableHead>
-                <TableHead className="w-[400px]">商品名</TableHead>
-                <TableHead className="w-28 text-center">カテゴリ</TableHead>
-                <TableHead className="w-32 text-center">価格</TableHead>
-                <TableHead className="w-32 text-center">在庫状況</TableHead>
-                <TableHead className="w-20 text-center">操作</TableHead>
+            <TableRow className="h-16">
+                <TableHead className="w-[100px]">商品画像</TableHead>
+                <TableHead>商品情報</TableHead>
+                <TableHead className="text-center">カテゴリー</TableHead>
+                <TableHead className="text-center">価格</TableHead>
+                <TableHead className="text-center w-32">在庫状況</TableHead>
+                <TableHead className="text-center w-[80px]">操作</TableHead>
             </TableRow>
         </TableHeader>
     )
