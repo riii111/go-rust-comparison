@@ -52,7 +52,7 @@ export interface ProductFilter {
 
 // APIレスポンス用
 export interface ProductsApiResponse {
-  products: Product[];
+  products: ProductWithStock[];
   total: number;
   page: number;
   limit: number;

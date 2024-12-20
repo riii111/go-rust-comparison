@@ -32,3 +32,16 @@ export type NavItem = {
   href: string;
   iconName: string;
 };
+
+// パスとタイトルのマッピングを事前に定義
+export const pathToTitleMap = {
+  "/management/dashboard": "Dashboard",
+  ...navItems.reduce(
+    (acc, item) => ({
+      ...acc,
+      [item.href]: item.title,
+    }),
+    {}
+  ),
+  [settingsItem.href]: settingsItem.title,
+} as const;
