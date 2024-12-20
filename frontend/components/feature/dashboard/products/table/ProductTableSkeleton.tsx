@@ -18,10 +18,10 @@ export function ProductTableSkeleton() {
             <div className="rounded-lg border">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-gray-50/50 text-left">
-                            <TableHead className="w-[100px]"></TableHead>
-                            <TableHead className="w-[400px]">商品名</TableHead>
-                            <TableHead className="w-28 text-center">カテゴリ</TableHead>
+                        <TableRow className="bg-gray-50/50 text-left h-16">
+                            <TableHead className="w-[100px]">商品画像</TableHead>
+                            <TableHead className="w-[400px]">商品情報</TableHead>
+                            <TableHead className="w-28 text-center">カテゴリー</TableHead>
                             <TableHead className="w-32 text-center">価格</TableHead>
                             <TableHead className="w-32 text-center">在庫状況</TableHead>
                             <TableHead className="w-20 text-center">操作</TableHead>
@@ -57,20 +57,6 @@ export function ProductTableSkeleton() {
                         ))}
                     </TableBody>
                 </Table>
-            </div>
-
-            {/* ページネーションのスケルトン */}
-            <div className="flex items-center justify-between p-4">
-                <Skeleton className="w-32 h-4" />
-                <div className="flex items-center gap-2">
-                    <Skeleton className="w-8 h-8" />
-                    <div className="flex gap-1">
-                        {[...Array(ITEMS_PER_PAGE)].map((_, i) => (
-                            <Skeleton key={i} className="w-8 h-8" />
-                        ))}
-                    </div>
-                    <Skeleton className="w-8 h-8" />
-                </div>
             </div>
         </Card>
     )
