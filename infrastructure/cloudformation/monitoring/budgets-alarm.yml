@@ -1,0 +1,228 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Budgets Alarm Stack"
+
+# -------------------------------------
+# Metadata
+# -------------------------------------
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Project Configuration"
+        Parameters:
+          - ProjectName
+          - Environment
+      - Label:
+          default: "Budget Configuration"
+        Parameters:
+          # 予算額
+          - Amount
+          # ブレンドコスト有無
+          - UseBlended
+          # 監視期間
+          - TimeUnit
+          # 予算額に対する予測額の割合
+          - Forecasted
+          # 予算額に対する実際の使用料の割合
+          - Actual1
+          - Actual2
+          - Actual3
+      - Label:
+          default: "SNS Topic Configuration"
+        Parameters:
+          - BudgetsTopicName
+          - KMSKeyAliasName
+      - Label:
+          default: "Chatbot Configuration"
+        Parameters:
+          # IAM
+          - ChatbotRoleArn
+          # Slack
+          - SlackWorkspaceID
+          - SlackChannelIDForBudgets
+
+# -------------------------------------
+# Parameters
+# -------------------------------------
+Parameters:
+  ProjectName:
+    Description: "Enter the project name (ex: go-rust-comparison)."
+    Type: String
+    MinLength: 1
+    ConstraintDescription: "ProjectName must be entered."
+    Default: go-rust-comparison
+  Environment:
+    Description: "Select a environment name."
+    Type: String
+    AllowedValues:
+      - dev
+      - stg
+      - prd
+    ConstraintDescription: "Environment name must be selected."
+  Amount:
+    Description: "Enter the budgeted amount."
+    Type: String
+    Default: 300
+  UseBlended:
+    Description: "Budgeted amount."
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  TimeUnit:
+    Description: "Select the length of time until a budget resets the actual and forecasted spend."
+    Type: String
+    Default: MONTHLY
+    AllowedValues:
+      - ANNUALLY
+      - MONTHLY
+      - QUARTERLY
+  Forecasted:
+    Description: "Enter the percentage of budgeted amount (Forecasted Costs)."
+    Type: Number
+    Default: 100
+    MinValue: 1
+    MaxValue: 100
+  Actual1:
+    Description: "Enter the percentage of budgeted amount (Actual Costs)."
+    Type: Number
+    Default: 50
+    MinValue: 1
+    MaxValue: 100
+  Actual2:
+    Description: "Enter the percentage of budgeted amount (Actual Costs)."
+    Type: Number
+    Default: 75
+    MinValue: 1
+    MaxValue: 100
+  Actual3:
+    Description: "Enter the percentage of budgeted amount (Actual Costs)."
+    Type: Number
+    Default: 100
+    MinValue: 1
+    MaxValue: 100
+  BudgetsTopicName:
+    Description: "Enter the SNS Topic name for budget alert (default: ai-budgets)."
+    Type: String
+    Default: ai-budgets
+  KMSKeyAliasName:
+    Description: "Enter the alias name for SNS KMS key."
+    Type: String
+    Default: alias/cmk/sns
+  # Chatbotが既に作成されていることが前提
+  ChatbotRoleArn:
+    Description: "Enter the Chatbot Role ARN."
+    Type: String
+  SlackWorkspaceID:
+    Description: "Enter the Slack Workspace ID of PJ100-Team."
+    Type: String
+  SlackChannelIDForBudgets:
+    Description: "Enter the Slack channel ID for budget notification."
+    Type: String
+
+# -------------------------------------
+# Resources
+# -------------------------------------
+Resources:
+  # -------------------------------------
+  # SNS Topic (予算アラート通知用)
+  # -------------------------------------
+  BudgetsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Ref BudgetsTopicName
+      TopicName: !Ref BudgetsTopicName
+      KmsMasterKeyId: !Ref KMSKeyAliasName
+  BudgetsTopicPolicy:
+    DependsOn: BudgetsTopic
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: BudgetsSNSPolicy
+            Effect: Allow
+            Principal:
+              Service:
+                - events.amazonaws.com
+            Action:
+              - sns:Publish
+            Resource: !Sub arn:aws:sns:us-east-1:${AWS::AccountId}:${BudgetsTopicName}
+            Condition:
+              StringEquals:
+                "AWS:SourceAccount": !Ref AWS::AccountId
+          - Sid: AWSBudgetsNotificationPolicy
+            Effect: Allow
+            Principal:
+              Service: budgets.amazonaws.com
+            Action: SNS:Publish
+            Resource: !Sub arn:aws:sns:us-east-1:${AWS::AccountId}:${BudgetsTopicName}
+      Topics:
+        - !Sub arn:aws:sns:us-east-1:${AWS::AccountId}:${BudgetsTopicName}
+
+  # -------------------------------------
+  # Chatbot
+  # -------------------------------------
+  ChatbotForBudgets:
+    Type: AWS::Chatbot::SlackChannelConfiguration
+    Properties:
+      ConfigurationName: notice-aws-budgets
+      IamRoleArn: !Ref ChatbotRoleArn
+      LoggingLevel: ERROR
+      SlackWorkspaceId: !Ref SlackWorkspaceID
+      SlackChannelId: !Ref SlackChannelIDForBudgets
+      SnsTopicArns:
+        - !Sub arn:aws:sns:us-east-1:${AWS::AccountId}:${BudgetsTopicName}
+
+  # -------------------------------------
+  # Budgets
+  # -------------------------------------
+  Budget:
+    Type: AWS::Budgets::Budget
+    Properties:
+      Budget:
+        BudgetName: !Sub budget-for-${AWS::AccountId}-${ProjectName}-${Environment}
+        BudgetLimit:
+          Amount: !Ref Amount
+          Unit: USD
+        BudgetType: COST
+        CostTypes:
+          UseBlended: !Ref UseBlended
+        TimeUnit: !Ref TimeUnit
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: FORECASTED
+            ComparisonOperator: GREATER_THAN
+            Threshold: !Ref Forecasted
+          Subscribers:
+            - SubscriptionType: SNS
+              Address: !Sub arn:aws:sns:us-east-1:${AWS::AccountId}:${BudgetsTopicName}
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: !Ref Actual1
+          Subscribers:
+            - SubscriptionType: SNS
+              Address: !Sub arn:aws:sns:us-east-1:${AWS::AccountId}:${BudgetsTopicName}
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: !Ref Actual2
+          Subscribers:
+            - SubscriptionType: SNS
+              Address: !Sub arn:aws:sns:us-east-1:${AWS::AccountId}:${BudgetsTopicName}
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: !Ref Actual3
+          Subscribers:
+            - SubscriptionType: SNS
+              Address: !Sub arn:aws:sns:us-east-1:${AWS::AccountId}:${BudgetsTopicName}
+
+# -------------------------------------
+# Outputs
+# -------------------------------------
+Outputs:
+  BudgetId:
+    Value: !Ref Budget
