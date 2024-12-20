@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition, useCallback, memo, useMemo } from 'react'
+import { useTransition, useCallback, memo } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useForm } from "@conform-to/react"
 import { parseWithZod } from '@conform-to/zod'
@@ -38,17 +38,17 @@ export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialo
     const [form, fields] = useForm({
         id: "store-form",
         defaultValue: {
-            name: initialData?.name ?? "",
-            address: initialData?.address ?? "",
-            phoneNumber: initialData?.phoneNumber ?? "",
+            name: initialData?.name,
+            address: initialData?.address,
+            phoneNumber: initialData?.phoneNumber,
             businessHours: {
-                start: initialData?.businessHours?.start ?? "09:00",
-                end: initialData?.businessHours?.end ?? "18:00",
+                start: initialData?.businessHours?.start,
+                end: initialData?.businessHours?.end,
                 regularHoliday: initialData?.businessHours?.regularHoliday ?? [],
             },
-            zipCode: initialData?.zipCode ?? "",
+            zipCode: initialData?.zipCode,
             description: initialData?.description ?? "",
-            isActive: initialData?.isActive ?? true,
+            isActive: initialData?.isActive,
         },
         onValidate: ({ formData }) => {
             return parseWithZod(formData, {
@@ -109,49 +109,6 @@ export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialo
         })
     }, [form, fields.phoneNumber.name])
 
-    const AddressFields = useMemo(() => (
-        <>
-            <div className="grid grid-cols-2 gap-4">
-                <FormField
-                    id={fields.zipCode.id}
-                    name={fields.zipCode.name}
-                    type="text"
-                    label="郵便番号"
-                    placeholder="例: 123-4567"
-                    required
-                    error={fields.zipCode.errors?.[0]}
-                    onChange={handleUpdateZipCode}
-                    value={fields.zipCode.value || ''}
-                />
-                <FormField
-                    id={fields.phoneNumber.id}
-                    name={fields.phoneNumber.name}
-                    type="tel"
-                    label="電話番号"
-                    placeholder="例: 03-1234-5678"
-                    required
-                    error={fields.phoneNumber.errors?.[0]}
-                    onChange={handleUpdatePhone}
-                    value={fields.phoneNumber.value || ''}
-                />
-            </div>
-            <FormField
-                id={fields.address.id}
-                name={fields.address.name}
-                type="text"
-                label="住所"
-                placeholder="例: 東京都渋谷区..."
-                required
-                error={fields.address.errors?.[0]}
-                onChange={handleUpdateAddress}
-                value={fields.address.value || ''}
-            />
-        </>
-    ), [
-        fields.zipCode, fields.phoneNumber, fields.address,
-        handleUpdateZipCode, handleUpdatePhone, handleUpdateAddress
-    ])
-
     // フォームの現在値を安全に取得
     const formValue = form.value ?? {
         name: "",
@@ -182,8 +139,48 @@ export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialo
                         error={fields.name.errors?.[0]}
                     />
 
-                    {AddressFields}
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* 郵便番号 */}
+                        <FormField
+                            id={fields.zipCode.id}
+                            name={fields.zipCode.name}
+                            type="text"
+                            label="郵便番号"
+                            placeholder="例: 123-4567"
+                            required
+                            error={fields.zipCode.errors?.[0]}
+                            onChange={handleUpdateZipCode}
+                            value={fields.zipCode.value || ''}
+                        />
 
+                        {/* 電話番号 */}
+                        <FormField
+                            id={fields.phoneNumber.id}
+                            name={fields.phoneNumber.name}
+                            type="tel"
+                            label="電話番号"
+                            placeholder="例: 03-1234-5678"
+                            required
+                            error={fields.phoneNumber.errors?.[0]}
+                            onChange={handleUpdatePhone}
+                            value={fields.phoneNumber.value || ''}
+                        />
+                    </div>
+
+                    {/* 住所 */}
+                    <FormField
+                        id={fields.address.id}
+                        name={fields.address.name}
+                        type="text"
+                        label="住所"
+                        placeholder="例: 東京都渋谷区..."
+                        required
+                        error={fields.address.errors?.[0]}
+                        onChange={handleUpdateAddress}
+                        value={fields.address.value || ''}
+                    />
+
+                    {/* 営業時間 */}
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
@@ -204,6 +201,7 @@ export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialo
                             />
                         </div>
 
+                        {/* 定休日 */}
                         <div className="space-y-2">
                             <Label>定休日</Label>
                             <div className="flex flex-wrap gap-2">
@@ -222,6 +220,7 @@ export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialo
                         </div>
                     </div>
 
+                    {/* 店舗説明 */}
                     <FormField
                         id={fields.description.id}
                         name={fields.description.name}
@@ -231,6 +230,7 @@ export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialo
                         error={fields.description.errors?.[0]}
                     />
 
+                    {/* 営業中 */}
                     <div className="flex items-center space-x-2">
                         <Switch
                             id={fields.isActive.id}
