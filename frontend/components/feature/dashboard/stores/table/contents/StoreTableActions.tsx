@@ -13,17 +13,30 @@ import { StoreFormDialog } from '@/components/feature/dashboard/stores/dialog/cr
 import { Store } from '@/config/types/api/store'
 import { StoreDeleteDialog } from '@/components/feature/dashboard/stores/dialog/delete/StoreDeleteDialog'
 
+type DialogType = 'edit' | 'delete' | null
+
 interface StoreTableActionsProps {
     store: Store
 }
 
 export function StoreTableActions({ store }: StoreTableActionsProps) {
-    const [showEditDialog, setShowEditDialog] = useState(false)
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+    const [activeDialog, setActiveDialog] = useState<DialogType>(null)
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+
+    const handleDialogOpen = (dialogType: DialogType) => {
+        setIsDropdownOpen(false)
+        setTimeout(() => {
+            setActiveDialog(dialogType)
+        }, 100)
+    }
+
+    const handleDialogClose = () => {
+        setActiveDialog(null)
+    }
 
     return (
         <>
-            <DropdownMenu>
+            <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
                 <DropdownMenuTrigger asChild>
                     <Button
                         variant="ghost"
@@ -34,30 +47,33 @@ export function StoreTableActions({ store }: StoreTableActionsProps) {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-[160px]">
-                    <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+                    <DropdownMenuItem onClick={() => handleDialogOpen('edit')}>
                         <Pencil className="mr-2 h-4 w-4" />
                         編集
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>
+                    <DropdownMenuItem onClick={() => handleDialogOpen('delete')}>
                         <Trash className="mr-2 h-4 w-4" />
                         削除
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* 編集ダイアログ */}
-            <StoreFormDialog
-                isOpen={showEditDialog}
-                onClose={() => setShowEditDialog(false)}
-                initialData={store}
-            />
+            {/* ダイアログコンポーネント */}
+            {activeDialog === 'edit' && (
+                <StoreFormDialog
+                    isOpen={true}
+                    onClose={handleDialogClose}
+                    initialData={store}
+                />
+            )}
 
-            {/* 削除確認ダイアログ */}
-            <StoreDeleteDialog
-                isOpen={showDeleteDialog}
-                onClose={() => setShowDeleteDialog(false)}
-                store={store}
-            />
+            {activeDialog === 'delete' && (
+                <StoreDeleteDialog
+                    isOpen={true}
+                    onClose={handleDialogClose}
+                    store={store}
+                />
+            )}
         </>
     )
 }
