@@ -6,6 +6,7 @@ export interface Store {
   name: string;
   address: string;
   phoneNumber: string;
+  zipCode: string;
   businessHours: BusinessHours;
   isActive: boolean;
   description?: string;

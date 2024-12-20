@@ -9,6 +9,7 @@ import FormField from '@/components/common/molecules/FormField'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import StoreFormActions from './contents/StoreFormActions'
+import { Store } from '@/config/types/api/store'
 
 const DialogTitleMemo = memo(function DialogTitleComponent({ isEditing }: { isEditing: boolean }) {
     return (
@@ -21,20 +22,7 @@ const DialogTitleMemo = memo(function DialogTitleComponent({ isEditing }: { isEd
 interface StoreFormDialogProps {
     isOpen: boolean
     onClose: () => void
-    initialData?: {
-        id?: string
-        name: string
-        address: string
-        phoneNumber: string
-        businessHours: {
-            start: string
-            end: string
-            regularHoliday?: string[]
-        }
-        zipCode: string
-        description?: string
-        isActive: boolean
-    }
+    initialData?: Store
 }
 
 export function StoreFormDialog({ isOpen, onClose, initialData }: StoreFormDialogProps) {
