@@ -8,7 +8,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { PRODUCT_PAGE_SIZE } from '@/config/constants/product'
+import { ITEMS_PER_PAGE } from '@/config/constants/product'
 
 // TODO: API実装後に動作しっかり確認
 // Skeletonコンポーネントは一度だけロードすれば良いので、サーバーコンポーネントとして実装
@@ -18,17 +18,17 @@ export function ProductTableSkeleton() {
             <div className="rounded-lg border">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-gray-50/50 text-left">
-                            <TableHead className="w-[100px]"></TableHead>
-                            <TableHead className="w-[400px]">商品名</TableHead>
-                            <TableHead className="w-28 text-center">カテゴリ</TableHead>
+                        <TableRow className="bg-gray-50/50 text-left h-16">
+                            <TableHead className="w-[100px]">商品画像</TableHead>
+                            <TableHead className="w-[400px]">商品情報</TableHead>
+                            <TableHead className="w-28 text-center">カテゴリー</TableHead>
                             <TableHead className="w-32 text-center">価格</TableHead>
                             <TableHead className="w-32 text-center">在庫状況</TableHead>
                             <TableHead className="w-20 text-center">操作</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {[...Array(PRODUCT_PAGE_SIZE)].map((_, index) => (
+                        {[...Array(ITEMS_PER_PAGE)].map((_, index) => (
                             <TableRow key={index}>
                                 <TableCell className="p-2">
                                     <Skeleton className="relative w-20 h-20 rounded-md" />

@@ -3,32 +3,52 @@ import { getProducts } from "@/lib/api/products"
 import { ProductHeader } from "@/app/management/dashboard/products/ProductHeader"
 import { Card } from "@/components/ui/card"
 import { ProductTable } from "@/components/feature/dashboard/products/table/ProductTable"
-import { ProductPagination } from "@/components/feature/dashboard/products/table/ProductPagenation"
+import { TablePagination } from '@/components/common/molecules/TablePagination'
+import { ITEMS_PER_PAGE } from "@/config/constants/product"
 import { ProductTableSkeleton } from "@/components/feature/dashboard/products/table/ProductTableSkeleton"
 
-// 商品テーブルのコンテンツ
-async function ProductTableContent() {
-    const products = await getProducts()
-    return <ProductTable products={products} />
+interface ProductsPageProps {
+    searchParams: Promise<{
+        search?: string
+        page?: string
+    }>
 }
 
-// TODO: 検索機能の実装
-// - サーバーサイドでの検索処理の実装が必要
-// - getProducts関数にsearchQuery引数を追加し、APIエンドポイントに検索パラメータを渡す
-// - 検索結果に応じたページネーションの調整
+async function ProductTableContent({ searchParams }: { searchParams: Promise<{ search?: string, page?: string }> }) {
+    const resolvedParams = await searchParams
+    const currentPage = Number(resolvedParams.page) || 1;
 
-// 商品ページ
-export default async function ProductsPage() {
+    // 検索パラメータを正しく渡す
+    const response = await getProducts({
+        search: resolvedParams.search,
+        page: currentPage,
+        limit: ITEMS_PER_PAGE
+    });
+
+    return (
+        <>
+            <ProductTable products={response.products} />
+            <TablePagination
+                totalItems={response.total}
+                itemsPerPage={ITEMS_PER_PAGE}
+                currentPage={currentPage}
+            />
+        </>
+    );
+}
+
+export default async function ProductsPage({ searchParams }: ProductsPageProps) {
     return (
         <div className="space-y-6 p-6">
-            {/* ヘッダー部分（検索、新規作成ボタンなど） */}
-            <ProductHeader />
+            {/* ヘッダー部分 */}
+            <Suspense>
+                <ProductHeader />
+            </Suspense>
 
             {/* 商品一覧テーブル */}
             <Suspense fallback={<ProductTableSkeleton />}>
                 <Card className="border-0 shadow-none">
-                    <ProductTableContent />
-                    <ProductPagination />
+                    <ProductTableContent searchParams={searchParams} />
                 </Card>
             </Suspense>
         </div>
