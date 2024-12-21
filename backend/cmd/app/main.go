@@ -16,7 +16,7 @@ func main() {
 	// ヘルスチェックエンドポイント
 	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"msg": "pass",
+			"msg": "ok",
 		})
 	})
 
