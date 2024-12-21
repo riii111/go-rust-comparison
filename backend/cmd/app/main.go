@@ -5,13 +5,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/riii111/go-rust-comparison/configs"
+	"github.com/riii111/go-rust-comparison/internal/adapter"
 )
 
 func main() {
 	r := gin.Default()
 
-	config.CORSConfig()
+	adapter.CORSConfig()
 
 	// ヘルスチェックエンドポイント
 	r.GET("/api/health", func(c *gin.Context) {
