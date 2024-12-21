@@ -9,9 +9,6 @@ export default function BrandingHeader() {
                 </div>
                 <h1 className="text-2xl font-bold text-gray-800">Store Analytics</h1>
             </div>
-            <p className="text-gray-400 text-center text-sm">
-                商品の在庫管理と売上分析を、<br />シンプルに一元化
-            </p>
         </div>
     );
 }

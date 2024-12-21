@@ -14,9 +14,11 @@ interface FormFieldProps {
     labelClassName?: string;
     autoComplete?: string;
     description?: string;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    value?: string;
 }
 
-const FormField: React.FC<FormFieldProps> = ({
+const FormField = memo(function FormField({
     id,
     name,
     type,
@@ -28,7 +30,9 @@ const FormField: React.FC<FormFieldProps> = ({
     labelClassName,
     autoComplete,
     description,
-}) => {
+    onChange,
+    value,
+}: FormFieldProps) {
     return (
         <div className="space-y-2">
             <Label
@@ -45,11 +49,13 @@ const FormField: React.FC<FormFieldProps> = ({
                 required={required}
                 className={className}
                 autoComplete={autoComplete}
+                onChange={onChange}
+                value={value}
             />
             {description && <p className="text-gray-400 text-xs">{description}</p>}
             {error && <p className="text-red-500 text-sm">{Array.isArray(error) ? error[0] : error}</p>}
         </div>
     );
-};
+});
 
-export default memo(FormField);
+export default FormField;
