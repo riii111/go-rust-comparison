@@ -11,7 +11,7 @@ func main() {
 	r := gin.Default()
 	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"msg": "ok",
+			"msg": "神羅転生",
 		})
 	})
 	if err := r.Run(":8000"); err != nil {
