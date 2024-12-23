@@ -47,6 +47,7 @@ Metadata:
           - CachePolicy
           - ResponseHeadersPolicy
           - WebACLArn
+          - BasicAuthStringParameter
 
 # -------------------------------------
 # Parameters
@@ -97,6 +98,10 @@ Parameters:
   WebACLArn:
     Description: "Enter the ARN of the WAFv2 to apply to CloudFront. (ex: arn:aws:wafv2:us-east-1:012345678910:global/webacl/example/xxxxx)"
     Type: String
+  BasicAuthStringParameter:
+      Type: AWS::SSM::Parameter::Value<String>
+      Description: "The base64 encoded auth string for Basic Auth"
+      Default: "/go-rust-comparison/common/BASIC_AUTH"
 
 # -------------------------------------
 # Conditions
@@ -109,6 +114,33 @@ Conditions:
 # Resources
 # -------------------------------------
 Resources:
+  # -------------------------------------
+  # CloudFront CachePolicy
+  # -------------------------------------
+  # .next/static/* などの静的ファイルのキャッシュポリシー
+  StaticFilesCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: "StaticFilesCachePolicy"
+        DefaultTTL: 86400 # 1 day
+        MaxTTL: 31536000 # 1 year
+        MinTTL: 60 # 1 minute
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig:
+            CookieBehavior: "none"
+          HeadersConfig:
+            HeaderBehavior: "none"
+          QueryStringsConfig:
+            QueryStringBehavior: "none"
+          EnableAcceptEncodingGzip: true
+          EnableAcceptEncodingBrotli: true
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
   # -------------------------------------
   # CloudFront Distribution
   # -------------------------------------
@@ -141,6 +173,11 @@ Resources:
         HttpVersion: http2
         ViewerCertificate:
           CloudFrontDefaultCertificate: true
+        CacheBehaviors:
+            - PathPattern: ".next/static/*"
+              TargetOriginId: Amplify
+              ViewerProtocolPolicy: redirect-to-https
+              CachePolicyId: !Ref StaticFilesCachePolicy
         IPV6Enabled: false
         WebACLId: !If
           - NotEmptyWebACLArn
@@ -150,6 +187,11 @@ Resources:
           Bucket: !GetAtt AccessLogsStorageBucket.RegionalDomainName
           IncludeCookies: false
           Prefix: cloudfront/
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
 
   # -------------------------------------
   # CloudFront Function
@@ -158,13 +200,13 @@ Resources:
     Type: AWS::CloudFront::Function
     Properties:
       AutoPublish: true
-      FunctionCode: |-
+      FunctionCode: !Sub |-
         function handler(event) {
           var request = event.request;
           var headers = request.headers;
 
           // echo -n user:pass | base64
-          var authString = "Basic YWlmdWw6ODUxNWFm";
+          var authString = "${BasicAuthStringParameter}";
 
           if (
             typeof headers.authorization === "undefined" ||
@@ -183,6 +225,11 @@ Resources:
         Comment: "This function for Basic Authorization"
         Runtime: cloudfront-js-2.0
       Name: !Sub ${ProjectName}-${Environment}-BasicAuth
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
 
   # -------------------------------------
   # S3 Bucket
@@ -215,6 +262,11 @@ Resources:
           - Id: ExpireAfter5Years
             Status: Enabled
             ExpirationInDays: 1825
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
 
   # -------------------------------------
   # S3 Bucket Policy
@@ -237,6 +289,61 @@ Resources:
             Condition:
               Bool:
                 aws:SecureTransport: false
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # -------------------------------------
+  # CloudWatch Alarm for CloudFront 5xx Errors
+  # -------------------------------------
+    CloudFront5xxErrorsAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: !Sub "${ProjectName}-${Environment}-CloudFront-5xx-Errors"
+        MetricName: "5xxErrorRate"
+        Namespace: "AWS/CloudFront"
+        Statistic: "Average"
+        Period: 300
+        EvaluationPeriods: 1
+        Threshold: 1
+        ComparisonOperator: "GreaterThanOrEqualToThreshold"
+        Dimensions:
+          - Name: "DistributionId"
+            Value: !Ref CloudFrontDistribution
+          - Name: "Region"
+            Value: "Global"
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+    # -------------------------------------
+    # CloudWatch Alarm for CloudFront 4xx Errors
+    # -------------------------------------
+    CloudFront4xxErrorsAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: !Sub "${ProjectName}-${Environment}-CloudFront-4xx-Errors"
+        MetricName: "4xxErrorRate"
+        Namespace: "AWS/CloudFront"
+        Statistic: "Average"
+        Period: 300
+        EvaluationPeriods: 1
+        Threshold: 1
+        ComparisonOperator: "GreaterThanOrEqualToThreshold"
+        Dimensions:
+          - Name: "DistributionId"
+            Value: !Ref CloudFrontDistribution
+          - Name: "Region"
+            Value: "Global"
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
 
 # -------------------------------------
 # Outputs
