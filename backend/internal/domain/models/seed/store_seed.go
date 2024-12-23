@@ -42,5 +42,27 @@ func CreateStoreSeedData() []models.Store {
 			CreatedBy:     systemUUID,
 			UpdatedBy:     systemUUID,
 		},
+		{
+			Name:          "名古屋支店",
+			Address:       "愛知県名古屋市中区栄3-1-1",
+			PhoneNumber:   "05212345678",
+			BusinessHours: "10:00-19:00",
+			ZipCode:       "460-0008",
+			Description:   "名古屋支店です",
+			IsActive:      true,
+			CreatedBy:     systemUUID,
+			UpdatedBy:     systemUUID,
+		},
+		{
+			Name:          "札幌支店",
+			Address:       "北海道札幌市中央区北一条西2-1",
+			PhoneNumber:   "01112345678",
+			BusinessHours: "10:00-19:00",
+			ZipCode:       "060-0001",
+			Description:   "札幌支店です",
+			IsActive:      true,
+			CreatedBy:     systemUUID,
+			UpdatedBy:     systemUUID,
+		},
 	}
 }
