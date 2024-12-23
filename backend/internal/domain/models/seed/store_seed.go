@@ -12,7 +12,7 @@ func CreateStoreSeedData() []models.Store {
 		{
 			Name:          "東京本店",
 			Address:       "東京都渋谷区神宮前1-1-1",
-			PhoneNumber:   "03123456789", // ハイフンなしの11桁に修正
+			PhoneNumber:   "03123456789",
 			BusinessHours: "10:00-19:00",
 			ZipCode:       "150-0001",
 			Description:   "東京本店です",
@@ -23,7 +23,7 @@ func CreateStoreSeedData() []models.Store {
 		{
 			Name:          "大阪支店",
 			Address:       "大阪府大阪市中央区心斎橋1-1-1",
-			PhoneNumber:   "06123456789", // ハイフンなしの11桁に修正
+			PhoneNumber:   "06123456789",
 			BusinessHours: "10:00-19:00",
 			ZipCode:       "542-0085",
 			Description:   "大阪支店です",
@@ -32,12 +32,12 @@ func CreateStoreSeedData() []models.Store {
 			UpdatedBy:     systemUUID,
 		},
 		{
-			Name:          "福岡支店",
-			Address:       "福岡県福岡市博多区博多駅前1-1-1",
-			PhoneNumber:   "09212345678", // ハイフンなしの11桁に修正
+			Name:          "山科支店",
+			Address:       "京都府京都市山科区竹鼻竹ノ街道町1-1",
+			PhoneNumber:   "07512345678",
 			BusinessHours: "10:00-19:00",
-			ZipCode:       "812-0011",
-			Description:   "福岡支店です",
+			ZipCode:       "607-8075",
+			Description:   "山科支店です",
 			IsActive:      true,
 			CreatedBy:     systemUUID,
 			UpdatedBy:     systemUUID,
@@ -54,12 +54,12 @@ func CreateStoreSeedData() []models.Store {
 			UpdatedBy:     systemUUID,
 		},
 		{
-			Name:          "札幌支店",
-			Address:       "北海道札幌市中央区北一条西2-1",
-			PhoneNumber:   "01112345678",
+			Name:          "愛荘支店",
+			Address:       "滋賀県愛知郡愛荘町愛知川1-1",
+			PhoneNumber:   "07492345678",
 			BusinessHours: "10:00-19:00",
-			ZipCode:       "060-0001",
-			Description:   "札幌支店です",
+			ZipCode:       "529-1313",
+			Description:   "愛荘支店です",
 			IsActive:      true,
 			CreatedBy:     systemUUID,
 			UpdatedBy:     systemUUID,

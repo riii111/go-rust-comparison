@@ -44,18 +44,20 @@ func main() {
 
 		// 店舗管理者の場合、対応する店舗のIDを設定
 		switch operators[i].Username {
+		case "システム管理者1", "システム管理者2":
+			operators[i].StoreID = storeIDs["東京本店"]
 		case "東京店管理者1", "東京店管理者2":
 			operators[i].StoreID = storeIDs["東京本店"]
 		case "大阪店管理者1", "大阪店管理者2":
 			operators[i].StoreID = storeIDs["大阪支店"]
-		case "福岡店管理者1":
-			operators[i].StoreID = storeIDs["福岡支店"]
 		case "名古屋店管理者1":
 			operators[i].StoreID = storeIDs["名古屋支店"]
-		case "札幌店管理者1", "札幌店管理者2":
-			operators[i].StoreID = storeIDs["札幌支店"]
-		case "システム管理者1", "システム管理者2":
-			// システム管理者は最初に作成された店舗に紐付ける
+		case "山科店管理者1":
+			operators[i].StoreID = storeIDs["山科支店"]
+		case "愛荘店管理者1", "愛荘店管理者2":
+			operators[i].StoreID = storeIDs["愛荘支店"]
+		default:
+			// デフォルトで東京本店に割り当て
 			operators[i].StoreID = storeIDs["東京本店"]
 		}
 
