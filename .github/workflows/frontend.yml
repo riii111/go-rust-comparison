@@ -1,12 +1,17 @@
 name: Frontend CI
 on:
-  pull_request:
-    types: [opened, reopened, synchronize, ready_for_review]
+  pull_request_target:
+    types: [opened, synchronize]
     paths:
       - "frontend/**"
-    branches-ignore:
-      - "release/**"
-      - "doc/**"
+    branches:
+      - "develop"
+      - "!release/**"
+      - "!doc/**"
+
+permissions:
+  contents: read
+  pull-requests: write
 
 env:
   WORKING_DIRECTORY: frontend
