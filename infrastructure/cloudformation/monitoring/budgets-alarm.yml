@@ -55,10 +55,6 @@ Parameters:
       - stg
       - prd
     ConstraintDescription: "Environment name must be selected."
-  Amount:
-    Description: "Enter the budgeted amount."
-    Type: String
-    Default: 300
   UseBlended:
     Description: "Budgeted amount."
     Type: String
@@ -66,14 +62,6 @@ Parameters:
     AllowedValues:
       - true
       - false
-  TimeUnit:
-    Description: "Select the length of time until a budget resets the actual and forecasted spend."
-    Type: String
-    Default: MONTHLY
-    AllowedValues:
-      - ANNUALLY
-      - MONTHLY
-      - QUARTERLY
   Forecasted:
     Description: "Enter the percentage of budgeted amount (Forecasted Costs)."
     Type: Number
