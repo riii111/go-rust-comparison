@@ -15,12 +15,8 @@ Metadata:
       - Label:
           default: "Budget Configuration"
         Parameters:
-          # 予算額
-          - Amount
           # ブレンドコスト有無
           - UseBlended
-          # 監視期間
-          - TimeUnit
           # 予算額に対する予測額の割合
           - Forecasted
           # 予算額に対する実際の使用料の割合
@@ -178,18 +174,60 @@ Resources:
   # -------------------------------------
   # Budgets
   # -------------------------------------
-  Budget:
+  BudgetDecember2024:
     Type: AWS::Budgets::Budget
     Properties:
       Budget:
-        BudgetName: !Sub budget-for-${AWS::AccountId}-${ProjectName}-${Environment}
+        BudgetName: !Sub budget-for-${AWS::AccountId}-${ProjectName}-${Environment}-december-2024
         BudgetLimit:
-          Amount: !Ref Amount
+          Amount: 20
           Unit: USD
         BudgetType: COST
         CostTypes:
           UseBlended: !Ref UseBlended
-        TimeUnit: !Ref TimeUnit
+        TimeUnit: MONTHLY
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: FORECASTED
+            ComparisonOperator: GREATER_THAN
+            Threshold: !Ref Forecasted
+          Subscribers:
+            - SubscriptionType: SNS
+              Address: !Sub arn:aws:sns:us-east-1:${AWS::AccountId}:${BudgetsTopicName}
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: !Ref Actual1
+          Subscribers:
+            - SubscriptionType: SNS
+              Address: !Sub arn:aws:sns:us-east-1:${AWS::AccountId}:${BudgetsTopicName}
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: !Ref Actual2
+          Subscribers:
+            - SubscriptionType: SNS
+              Address: !Sub arn:aws:sns:us-east-1:${AWS::AccountId}:${BudgetsTopicName}
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: !Ref Actual3
+          Subscribers:
+            - SubscriptionType: SNS
+              Address: !Sub arn:aws:sns:us-east-1:${AWS::AccountId}:${BudgetsTopicName}
+
+  BudgetJanuary2025:
+    Type: AWS::Budgets::Budget
+    Properties:
+      Budget:
+        BudgetName: !Sub budget-for-${AWS::AccountId}-${ProjectName}-${Environment}-january-2025
+        BudgetLimit:
+          Amount: 120
+          Unit: USD
+        BudgetType: COST
+        CostTypes:
+          UseBlended: !Ref UseBlended
+        TimeUnit: MONTHLY
       NotificationsWithSubscribers:
         - Notification:
             NotificationType: FORECASTED
@@ -224,5 +262,7 @@ Resources:
 # Outputs
 # -------------------------------------
 Outputs:
-  BudgetId:
-    Value: !Ref Budget
+  BudgetDecember2024Id:
+    Value: !Ref BudgetDecember2024
+  BudgetJanuary2025Id:
+    Value: !Ref BudgetJanuary2025
