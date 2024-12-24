@@ -34,7 +34,6 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 		return
 	}
 
-	// パスワードのハッシュ化
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "パスワードのハッシュ化に失敗しました"})
@@ -47,9 +46,12 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 		PasswordHash: string(hashedPassword),
 		Role:         req.Role,
 		StoreID:      req.StoreID,
-		AvatarURL:    req.AvatarURL,
 		CreatedBy:    req.CreatedBy,
 		UpdatedBy:    req.CreatedBy, // 作成時は作成者と更新者は同じ
+	}
+
+	if req.AvatarURL != "" {
+		operator.AvatarURL = req.AvatarURL
 	}
 
 	if err := database.DB.Create(operator).Error; err != nil {
@@ -57,7 +59,6 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 		return
 	}
 
-	// パスワードハッシュを除外してレスポンスを返す
 	operator.PasswordHash = ""
 	c.JSON(http.StatusCreated, operator)
 }
