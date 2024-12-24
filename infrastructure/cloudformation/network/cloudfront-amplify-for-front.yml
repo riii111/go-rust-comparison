@@ -127,7 +127,7 @@ Resources:
     Properties:
       CachePolicyConfig:
         Name: "StaticFilesCachePolicy"
-        DefaultTTL: 86400 # 1日
+        DefaultTTL: 2592000 # 30日
         MaxTTL: 31536000 # 1年
         MinTTL: 60 # 1分
         ParametersInCacheKeyAndForwardedToOrigin:
