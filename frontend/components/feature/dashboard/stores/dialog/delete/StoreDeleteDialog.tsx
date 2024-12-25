@@ -11,15 +11,15 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Product } from '@/config/types/api/product'
+import { Store } from '@/config/types/api/store'
 
-interface ProductDeleteDialogProps {
+interface StoreDeleteDialogProps {
     isOpen: boolean
     onClose: () => void
-    product: Product
+    store: Store
 }
 
-export function ProductDeleteDialog({ isOpen, onClose, product }: ProductDeleteDialogProps) {
+export function StoreDeleteDialog({ isOpen, onClose, store }: StoreDeleteDialogProps) {
     const [isPending, startTransition] = useTransition()
 
     const handleDelete = () => {
@@ -27,10 +27,10 @@ export function ProductDeleteDialog({ isOpen, onClose, product }: ProductDeleteD
             try {
                 // TODO: APIが実装されるまでダミーデータで対応
                 await new Promise(resolve => setTimeout(resolve, 1000))
-                console.log('Delete product:', product.id)
+                console.log('Delete store:', store.id)
                 onClose()
             } catch (error) {
-                console.error('Failed to delete product:', error)
+                console.error('Failed to delete store:', error)
             }
         })
     }
@@ -39,9 +39,9 @@ export function ProductDeleteDialog({ isOpen, onClose, product }: ProductDeleteD
         <AlertDialog open={isOpen} onOpenChange={onClose}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>商品を削除しますか？</AlertDialogTitle>
+                    <AlertDialogTitle>店舗を削除しますか？</AlertDialogTitle>
                     <AlertDialogDescription>
-                        この操作は取り消せません。商品「{product.name}」を削除してもよろしいですか？
+                        この操作は取り消せません。店舗「{store.name}」を削除してもよろしいですか？
                         <br />
                         ※在庫データが存在する場合は削除できません。
                     </AlertDialogDescription>

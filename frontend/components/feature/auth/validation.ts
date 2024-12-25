@@ -54,41 +54,6 @@ export const emailSchema = z
   })
   .email(MESSAGES.email.invalid);
 
-// フィールドのバリデーションヘルパー
-export const validateField = (
-  schema: z.ZodType<string>,
-  name: string,
-  value: unknown,
-  setErrors: React.Dispatch<
-    React.SetStateAction<{
-      accountInfo: Record<string, string>;
-      storeInfo: Record<string, string>;
-    }>
-  >,
-  currentStep: "accountInfo" | "storeInfo"
-): void => {
-  try {
-    schema.parse(value);
-    setErrors((prev) => ({
-      ...prev,
-      [currentStep]: {
-        ...prev[currentStep],
-        [name]: undefined,
-      },
-    }));
-  } catch (err) {
-    if (err instanceof z.ZodError) {
-      setErrors((prev) => ({
-        ...prev,
-        [currentStep]: {
-          ...prev[currentStep],
-          [name]: err.errors[0]?.message || "",
-        },
-      }));
-    }
-  }
-};
-
 // ----------------------------------------------------------------
 // ログインフォームのバリデーション
 // ----------------------------------------------------------------
