@@ -48,6 +48,7 @@ Metadata:
           - ResponseHeadersPolicy
           - WebACLArn
           - BasicAuthStringParameter
+          - AlertTopicArn
 
 # -------------------------------------
 # Parameters
@@ -102,6 +103,9 @@ Parameters:
       Type: AWS::SSM::Parameter::Value<String>
       Description: "The base64 encoded auth string for Basic Auth"
       Default: "/go-rust-comparison/common/BASIC_AUTH"
+  AlertTopicArn:
+    Description: "Enter the ARN of the SNS topic for alerts."
+    Type: String
 
 # -------------------------------------
 # Conditions
@@ -123,7 +127,7 @@ Resources:
     Properties:
       CachePolicyConfig:
         Name: "StaticFilesCachePolicy"
-        DefaultTTL: 86400 # 1日
+        DefaultTTL: 2592000 # 30日
         MaxTTL: 31536000 # 1年
         MinTTL: 60 # 1分
         ParametersInCacheKeyAndForwardedToOrigin:
@@ -305,6 +309,8 @@ Resources:
           Value: !Ref CloudFrontDistribution
         - Name: "Region"
           Value: "Global"
+      AlarmActions:
+        - !Ref AlertTopicArn
 
 
   # -------------------------------------
@@ -326,6 +332,8 @@ Resources:
           Value: !Ref CloudFrontDistribution
         - Name: "Region"
           Value: "Global"
+      AlarmActions:
+        - !Ref AlertTopicArn
 
 
 # -------------------------------------
