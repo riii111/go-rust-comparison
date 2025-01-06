@@ -1,0 +1,350 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "CloudFront Stack"
+
+# -------------------------------------
+# Mappings
+# -------------------------------------
+Mappings:
+  CachePolicyIds:
+    CachingOptimized:
+      Id: 658327ea-f89d-4fab-a63d-7e88639e58f6
+    CachingDisabled:
+      Id: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+    CachingOptimizedForUncompressedObjects:
+      Id: b2884449-e4de-46a7-ac36-70bc7f1ddd6d
+    Elemental-MediaPackage:
+      Id: 08627262-05a9-4f76-9ded-b50ca2e3a84f
+    Amplify:
+      Id: 2e54312d-136d-493c-8eb9-b001f22f67d2
+  ResponseHeadersPolicyIds:
+    CORS-and-SecurityHeadersPolicy:
+      Id: e61eb60c-9c35-4d20-a928-2b84e02af89c
+    CORS-With-Preflight:
+      Id: 5cc3b908-e619-4b99-88e5-2cf7f45965bd
+    CORS-with-preflight-and-SecurityHeadersPolicy:
+      Id: eaab4381-ed33-4a86-88ca-d9558dc6cd63
+    SecurityHeadersPolicy:
+      Id: 67f7725c-6f97-4210-82d7-5512b31e9d03
+    SimpleCORS:
+      Id: 60669652-455b-4ae9-85a4-c4c02393f86c
+
+# -------------------------------------
+# Metadata
+# -------------------------------------
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Project Configuration"
+        Parameters:
+          - ProjectName
+          - Environment
+      - Label:
+          default: "CloudFront Configuration"
+        Parameters:
+          - AmplifyURL
+          - AuthHeaderValue
+          - CachePolicy
+          - ResponseHeadersPolicy
+          - WebACLArn
+          - BasicAuthStringParameter
+          - AlertTopicArn
+
+# -------------------------------------
+# Parameters
+# -------------------------------------
+Parameters:
+  ProjectName:
+    Description: "Enter the project name. (ex: go-rust-comparison)"
+    Type: String
+    MinLength: 1
+    ConstraintDescription: "ProjectName must be entered."
+    Default: go-rust-comparison
+  Environment:
+    Description: "Select a environment name."
+    Type: String
+    AllowedValues:
+      - dev
+      - stg
+      - prd
+    ConstraintDescription: "Environment name must be selected."
+    Default: dev
+  AmplifyURL:
+    Description: "Enter the Amplify URL. (ex: develop.xxxxx.amplifyapp.com)"
+    Type: String
+  AuthHeaderValue:
+    Description: "Enter the base64 Amplify basic auth credentials.(ex: Basic xxxxxxxxxxxxxxx)"
+    Type: String
+    NoEcho: true
+  CachePolicy:
+    Description: "Select the CloudFront cache policy."
+    Type: String
+    Default: CachingDisabled
+    AllowedValues:
+      - CachingOptimized
+      - CachingDisabled
+      - CachingOptimizedForUncompressedObjects
+      - Elemental-MediaPackage
+      - Amplify
+  ResponseHeadersPolicy:
+    Description: "Select the CloudFront response headers policy."
+    Type: String
+    Default: SecurityHeadersPolicy
+    AllowedValues:
+      - CORS-and-SecurityHeadersPolicy
+      - CORS-With-Preflight
+      - CORS-with-preflight-and-SecurityHeadersPolicy
+      - SecurityHeadersPolicy
+      - SimpleCORS
+  WebACLArn:
+    Description: "Enter the ARN of the WAFv2 to apply to CloudFront. (ex: arn:aws:wafv2:us-east-1:012345678910:global/webacl/example/xxxxx)"
+    Type: String
+  BasicAuthStringParameter:
+      Type: AWS::SSM::Parameter::Value<String>
+      Description: "The base64 encoded auth string for Basic Auth"
+      Default: "/go-rust-comparison/common/BASIC_AUTH"
+  AlertTopicArn:
+    Description: "Enter the ARN of the SNS topic for alerts."
+    Type: String
+
+# -------------------------------------
+# Conditions
+# -------------------------------------
+Conditions:
+  # WAFv2 の指定有無による条件
+  NotEmptyWebACLArn: !Not [!Equals [!Ref WebACLArn, ""]]
+
+# -------------------------------------
+# Resources
+# -------------------------------------
+Resources:
+  # -------------------------------------
+  # CloudFront CachePolicy
+  # -------------------------------------
+  # .next/static/* などの静的ファイルのキャッシュポリシー
+  StaticFilesCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: "StaticFilesCachePolicy"
+        DefaultTTL: 2592000 # 30日
+        MaxTTL: 31536000 # 1年
+        MinTTL: 60 # 1分
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig:
+            CookieBehavior: "none"
+          HeadersConfig:
+            HeaderBehavior: "none"
+          QueryStringsConfig:
+            QueryStringBehavior: "none"
+          EnableAcceptEncodingGzip: true
+          EnableAcceptEncodingBrotli: true
+
+
+  # -------------------------------------
+  # CloudFront Distribution
+  # -------------------------------------
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+        - Id: Amplify
+          DomainName: !Ref AmplifyURL
+          CustomOriginConfig:
+            OriginProtocolPolicy: https-only
+            OriginSSLProtocols:
+              - TLSv1.2
+          OriginCustomHeaders:
+            - HeaderName: Authorization
+              HeaderValue: !Ref AuthHeaderValue
+        Enabled: true
+        Comment: "Amplify Hosting Distribution"
+        DefaultCacheBehavior:
+          # CachingOptimized
+          CachePolicyId: !FindInMap [CachePolicyIds, !Ref CachePolicy , Id]
+          # SecurityHeadersPolicy
+          ResponseHeadersPolicyId: !FindInMap [ResponseHeadersPolicyIds, !Ref ResponseHeadersPolicy, Id]
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !Ref CloudFrontFunctionForBasicAuth
+          TargetOriginId: Amplify
+          ViewerProtocolPolicy: redirect-to-https
+        HttpVersion: http2
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+        CacheBehaviors:
+            - PathPattern: ".next/static/*"
+              TargetOriginId: Amplify
+              ViewerProtocolPolicy: redirect-to-https
+              CachePolicyId: !Ref StaticFilesCachePolicy
+        IPV6Enabled: false
+        WebACLId: !If
+          - NotEmptyWebACLArn
+          - !Ref WebACLArn
+          - !Ref AWS::NoValue
+        Logging:
+          Bucket: !GetAtt AccessLogsStorageBucket.RegionalDomainName
+          IncludeCookies: false
+          Prefix: cloudfront/
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # -------------------------------------
+  # CloudFront Function
+  # -------------------------------------
+  CloudFrontFunctionForBasicAuth:
+    Type: AWS::CloudFront::Function
+    Properties:
+      AutoPublish: true
+      FunctionCode: !Sub |-
+        function handler(event) {
+          var request = event.request;
+          var headers = request.headers;
+
+          // echo -n user:pass | base64
+          var authString = "${BasicAuthStringParameter}";
+
+          if (
+            typeof headers.authorization === "undefined" ||
+            headers.authorization.value !== authString
+          ) {
+            return {
+              statusCode: 401,
+              statusDescription: "Unauthorized",
+              headers: {"www-authenticate": {value: "Basic"}}
+            };
+          }
+
+          return request;
+        }
+      FunctionConfig:
+        Comment: "This function for Basic Authorization"
+        Runtime: cloudfront-js-2.0
+      Name: !Sub ${ProjectName}-${Environment}-BasicAuth
+
+
+  # -------------------------------------
+  # S3 Bucket
+  # -------------------------------------
+  # For CloudFront Access Logs Bucket
+  AccessLogsStorageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      AccessControl: LogDeliveryWrite
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Sub ${ProjectName}-${Environment}-cloudfront-access-logs
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionToGlacierAfter365Days
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 365
+                StorageClass: GLACIER
+          - Id: ExpireAfter5Years
+            Status: Enabled
+            ExpirationInDays: 1825
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # -------------------------------------
+  # S3 Bucket Policy
+  # -------------------------------------
+  # For CloudFront Access Logs Bucket Policy
+  AccessLogsBucketPolicy:
+    DependsOn: AccessLogsStorageBucket
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AccessLogsStorageBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub arn:aws:s3:::${AccessLogsStorageBucket}/*
+              - !GetAtt AccessLogsStorageBucket.Arn
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+
+
+  # -------------------------------------
+  # CloudWatch Alarm for CloudFront 5xx Errors
+  # -------------------------------------
+  CloudFront5xxErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-${Environment}-CloudFront-5xx-Errors"
+      MetricName: "5xxErrorRate"
+      Namespace: "AWS/CloudFront"
+      Statistic: "Average"
+      # 300秒での評価期間
+      Period: 300
+      # 1つの評価期間
+      EvaluationPeriods: 1
+      # エラーレートが5%以上の場合
+      Threshold: 5
+      ComparisonOperator: "GreaterThanOrEqualToThreshold"
+      Dimensions:
+        - Name: "DistributionId"
+          Value: !Ref CloudFrontDistribution
+        - Name: "Region"
+          Value: "Global"
+      AlarmActions:
+        - !Ref AlertTopicArn
+
+
+  # -------------------------------------
+  # CloudWatch Alarm for CloudFront 4xx Errors
+  # -------------------------------------
+  CloudFront4xxErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-${Environment}-CloudFront-4xx-Errors"
+      MetricName: "4xxErrorRate"
+      Namespace: "AWS/CloudFront"
+      Statistic: "Average"
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 5
+      ComparisonOperator: "GreaterThanOrEqualToThreshold"
+      Dimensions:
+        - Name: "DistributionId"
+          Value: !Ref CloudFrontDistribution
+        - Name: "Region"
+          Value: "Global"
+      AlarmActions:
+        - !Ref AlertTopicArn
+
+
+# -------------------------------------
+# Outputs
+# -------------------------------------
+Outputs:
+  CloudFrontDistributionID:
+    Value: !Ref CloudFrontDistribution
+  AccessLogsStorageBucketName:
+    Value: !Ref AccessLogsStorageBucket
+  AccessLogsStorageBucketArn:
+    Value: !GetAtt AccessLogsStorageBucket.Arn
+  AccessLogsStorageBucketDomainName:
+    Value: !GetAtt AccessLogsStorageBucket.RegionalDomainName
