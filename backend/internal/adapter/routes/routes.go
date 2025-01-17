@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/presentation/handlers"
 )
 
@@ -20,7 +21,8 @@ func SetupRoutes(r *gin.Engine) {
 		// オペレーター関連のエンドポイント
 		operators := api.Group("/operators")
 		{
-			operatorHandler := handlers.NewOperatorHandler()
+			operatorUsecase := usecase.NewOperatorUsecase()
+			operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
 			operators.POST("", operatorHandler.CreateOperator)
 		}
 	}

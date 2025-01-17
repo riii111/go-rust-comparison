@@ -2,72 +2,53 @@ package handlers
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/riii111/go-rust-comparison/internal/adapter/database"
-	"github.com/riii111/go-rust-comparison/internal/domain/models"
+	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
 )
 
-type OperatorHandler struct{}
+type OperatorHandler struct {
+	operatorUsecase *usecase.OperatorUsecase
+}
 
-func NewOperatorHandler() *OperatorHandler {
-	return &OperatorHandler{}
+func NewOperatorHandler(operatorUsecase *usecase.OperatorUsecase) *OperatorHandler {
+	return &OperatorHandler{
+		operatorUsecase: operatorUsecase,
+	}
 }
 
 func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 	var req requests.CreateOperatorRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "入力内容に誤りがあります。確認して再度お試しください",
-			"details": err.Error(),
+		c.JSON(http.StatusBadRequest, responses.ErrorResponse{
+			Error:   "入力内容に誤りがあります。確認して再度お試しください",
+			Details: err.Error(),
 		})
 		return
 	}
 
-	// UpdatedByが設定されていない場合、CreatedByの値を使用
-	if req.UpdatedBy == "" {
-		req.UpdatedBy = req.CreatedBy
-	}
-
-	// パスワードのハッシュ化
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	err := h.operatorUsecase.CreateOperator(req)
 	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error": "パスワードの処理に失敗しました。パスワードの要件を確認してください",
-		})
-		return
-	}
-
-	operator := &models.Operator{
-		Email:        req.Email,
-		Username:     req.Username,
-		PasswordHash: string(hashedPassword),
-		Role:         req.Role,
-		StoreID:      req.StoreID,
-		AvatarURL:    req.AvatarURL,
-		CreatedBy:    req.CreatedBy,
-		UpdatedBy:    req.CreatedBy,
-	}
-
-	if err := database.DB.Create(operator).Error; err != nil {
-		// データベースのユニーク制約違反の場合
-		if strings.Contains(err.Error(), "duplicate key") {
-			c.JSON(http.StatusConflict, gin.H{
-				"error": "このメールアドレスは既に登録されています",
+		switch err {
+		case usecase.ErrDuplicateEmail:
+			c.JSON(http.StatusConflict, responses.ErrorResponse{
+				Error: "このメールアドレスは既に登録されています",
 			})
-			return
+		case usecase.ErrPasswordProcessing:
+			c.JSON(http.StatusUnprocessableEntity, responses.ErrorResponse{
+				Error: "パスワードの処理に失敗しました。パスワードの要件を確認してください",
+			})
+		default:
+			c.JSON(http.StatusUnprocessableEntity, responses.ErrorResponse{
+				Error: "オペレーターの登録に失敗しました。入力内容を確認してください",
+			})
 		}
-		// その他のデータベースエラー
-		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error": "オペレーターの登録に失敗しました。入力内容を確認してください",
-		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "オペレーターの登録に成功しました",
+	c.JSON(http.StatusCreated, responses.CreateOperatorResponse{
+		Message: "オペレーターの登録に成功しました",
 	})
 }
