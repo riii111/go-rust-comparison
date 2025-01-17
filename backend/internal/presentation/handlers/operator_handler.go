@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
+	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -16,19 +17,8 @@ func NewOperatorHandler() *OperatorHandler {
 	return &OperatorHandler{}
 }
 
-type CreateOperatorRequest struct {
-	Email     string `json:"email" binding:"required,email"`
-	Username  string `json:"username" binding:"required"`
-	Password  string `json:"password" binding:"required,min=8"`
-	Role      string `json:"role" binding:"required,oneof=system_admin store_admin"`
-	StoreID   string `json:"store_id" binding:"required,uuid"`
-	AvatarURL string `json:"avatar_url" binding:"omitempty,url"`
-	CreatedBy string `json:"created_by" binding:"required,uuid"`
-	UpdatedBy string `json:"updated_by" binding:"omitempty,uuid"`
-}
-
 func (h *OperatorHandler) CreateOperator(c *gin.Context) {
-	var req CreateOperatorRequest
+	var req requests.CreateOperatorRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error":   "入力内容に誤りがあります。確認して再度お試しください",
@@ -66,7 +56,7 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 		// データベースのユニーク制約違反の場合
 		if strings.Contains(err.Error(), "duplicate key") {
 			c.JSON(http.StatusConflict, gin.H{
-				"error": "このメールアドレスは既に登録されています。",
+				"error": "このメールアドレスは既に登録されています",
 			})
 			return
 		}
