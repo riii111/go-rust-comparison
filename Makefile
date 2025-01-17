@@ -45,3 +45,7 @@ test-shuffle:
 
 migrate:
 	docker exec -it $(APP_SERVICE_NAME) go run ./internal/infrastructure/db/migrations/migration.go
+
+.PHONY: seed
+seed:
+	docker exec -it $(APP_SERVICE_NAME) go run ./cmd/seed/main.go
