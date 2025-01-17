@@ -31,7 +31,7 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 	var req CreateOperatorRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "入力内容に誤りがあります。確認して再度お試しください。",
+			"error":   "入力内容に誤りがあります。確認して再度お試しください",
 			"details": err.Error(),
 		})
 		return
@@ -46,7 +46,7 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error": "パスワードの処理に失敗しました。パスワードの要件を確認してください。",
+			"error": "パスワードの処理に失敗しました。パスワードの要件を確認してください",
 		})
 		return
 	}
@@ -72,7 +72,7 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 		}
 		// その他のデータベースエラー
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
-			"error": "オペレーターの登録に失敗しました。入力内容を確認してください。",
+			"error": "オペレーターの登録に失敗しました。入力内容を確認してください",
 		})
 		return
 	}
