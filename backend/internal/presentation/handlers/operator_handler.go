@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
+	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
 )
@@ -32,7 +33,7 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 	err := h.operatorUsecase.CreateOperator(req)
 	if err != nil {
 		switch err {
-		case usecase.ErrDuplicateEmail:
+		case repository.ErrDuplicateEmail:
 			c.JSON(http.StatusConflict, responses.ErrorResponse{
 				Error: "このメールアドレスは既に登録されています",
 			})

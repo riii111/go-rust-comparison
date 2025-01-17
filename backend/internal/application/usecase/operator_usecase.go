@@ -6,6 +6,7 @@ import (
 
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
+	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -22,12 +23,10 @@ func NewOperatorUsecase() *OperatorUsecase {
 }
 
 func (u *OperatorUsecase) CreateOperator(req requests.CreateOperatorRequest) error {
-	// UpdatedByが設定されていない場合、CreatedByの値を使用
 	if req.UpdatedBy == "" {
 		req.UpdatedBy = req.CreatedBy
 	}
 
-	// パスワードのハッシュ化
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return ErrPasswordProcessing
@@ -46,7 +45,7 @@ func (u *OperatorUsecase) CreateOperator(req requests.CreateOperatorRequest) err
 
 	if err := database.DB.Create(operator).Error; err != nil {
 		if strings.Contains(err.Error(), "duplicate key") {
-			return ErrDuplicateEmail
+			return repository.ErrDuplicateEmail
 		}
 		return err
 	}
