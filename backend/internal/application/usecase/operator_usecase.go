@@ -9,11 +9,13 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 var (
 	ErrDuplicateEmail     = errors.New("duplicate email")
 	ErrPasswordProcessing = errors.New("password processing failed")
+	ErrStoreNotFound      = errors.New("store not found")
 )
 
 type OperatorUsecase struct{}
@@ -25,6 +27,15 @@ func NewOperatorUsecase() *OperatorUsecase {
 func (u *OperatorUsecase) CreateOperator(req requests.CreateOperatorRequest) error {
 	if req.UpdatedBy == "" {
 		req.UpdatedBy = req.CreatedBy
+	}
+
+	// 店舗の存在確認
+	var store models.Store
+	if err := database.DB.First(&store, "id = ?", req.StoreID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrStoreNotFound
+		}
+		return err
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
