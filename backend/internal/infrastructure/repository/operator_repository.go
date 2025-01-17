@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
@@ -22,8 +23,8 @@ func NewOperatorRepository() *OperatorRepository {
 func (r *OperatorRepository) CreateOperator(operator *models.Operator) error {
 	result := r.db.Create(operator)
 	if result.Error != nil {
-		// メールアドレスの重複エラーをチェック
-		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
+		// PostgreSQLのユニーク制約違反エラーをチェック
+		if strings.Contains(result.Error.Error(), "uni_operators_email") {
 			return ErrDuplicateEmail
 		}
 		return result.Error

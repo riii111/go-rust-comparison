@@ -15,10 +15,15 @@ import (
 )
 
 func init() {
-	// テスト時のSQLエラーログを抑制
-	database.DB, _ = gorm.Open(database.DB.Dialector, &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Silent),
-	})
+	// データベース接続の初期化を先に行う
+	database.InitDB()
+
+	// その後、ロガーの設定を変更
+	if database.DB != nil {
+		database.DB, _ = gorm.Open(database.DB.Dialector, &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		})
+	}
 }
 
 func setupTestData(t *testing.T) string {
