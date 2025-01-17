@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
-	"github.com/riii111/go-rust-comparison/internal/domain/models/seed"
+	"github.com/riii111/go-rust-comparison/internal/domain/seed"
 	"golang.org/x/crypto/bcrypt"
 )
 
