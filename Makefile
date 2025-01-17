@@ -48,4 +48,4 @@ migrate:P
 
 .PHONY: seed
 seed:
-	docker exec -it $(APP_SERVICE_NAME) go run ./cmd/seed/main.go
+	docker exec -it $(APP_SERVICE_NAME) go run ./cmd/seed/seed.go
