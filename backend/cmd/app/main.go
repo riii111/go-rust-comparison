@@ -2,24 +2,27 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/adapter/middleware"
+	"github.com/riii111/go-rust-comparison/internal/adapter/routes"
 )
 
 func main() {
+	// データベース初期化
+	database.InitDB()
+
+	// Ginエンジンの初期化
 	r := gin.Default()
 
-	middleware.CORSConfig()
+	// CORSミドルウェアの設定
+	r.Use(middleware.CORSConfig())
 
-	// ヘルスチェックエンドポイント
-	r.GET("/api/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"msg": "ok",
-		})
-	})
+	// ルーティングの設定
+	routes.SetupRoutes(r)
 
+	// サーバーの起動
 	if err := r.Run(":8000"); err != nil {
 		log.Fatalf("サーバの起動に失敗しました: %v", err)
 	}
