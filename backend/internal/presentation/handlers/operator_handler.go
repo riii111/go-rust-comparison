@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
@@ -29,7 +30,10 @@ type CreateOperatorRequest struct {
 func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 	var req CreateOperatorRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "入力内容に誤りがあります。確認して再度お試しください。",
+			"details": err.Error(),
+		})
 		return
 	}
 
@@ -41,7 +45,9 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 	// パスワードのハッシュ化
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "パスワードのハッシュ化に失敗しました"})
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error": "パスワードの処理に失敗しました。パスワードの要件を確認してください。",
+		})
 		return
 	}
 
@@ -53,13 +59,25 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 		StoreID:      req.StoreID,
 		AvatarURL:    req.AvatarURL,
 		CreatedBy:    req.CreatedBy,
-		UpdatedBy:    req.CreatedBy, // CreatedByの値を使用
+		UpdatedBy:    req.CreatedBy,
 	}
 
 	if err := database.DB.Create(operator).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "オペレーターの作成に失敗しました"})
+		// データベースのユニーク制約違反の場合
+		if strings.Contains(err.Error(), "duplicate key") {
+			c.JSON(http.StatusConflict, gin.H{
+				"error": "このメールアドレスは既に登録されています。",
+			})
+			return
+		}
+		// その他のデータベースエラー
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error": "オペレーターの登録に失敗しました。入力内容を確認してください。",
+		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, operator)
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "オペレーターの登録に成功しました",
+	})
 }

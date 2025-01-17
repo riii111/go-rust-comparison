@@ -13,7 +13,7 @@ func SetupRoutes(r *gin.Engine) {
 		// ヘルスチェックエンドポイント
 		api.GET("/health", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
-				"status": "odddk",
+				"status": "ok",
 			})
 		})
 
