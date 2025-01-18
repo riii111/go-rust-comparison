@@ -4,12 +4,16 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/adapter/middleware"
 	"github.com/riii111/go-rust-comparison/internal/adapter/routes"
 )
 
 func main() {
 	r := gin.Default()
+
+	// データベースの初期化を追加
+	database.InitDB()
 
 	middleware.CORSConfig()
 

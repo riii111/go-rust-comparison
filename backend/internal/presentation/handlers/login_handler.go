@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -14,7 +15,7 @@ import (
 
 type LoginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,password"`
+	Password string `json:"password" binding:"required"`
 }
 
 type LoginResponse struct {
@@ -30,7 +31,7 @@ func Login(c *gin.Context) {
 
 	// データベースからユーザーを検索
 	var operator models.Operator
-	if err := db.Where("email = ?", req.Email).First(&operator).Error; err != nil {
+	if err := database.DB.Where("email = ?", req.Email).First(&operator).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "メールアドレスまたはパスワードが正しくありません"})
 			return
