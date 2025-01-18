@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -20,6 +21,44 @@ type LoginRequest struct {
 
 type LoginResponse struct {
 	Token string `json:"token"`
+}
+
+type TokenPair struct {
+	AccessToken  string
+	RefreshToken string
+}
+
+func generateTokenPair(user *models.Operator) (*TokenPair, error) {
+	// アクセストークンの生成
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":   user.ID,
+		"email": user.Email,
+		"role":  user.Role,
+		"exp":   time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	// リフレッシュトークンの生成
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": user.ID,
+		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+	})
+
+	// アクセストークンの署名
+	accessTokenString, err := accessToken.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
+	if err != nil {
+		return nil, fmt.Errorf("アクセストークンの署名に失敗しました: %w", err)
+	}
+
+	// リフレッシュトークンの署名
+	refreshTokenString, err := refreshToken.SignedString([]byte(os.Getenv("JWT_REFRESH_SECRET_KEY")))
+	if err != nil {
+		return nil, fmt.Errorf("リフレッシュトークンの署名に失敗しました: %w", err)
+	}
+
+	return &TokenPair{
+		AccessToken:  accessTokenString,
+		RefreshToken: refreshTokenString,
+	}, nil
 }
 
 func Login(c *gin.Context) {
@@ -47,22 +86,36 @@ func Login(c *gin.Context) {
 	}
 
 	// JWTトークンの生成
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":   operator.ID,
-		"email": operator.Email,
-		"role":  operator.Role,
-		"exp":   time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	// トークンに署名
-	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
+	tokenPair, err := generateTokenPair(&operator)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "トークンの生成に失敗しました"})
 		return
 	}
 
-	// レスポンスを返す
-	c.JSON(http.StatusOK, LoginResponse{
-		Token: tokenString,
+	// HTTPOnly Cookieとしてトークンを設定
+	c.SetCookie(
+		"access_token",        // クッキー名
+		tokenPair.AccessToken, // 値
+		3600*24,               // 有効期限（秒）
+		"/",                   // パス
+		os.Getenv("DOMAIN"),   // ドメイン
+		true,                  // セキュア（HTTPS only）
+		true,                  // HTTPOnly
+	)
+
+	// リフレッシュトークンの設定
+	c.SetCookie(
+		"refresh_token",
+		tokenPair.RefreshToken,
+		3600*24*30, // 30日
+		"/",
+		os.Getenv("DOMAIN"),
+		true,
+		true,
+	)
+
+	// トークンを含まないレスポンスを返す
+	c.JSON(http.StatusOK, gin.H{
+		"message": "ログインに成功しました",
 	})
 }
