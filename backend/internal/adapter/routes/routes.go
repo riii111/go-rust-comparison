@@ -15,12 +15,12 @@ func SetupRoutes(r *gin.Engine) {
 	{
 		// 認証不要のエンドポイント
 		api.POST("/login", handlers.Login)
-		api.POST("/logout", handlers.Logout) // ログアウトは認証不要に変更
 
 		// 認証が必要なエンドポイント
 		protected := api.Group("")
 		protected.Use(middleware.AuthMiddleware())
 		{
+			protected.POST("/logout", handlers.Logout)
 			protected.GET("/health", handlers.HealthCheck)
 			// その他の保護されたエンドポイント...
 		}
