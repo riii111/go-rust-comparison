@@ -6,6 +6,7 @@ import (
 
 func CreateOperatorSeedData() []models.Operator {
 	systemUUID := "00000000-0000-0000-0000-000000000000"
+	deletedByPtr := &systemUUID
 
 	return []models.Operator{
 		// システム管理者
@@ -18,7 +19,7 @@ func CreateOperatorSeedData() []models.Operator {
 			AvatarURL:    systemUUID,
 			CreatedBy:    systemUUID,
 			UpdatedBy:    systemUUID,
-			DeletedBy:    systemUUID,
+			DeletedBy:    deletedByPtr,
 		},
 		{
 			Email:        "system2@example.com",
@@ -29,7 +30,7 @@ func CreateOperatorSeedData() []models.Operator {
 			AvatarURL:    systemUUID,
 			CreatedBy:    systemUUID,
 			UpdatedBy:    systemUUID,
-			DeletedBy:    systemUUID,
+			DeletedBy:    deletedByPtr,
 		},
 		// 店舗管理者
 		{
@@ -41,7 +42,7 @@ func CreateOperatorSeedData() []models.Operator {
 			AvatarURL:    systemUUID,
 			CreatedBy:    systemUUID,
 			UpdatedBy:    systemUUID,
-			DeletedBy:    systemUUID,
+			DeletedBy:    deletedByPtr,
 		},
 		{
 			Email:        "tokyo2@example.com",
@@ -52,7 +53,7 @@ func CreateOperatorSeedData() []models.Operator {
 			AvatarURL:    systemUUID,
 			CreatedBy:    systemUUID,
 			UpdatedBy:    systemUUID,
-			DeletedBy:    systemUUID,
+			DeletedBy:    deletedByPtr,
 		},
 		{
 			Email:        "osaka1@example.com",
@@ -63,7 +64,7 @@ func CreateOperatorSeedData() []models.Operator {
 			AvatarURL:    systemUUID,
 			CreatedBy:    systemUUID,
 			UpdatedBy:    systemUUID,
-			DeletedBy:    systemUUID,
+			DeletedBy:    deletedByPtr,
 		},
 		{
 			Email:        "osaka2@example.com",
@@ -74,7 +75,7 @@ func CreateOperatorSeedData() []models.Operator {
 			AvatarURL:    systemUUID,
 			CreatedBy:    systemUUID,
 			UpdatedBy:    systemUUID,
-			DeletedBy:    systemUUID,
+			DeletedBy:    deletedByPtr,
 		},
 		{
 			Email:        "nagoya1@example.com",
@@ -85,7 +86,7 @@ func CreateOperatorSeedData() []models.Operator {
 			AvatarURL:    systemUUID,
 			CreatedBy:    systemUUID,
 			UpdatedBy:    systemUUID,
-			DeletedBy:    systemUUID,
+			DeletedBy:    deletedByPtr,
 		},
 		{
 			Email:        "yamashina1@example.com",
@@ -96,7 +97,7 @@ func CreateOperatorSeedData() []models.Operator {
 			AvatarURL:    systemUUID,
 			CreatedBy:    systemUUID,
 			UpdatedBy:    systemUUID,
-			DeletedBy:    systemUUID,
+			DeletedBy:    deletedByPtr,
 		},
 		{
 			Email:        "aisho1@example.com",
@@ -107,7 +108,7 @@ func CreateOperatorSeedData() []models.Operator {
 			AvatarURL:    systemUUID,
 			CreatedBy:    systemUUID,
 			UpdatedBy:    systemUUID,
-			DeletedBy:    systemUUID,
+			DeletedBy:    deletedByPtr,
 		},
 		{
 			Email:        "aisho2@example.com",
@@ -118,7 +119,7 @@ func CreateOperatorSeedData() []models.Operator {
 			AvatarURL:    systemUUID,
 			CreatedBy:    systemUUID,
 			UpdatedBy:    systemUUID,
-			DeletedBy:    systemUUID,
+			DeletedBy:    deletedByPtr,
 		},
 	}
 }
