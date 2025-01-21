@@ -1,0 +1,175 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Security Group Stack"
+# カスタムマクロの有効化
+Transform: PyPlate
+
+# -------------------------------------
+# Metadata
+# -------------------------------------
+Metadata:
+  AWS::CloudFormation::Interface:
+    # パラメータの並び順
+    ParameterGroups:
+      - Label:
+          default: "Project Configuration"
+        Parameters:
+          - ProjectName
+          - Environment
+      - Label:
+          default: "Security Group Configuration"
+        Parameters:
+          - VPCID
+          - ManagementIPAddresses
+          - ManagementIPDescriptions
+
+# -------------------------------------
+# Parameters
+# -------------------------------------
+Parameters:
+  ProjectName:
+    Description: "Enter the project name. (ex: go-rust-comparison)"
+    Type: String
+    MinLength: 1
+    ConstraintDescription: "ProjectName must be entered."
+    Default: go-rust-comparison
+  Environment:
+    Description: "Select the environment name."
+    Type: String
+    AllowedValues:
+      - dev
+      - stg
+      - prd
+    ConstraintDescription: "Environment name must be selected."
+    Default: dev
+  VPCID:
+    Description: "Enter the VPC ID for create security groups."
+    Type: AWS::EC2::VPC::Id
+  ManagementIPAddresses:
+    Description: "Enter the IP addresses for management separated by commas. (ex: 0.0.0.0/32,1.1.1.1/32)"
+    Type: CommaDelimitedList
+  ManagementIPDescriptions:
+    Description: "Enter the descriptions for the management IP addresses separated by commas. (ex: from xxxx,from xxxx)"
+    Type: CommaDelimitedList
+
+# -------------------------------------
+# Resources
+# -------------------------------------
+Resources:
+  # For ALB
+  ALBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${ProjectName}-${Environment}-alb-ag
+      GroupDescription: "Security Group For ALB"
+      VpcId: !Ref VPCID
+      SecurityGroupIngress: |
+          #!PyPlate
+          import json
+          output = [
+              {
+                "IpProtocol": "tcp",
+                "FromPort": 8081,
+                "ToPort": 8081,
+                "CidrIp": ip,
+                "Description": desc
+              }
+              for ip, desc in zip(params["ManagementIPAddresses"], params["ManagementIPDescriptions"])
+          ]
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-alb-sg
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  ALBSGIngressHTTPS:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref ALBSG
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      CidrIp: 0.0.0.0/0
+      Description: "from client"
+
+  # For ECS Fargate
+  FargateSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${ProjectName}-${Environment}-fargate-sg
+      GroupDescription: "Security Group For ECS Fargate"
+      VpcId: !Ref VPCID
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-fargate-sg
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  FargateSGIngressHTTP:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref FargateSG
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourceSecurityGroupId: !Ref ALBSG
+      Description: "from alb health check"
+  FargateSGIngressHTTPS:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref FargateSG
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId: !Ref ALBSG
+      Description: "from alb"
+
+  # Use only when Blue/Green Deployment
+  FargateSGIngressHTTPTest:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref FargateSG
+      IpProtocol: tcp
+      FromPort: 8081
+      ToPort: 8081
+      SourceSecurityGroupId: !Ref ALBSG
+      Description: "from alb (for blue/green deployment)"
+  # For RDS (MySQL)
+  RDSForMySQLSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPCID
+      GroupName: !Sub ${ProjectName}-${Environment}-rds-sg
+      GroupDescription: "Security Group For RDS (MySQL)"
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-rds-sg
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  RDSForMySQLSGIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref RDSForMySQLSG
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+      SourceSecurityGroupId: !Ref FargateSG
+      Description: "from fargate"
+
+
+# -------------------------------------
+# Outputs
+# -------------------------------------
+Outputs:
+  ALBSG:
+    Description: "Security Group For ALB"
+    Value: !Ref ALBSG
+  FargateSG:
+    Description: "Security Group For ECS Fargate"
+    Value: !Ref FargateSG
+  RDSForMySQLSG:
+    Description: "Security Group For RDS (MySQL)"
+    Value: !Ref RDSForMySQLSG

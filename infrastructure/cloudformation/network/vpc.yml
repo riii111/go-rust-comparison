@@ -1,0 +1,487 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "VPC Stack"
+
+# -------------------------------------
+# Metadata
+# -------------------------------------
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Project Configuration"
+        Parameters:
+          - ProjectName
+          - Environment
+      - Label:
+          default: "VPC Configuration"
+        Parameters:
+          - AvailabilityZone1
+          - AvailabilityZone2
+          - VPCCIDR
+          - ALBPublicSubnet1CIDR
+          - ALBPublicSubnet2CIDR
+          - ECSProtectedSubnet1CIDR
+          - ECSProtectedSubnet2CIDR
+          - RDSPrivateSubnet1CIDR
+          - RDSPrivateSubnet2CIDR
+      - Label:
+          default: "VPC FlowLogs Configuration"
+        Parameters:
+          - VPCFlowLogsRetentionInDays
+
+# -------------------------------------
+# Parameters
+# -------------------------------------
+Parameters:
+  ProjectName:
+    Description: "Enter the project name. (ex: go-rust-comparison)"
+    Type: String
+    Default: go-rust-comparison
+    ConstraintDescription: "ProjectName must be entered."
+    MinLength: 1
+  Environment:
+    Description: "Select the environment name."
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - stg
+      - prd
+    ConstraintDescription: "Environment name must be selected."
+  AvailabilityZone1:
+    Description: "Enter the 1st Availability Zone name."
+    Type: String
+    Default: ap-northeast-1a
+  AvailabilityZone2:
+    Description: "Enter the 2nd Availability Zone name."
+    Type: String
+    Default: ap-northeast-1c
+  VPCCIDR:
+    Description: "Enter the VPC CIDR block."
+    Type: String
+  ALBPublicSubnet1CIDR:
+    Description: "Enter the Subnet CIDR block for ALB in the 1st Availability Zone."
+    Type: String
+  ALBPublicSubnet2CIDR:
+    Description: "Enter the Subnet CIDR block for ALB in the 2nd Availability Zone."
+    Type: String
+  ECSProtectedSubnet1CIDR:
+    Description: "Enter the Subnet CIDR block for ECS in the 1st Availability Zone."
+    Type: String
+  ECSProtectedSubnet2CIDR:
+    Description: "Enter the Subnet CIDR block for ECS in the 2nd Availability Zone."
+    Type: String
+  RDSPrivateSubnet1CIDR:
+    Description: "Enter the Subnet CIDR block for RDS in the 1st Availability Zone."
+    Type: String
+  RDSPrivateSubnet2CIDR:
+    Description: "Enter the Subnet CIDR block for RDS in the 2nd Availability Zone."
+    Type: String
+  VPCFlowLogsRetentionInDays:
+    Description: "Enter the data retention period for VPC FlowLogs. (ex: 30)"
+    Type: String
+    Default: 30
+
+# -------------------------------------
+# Conditions
+# -------------------------------------
+Conditions:
+  IsPrdEnv: !Equals [!Ref Environment, prd]
+
+# -------------------------------------
+# Resources
+# -------------------------------------
+Resources:
+  # -------------------------------------
+  # VPC
+  # -------------------------------------
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-vpc
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  # -------------------------------------
+  # VPC FlowLogs
+  # -------------------------------------
+  # For CW Logs
+  VPCFlowLogToCWLog:
+    Type: AWS::EC2::FlowLog
+    Properties:
+      DeliverLogsPermissionArn: !GetAtt VPCFlowLogsRoleForCWLogs.Arn
+      LogDestinationType: cloud-watch-logs
+      LogGroupName: !Ref VPCFlowLogGroup
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      TrafficType: ALL
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-vpc
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  VPCFlowLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/vpc/flowlogs/${ProjectName}-${Environment}-vpc
+      RetentionInDays: !Ref VPCFlowLogsRetentionInDays
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-vpc
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  VPCFlowLogsRoleForCWLogs:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub VPCFlowLogsRoleForCWLogs-${ProjectName}-${Environment}
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - vpc-flow-logs.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-vpc
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+      Policies:
+        - PolicyName: !Sub VPCFlowLogsRoleAccessForCWLogs-${ProjectName}-${Environment}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/vpc/flowlogs/${ProjectName}/${Environment}:*
+  # For S3
+  VPCFlowLogToS3:
+    DependsOn: VPCFlowLogBucket
+    Type: AWS::EC2::FlowLog
+    Properties:
+      LogDestinationType: s3
+      LogDestination: !GetAtt VPCFlowLogBucket.Arn
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      TrafficType: ALL
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-vpc
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  VPCFlowLogBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-${Environment}-vpc-flowlogs
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      AccessControl: LogDeliveryWrite
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionToGlacierAfter365Days
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 365
+                StorageClass: GLACIER
+          - Id: ExpireAfter5Years
+            Status: Enabled
+            ExpirationInDays: 1825
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-vpc
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # -------------------------------------
+  # Internet Gateway
+  # -------------------------------------
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-igw
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+  # -------------------------------------
+  # Public Subnets
+  # -------------------------------------
+  # For ALB
+  ALBPublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone1
+      VpcId: !Ref VPC
+      CidrBlock: !Ref ALBPublicSubnet1CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Join
+            - "-"
+            - - !Sub "${ProjectName}-${Environment}-pub-alb"
+              - !Select [2, !Split ["-", !Ref AvailabilityZone1]]
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  ALBPublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone2
+      VpcId: !Ref VPC
+      CidrBlock: !Ref ALBPublicSubnet2CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Join
+            - "-"
+            - - !Sub "${ProjectName}-${Environment}-pub-alb"
+              - !Select [2, !Split ["-", !Ref AvailabilityZone2]]
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  # -------------------------------------
+  # Protected Subnets
+  # -------------------------------------
+  # For ECS
+  ECSProtectedSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone1
+      VpcId: !Ref VPC
+      CidrBlock: !Ref ECSProtectedSubnet1CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Join
+            - "-"
+            - - !Sub "${ProjectName}-${Environment}-prot-ecs"
+              - !Select [2, !Split ["-", !Ref AvailabilityZone1]]
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  ECSProtectedSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone2
+      VpcId: !Ref VPC
+      CidrBlock: !Ref ECSProtectedSubnet2CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Join
+            - "-"
+            - - !Sub "${ProjectName}-${Environment}-prot-ecs"
+              - !Select [2, !Split ["-", !Ref AvailabilityZone2]]
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  # -------------------------------------
+  # Private Subnets
+  # -------------------------------------
+  # For RDS
+  RDSPrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone1
+      VpcId: !Ref VPC
+      CidrBlock: !Ref RDSPrivateSubnet1CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Join
+            - "-"
+            - - !Sub "${ProjectName}-${Environment}-priv-rds"
+              - !Select [2, !Split ["-", !Ref AvailabilityZone1]]
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  RDSPrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone2
+      VpcId: !Ref VPC
+      CidrBlock: !Ref RDSPrivateSubnet2CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          # output-image: lc-inquiry-pro-dev-priv-rds-1c
+          Value: !Join
+            - "-"
+            - - !Sub "${ProjectName}-${Environment}-priv-rds"
+              - !Select [2, !Split ["-", !Ref AvailabilityZone2]]
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  # -------------------------------------
+  # Public Route Tables
+  # -------------------------------------
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-pub-rtb
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  # For ALB
+  ALBPublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ALBPublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+  ALBPublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ALBPublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+  # -------------------------------------
+  # Protected Route Tables
+  # -------------------------------------
+  ProtectedRouteTable1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          # output-image: lc-inquiry-pro-dev-prot-rtb-1a
+          Value: !Join
+            - "-"
+            - - !Sub ${ProjectName}-${Environment}-prot-rtb
+              - !Select [2, !Split ["-", !Ref AvailabilityZone1]]
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  ProtectedRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          # output-image: lc-inquiry-pro-dev-prot-rtb-1c
+          Value: !Join
+            - "-"
+            - - !Sub ${ProjectName}-${Environment}-prot-rtb
+              - !Select [2, !Split ["-", !Ref AvailabilityZone2]]
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  # For ECS
+  ECSProtectedSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ECSProtectedSubnet1
+      RouteTableId: !Ref ProtectedRouteTable1
+  ECSProtectedSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ECSProtectedSubnet2
+      RouteTableId: !Ref ProtectedRouteTable2
+  # -------------------------------------
+  # Private Route Tables
+  # -------------------------------------
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-priv-rtb
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  # For RDS
+  RDSPrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref RDSPrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable
+  RDSPrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref RDSPrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable
+
+# -------------------------------------
+# Outputs
+# -------------------------------------
+Outputs:
+  VPC:
+    Description: "A reference to the created VPC."
+    Value: !Ref VPC
+  ALBPublicSubnet1:
+    Description: "A reference to the public subnet in the 1st Availability Zone."
+    Value: !Ref ALBPublicSubnet1
+  ALBPublicSubnet2:
+    Description: "A reference to the public subnet in the 2nd Availability Zone."
+    Value: !Ref ALBPublicSubnet2
+  ECSProtectedSubnet1:
+    Description: "A reference to the public subnet in the 1st Availability Zone."
+    Value: !Ref ECSProtectedSubnet1
+  ECSProtectedSubnet2:
+    Description: "A reference to the public subnet in the 2nd Availability Zone."
+    Value: !Ref ECSProtectedSubnet2
+  RDSPrivateSubnet1:
+    Description: "A reference to the private subnet in the 1st Availability Zone."
+    Value: !Ref RDSPrivateSubnet1
+  RDSPrivateSubnet2:
+    Description: "A reference to the private subnet in the 2nd Availability Zone."
+    Value: !Ref RDSPrivateSubnet2
