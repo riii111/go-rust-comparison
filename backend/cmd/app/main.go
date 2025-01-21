@@ -1,26 +1,41 @@
 package main
 
 import (
-	"log"
+	"go_rust_comparison/backend/docs"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/riii111/go-rust-comparison/internal/adapter/middleware"
+
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+// @BasePath /api/v1
+
+// PingExample godoc
+// @Summary ping example
+// @Schemes
+// @Description do ping
+// @Tags example
+// @Accept json
+// @Produce json
+// @Success 200 {string} Helloworld
+// @Router /example/helloworld [get]
+func Helloworld(g *gin.Context) {
+	g.JSON(http.StatusOK, "helloworld")
+}
 
 func main() {
 	r := gin.Default()
-
-	middleware.CORSConfig()
-
-	// ヘルスチェックエンドポイント
-	r.GET("/api/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"msg": "ok",
-		})
-	})
-
-	if err := r.Run(":8000"); err != nil {
-		log.Fatalf("サーバの起動に失敗しました: %v", err)
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	v1 := r.Group("/api/v1")
+	{
+		eg := v1.Group("/example")
+		{
+			eg.GET("/helloworld", Helloworld)
+		}
 	}
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	r.Run(":8000")
+
 }
