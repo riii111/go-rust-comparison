@@ -69,10 +69,16 @@ project-layout/
 ├── README.md                     # リポジトリの概要説明（プロジェクトの目的や使い方を記述）
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ```
 =======
+=======
+>>>>>>> develop
 ```
 
 ## その他参考記事
 https://github.com/golang-standards/project-layout/tree/master
+<<<<<<< HEAD
+>>>>>>> develop
+=======
 >>>>>>> develop
