@@ -9,7 +9,7 @@ import (
 )
 
 func performMigration() error {
-	if err := database.DB.AutoMigrate(&models.Operator{}, &models.Store{}, &models.Stock{}); err != nil {
+	if err := database.DB.AutoMigrate(&models.Operator{}, &models.Store{}, &models.Product{}, &models.Stock{}); err != nil {
 		return fmt.Errorf("マイグレーションに失敗しました: %w", err)
 	}
 	return nil
