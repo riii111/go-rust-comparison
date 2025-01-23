@@ -50,23 +50,13 @@ func setupTestData(t *testing.T) string {
 }
 
 func cleanupTestData(t *testing.T) {
-	// トランザクションを使用してアトミックな削除を実行
-	tx := database.DB.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
+	// 先にオペレーターを削除
+	err := database.DB.Exec("DELETE FROM operators").Error
+	require.NoError(t, err)
 
-	// 外部キー制約を考慮して、オペレーターを先に削除
-	err := tx.Exec("DELETE FROM operators").Error
-	require.NoError(t, err, "オペレーターデータの削除に失敗しました")
-
-	err = tx.Exec("DELETE FROM stores").Error
-	require.NoError(t, err, "店舗データの削除に失敗しました")
-
-	err = tx.Commit().Error
-	require.NoError(t, err, "トランザクションのコミットに失敗しました")
+	// その後に店舗を削除
+	err = database.DB.Exec("DELETE FROM stores").Error
+	require.NoError(t, err)
 }
 
 func TestCreateOperator(t *testing.T) {
