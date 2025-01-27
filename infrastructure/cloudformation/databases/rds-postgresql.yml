@@ -187,23 +187,12 @@ Resources:
     Type: AWS::RDS::DBParameterGroup
     Properties:
       Description: !Sub ${ProjectName}-${Environment}-rds-pg
-      Family: !Sub PostgreSQL${PostgreSQLMajorVersion}
+      Family: !Sub postgres${PostgreSQLMajorVersion}
       Parameters:
-        general_log: 1
-        slow_query_log: 1
-        long_query_time: 10
-        log_output: FILE
-        log_queries_not_using_indexes: 0
-        time_zone: Asia/Tokyo
-        character_set_database: utf8mb4
-        character_set_server: utf8mb4
-        character_set_client: utf8mb4
-        character_set_connection: utf8mb4
-        character_set_filesystem: utf8mb4
-        character_set_results: utf8mb4
-        skip-character-set-client-handshake: 1
-        collation_connection: utf8mb4_bin
-        collation_server: utf8mb4_bin
+        log_duration: 1
+        log_min_duration_statement: 10000
+        log_statement: all
+        timezone: Asia/Tokyo
       Tags:
         - Key: Name
           Value: !Sub ${ProjectName}-${Environment}-rds-pg
@@ -212,17 +201,6 @@ Resources:
         - Key: Environment
           Value: !Sub ${Environment}
 
-  # -------------------------------------
-  # RDS DB OptionGroup
-  # -------------------------------------
-  RDSDBOptionGroup:
-    Type: AWS::RDS::OptionGroup
-    Properties:
-      EngineName: PostgreSQL
-      MajorEngineVersion: !Ref PostgreSQLMajorVersion
-      OptionConfigurations:
-        - OptionName: MARIADB_AUDIT_PLUGIN
-      OptionGroupDescription: !Sub ${ProjectName}-${Environment}-rds-og
 
   # -------------------------------------
   # RDS for PostgreSQL DB Instances
@@ -230,13 +208,13 @@ Resources:
   RDSDBInstance:
     Type: AWS::RDS::DBInstance
     Properties:
+      Engine: postgres
+      EngineVersion: !Sub ${PostgreSQLMajorVersion}.${PostgreSQLMinorVersion}
       DBInstanceIdentifier: !Sub ${ProjectName}-${Environment}-rds
+      DBName: !Ref DBName
       MasterUsername: !Ref DBMasterUserName
       MasterUserPassword: !Ref DBMasterUserPassword
       DBInstanceClass: !Ref DBInstanceClass
-      DBName: !Ref DBName
-      Engine: PostgreSQL
-      EngineVersion: !Sub ${PostgreSQLMajorVersion}.${PostgreSQLMinorVersion}
       StorageType: !Ref DBInstanceStorageType
       AllocatedStorage: !Ref DBInstanceStorageSize
       MultiAZ: !Ref MultiAZEnabled
@@ -245,7 +223,6 @@ Resources:
         - !Ref DBSecurityGroup
       DBSubnetGroupName: !Ref RDSDBSubnetGroup
       DBParameterGroupName: !Ref RDSDBParameterGroup
-      OptionGroupName: !Ref RDSDBOptionGroup
       CopyTagsToSnapshot: !Ref CopyTagsToSnapshot
       BackupRetentionPeriod: !Ref BackupRetentionPeriod
       PreferredBackupWindow: !Ref PreferredBackupWindow
@@ -253,10 +230,8 @@ Resources:
       MonitoringInterval: 60
       MonitoringRoleArn: !GetAtt RDSMonitoringRole.Arn
       EnableCloudwatchLogsExports:
-        - audit
-        - error
-        - general
-        - slowquery
+        - postgresql
+        - upgrade
       StorageEncrypted: true
       EnablePerformanceInsights: !Ref EnablePerformanceInsights
       AutoMinorVersionUpgrade: !Ref AutoMinorVersionUpgradeEnabled

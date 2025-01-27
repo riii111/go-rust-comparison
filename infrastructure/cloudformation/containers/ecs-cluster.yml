@@ -88,6 +88,13 @@ Resources:
         # ECSTaskExecutionRole が使用できるデフォルト権限
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
       RoleName: !Sub ECSTaskExecutionRole-${ProjectName}-${Environment}
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-cluster
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
 
   ECSTaskExecutionRolePolicy:
     Type: AWS::IAM::Policy
@@ -142,6 +149,13 @@ Resources:
         # CloudWatchEvents との連携用
         - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole
       RoleName: !Sub ECSTaskRole-${ProjectName}-${Environment}
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-cluster
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
 
   ECSTaskRolePolicy:
     Type: AWS::IAM::Policy

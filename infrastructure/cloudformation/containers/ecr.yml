@@ -40,9 +40,9 @@ Parameters:
     ConstraintDescription: "Environment name must be selected."
     Default: dev
   BackendAppRepositorySuffix:
-    Description: "Repository name suffix of the application container image. (ex: Gin)"
+    Description: "Repository name suffix of the application container image. (ex: golang)"
     Type: String
-    Default: gin
+    Default: golang
   BackendWebRepositorySuffix:
     Description: "Repository name suffix of the webserver container image. (ex: nginx)"
     Type: String
@@ -67,10 +67,12 @@ Resources:
         ScanOnPush: true
       ImageTagMutability: !Ref ImageTagMutability
       Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-ecr
         - Key: ProjectName
-          Value: !Sub ${ProjectName}
+          Value: !Ref ProjectName
         - Key: Environment
-          Value: !Sub ${Environment}
+          Value: !Ref Environment
   BackendWebRepository:
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
@@ -81,10 +83,12 @@ Resources:
         ScanOnPush: true
       ImageTagMutability: !Ref ImageTagMutability
       Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-ecr
         - Key: ProjectName
-          Value: !Sub ${ProjectName}
+          Value: !Ref ProjectName
         - Key: Environment
-          Value: !Sub ${Environment}
+          Value: !Ref Environment
 
 # -------------------------------------
 # Outputs
