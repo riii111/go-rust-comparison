@@ -5,11 +5,22 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/adapter/middleware"
+	"github.com/riii111/go-rust-comparison/internal/application/usecase"
+	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
+	"github.com/riii111/go-rust-comparison/internal/presentation/handlers"
 )
 
 func main() {
 	r := gin.Default()
+
+	database.InitDB()
+	stockRep := repository.NewStockRepository(database.DB)
+	stockUserCase := usecase.NewStockUseCase(stockRep)
+	stockHan := handlers.NewStockHandler(stockUserCase)
+
+	r.POST("/stock", stockHan.CreateStock)
 
 	middleware.CORSConfig()
 
