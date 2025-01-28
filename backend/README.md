@@ -1,5 +1,5 @@
 ## ディレクトリ構成
-https://pj100.esa.io/posts/25385を参考
+https://pj100.esa.io/posts/25385 を参考
 ```
 project-layout/
 ├── .devcontainer/                # DevContainer設定ファイル
@@ -68,3 +68,6 @@ project-layout/
 ├── README.md                     # リポジトリの概要説明（プロジェクトの目的や使い方を記述）
 
 ```
+
+## その他参考記事
+https://github.com/golang-standards/project-layout/tree/master
