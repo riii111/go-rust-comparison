@@ -39,6 +39,7 @@ Parameters:
       - stg
       - prd
     ConstraintDescription: "Environment name must be selected."
+    Default: dev
   WAFLogsPrefix:
     Description: "Enter the prefix for WAF logs."
     Type: String
