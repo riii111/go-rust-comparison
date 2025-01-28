@@ -9,7 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// AuthMiddleware は認証が必要なエンドポイントに使用するミドルウェア
+// 認証が必要なエンドポイントに使用するミドルウェア
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Cookieからアクセストークンを取得し、存在しない場合は401エラーを返す
