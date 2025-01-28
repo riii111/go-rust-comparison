@@ -14,22 +14,26 @@ import (
 	"gorm.io/gorm"
 )
 
+// ログインリクエストの構造体
 type LoginRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
 
+// ログインレスポンスの構造体
 type LoginResponse struct {
 	Token string `json:"token"`
 }
 
+// アクセストークンとリフレッシュトークンのペアを保持する構造体
 type TokenPair struct {
 	AccessToken  string
 	RefreshToken string
 }
 
+// ユーザー情報を基にJWTトークンペアを生成する関数
 func generateTokenPair(user *models.Operator) (*TokenPair, error) {
-	// アクセストークンの生成
+	// アクセストークンの生成（24時間有効）
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":   user.ID,
 		"email": user.Email,
@@ -37,7 +41,7 @@ func generateTokenPair(user *models.Operator) (*TokenPair, error) {
 		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	// リフレッシュトークンの生成
+	// リフレッシュトークンの生成（30日間有効）
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
 		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
@@ -61,14 +65,16 @@ func generateTokenPair(user *models.Operator) (*TokenPair, error) {
 	}, nil
 }
 
+// ログイン処理を行うハンドラー関数
 func Login(c *gin.Context) {
+	// リクエストのバリデーション
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "無効なリクエストです"})
 		return
 	}
 
-	// データベースからユーザーを検索
+	// メールアドレスを使用してユーザーを検索
 	var operator models.Operator
 	if err := database.DB.Where("email = ?", req.Email).First(&operator).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -79,42 +85,42 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// パスワードの検証
+	// パスワードのハッシュを比較して認証
 	if err := bcrypt.CompareHashAndPassword([]byte(operator.PasswordHash), []byte(req.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "メールアドレスまたはパスワードが正しくありません"})
 		return
 	}
 
-	// JWTトークンの生成
+	// JWTトークンペアを生成
 	tokenPair, err := generateTokenPair(&operator)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "トークンの生成に失敗しました"})
 		return
 	}
 
-	// HTTPOnly Cookieとしてトークンを設定
+	// アクセストークンをHTTPOnlyクッキーとして設定
 	c.SetCookie(
-		"access_token",        // クッキー名
-		tokenPair.AccessToken, // 値
-		3600*24,               // 有効期限（秒）
-		"/",                   // パス
-		os.Getenv("DOMAIN"),   // ドメイン
-		true,                  // セキュア（HTTPS only）
-		true,                  // HTTPOnly
+		"access_token",
+		tokenPair.AccessToken,
+		3600*24, // 24時間
+		"/",
+		os.Getenv("DOMAIN"),
+		true, // HTTPSのみ
+		true, // JavaScriptからアクセス不可
 	)
 
-	// リフレッシュトークンの設定
+	// リフレッシュトークンをHTTPOnlyクッキーとして設定
 	c.SetCookie(
 		"refresh_token",
 		tokenPair.RefreshToken,
-		3600*24*30, // 30日
+		3600*24*30, // 30日間
 		"/",
 		os.Getenv("DOMAIN"),
-		true,
-		true,
+		true, // HTTPSのみ
+		true, // JavaScriptからアクセス不可
 	)
 
-	// トークンを含まないレスポンスを返す
+	// 成功レスポンスを返す
 	c.JSON(http.StatusOK, gin.H{
 		"message": "ログインに成功しました",
 	})
