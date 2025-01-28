@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
@@ -10,6 +11,15 @@ import (
 )
 
 func main() {
+	// 環境変数DEBUGに基づいてGinモードを設定
+	if os.Getenv("DEBUG") == "true" {
+		gin.SetMode(gin.DebugMode)
+		log.Println("Ginをデバッグモードで起動します")
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+		log.Println("Ginをリリースモードで起動します")
+	}
+
 	// データベース初期化
 	database.InitDB()
 

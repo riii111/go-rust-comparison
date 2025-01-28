@@ -27,10 +27,16 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 	// リクエストボディをバインド
 	var req requests.CreateOperatorRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, responses.ErrorResponse{
-			Error:   "入力内容に誤りがあります。確認して再度お試しください",
-			Details: err.Error(),
-		})
+		errorResponse := responses.ErrorResponse{
+			Error: "入力内容に誤りがあります。確認して再度お試しください",
+		}
+
+		// デバッグモードの場合のみエラー詳細を追加
+		if gin.Mode() == gin.DebugMode {
+			errorResponse.Details = err.Error()
+		}
+
+		c.JSON(http.StatusBadRequest, errorResponse)
 		return
 	}
 
