@@ -8,8 +8,10 @@ Mappings:
   # 使用する可能性のある "国内リージョン" のみを列挙
   RegionMap:
     ap-northeast-1:
+      # AWSで公表されている ELB Account ID
       ELBAccountID: 582318560864
     ap-northeast-3:
+      # AWSで公表されている ELB Account ID
       ELBAccountID: 383597477331
 
 # -------------------------------------
@@ -27,23 +29,13 @@ Metadata:
       - Label:
           default: "ALB Configuration"
         Parameters:
-          - DomainNameForAPI
-          - DomainNameForInternal
           - DomainNameForFront
-          - DomainNameForAdminFront
-          - HostZoneID
-          - PrivateHostZoneID
           - VPCID
           - ALBPublicSubnet1
           - ALBPublicSubnet2
           - ALBSecurityGroupID
-          - InternalALBPrivateSubnet1
-          - InternalALBPrivateSubnet2
-          - InternalALBSecurityGroupID
-          - ACMCertificateArn
           - AuthHeaderName
           - AuthHeaderValue
-          - AuthHeaderValueForAdmin
           - HealthCheckPath
           - DeletionProtectionEnabled
           - IdleTimeoutSeconds
@@ -69,24 +61,9 @@ Parameters:
       - prd
     ConstraintDescription: "Environment name must be selected."
     Default: dev
-  DomainNameForAPI:
-    Description: "Enter the domain name for backend API. (ex: api.dev.inquiry-pro.lifecard.co.jp)"
-    Type: String
-  DomainNameForInternal:
-    Description: "Enter the domain name for internal backend API. (ex: internal.dev.inquiry-pro.lifecard.co.jp)"
-    Type: String
   DomainNameForFront:
-    Description: "Enter the domain name for frontend. (ex: dev.inquiry-pro.lifecard.co.jp)"
+    Description: "Enter the domain name for frontend."
     Type: String
-  DomainNameForAdminFront:
-    Description: "Enter the domain name for admin frontend. (ex: dev.admin.inquiry-pro.lifecard.co.jp)"
-    Type: String
-  HostZoneID:
-    Description: "Select the Route 53 hosted zone ID."
-    Type: AWS::Route53::HostedZone::Id
-  PrivateHostZoneID:
-    Description: "Select the Route 53 private hosted zone ID."
-    Type: AWS::Route53::HostedZone::Id
   VPCID:
     Description: "Select the VPC ID."
     Type: AWS::EC2::VPC::Id
@@ -99,18 +76,6 @@ Parameters:
   ALBSecurityGroupID:
     Description: "Select the Security Group ID for ALB."
     Type: AWS::EC2::SecurityGroup::Id
-  InternalALBPrivateSubnet1:
-    Description: "Enter the Subnet ID for Internal ALB in the selected VPC."
-    Type: AWS::EC2::Subnet::Id
-  InternalALBPrivateSubnet2:
-    Description: "Enter the Subnet ID for Internal ALB in the selected VPC."
-    Type: AWS::EC2::Subnet::Id
-  InternalALBSecurityGroupID:
-    Description: "Select the Security Group ID for Internal ALB."
-    Type: AWS::EC2::SecurityGroup::Id
-  ACMCertificateArn:
-    Description: "Enter the Certificate ARN. (ex: arn:aws:acm:<AWS_REGION>:<AWS_ACCOUNT_ID>:certificate/<ACMCertificateID>)"
-    Type: String
   AuthHeaderName:
     Description: "Enter the header name required for authentication between Amplify and ALB. (default: X-Auth-ALB)"
     Type: String
@@ -118,10 +83,6 @@ Parameters:
     NoEcho: true
   AuthHeaderValue:
     Description: "Enter the header value required for authentication between Amplify and ALB."
-    Type: String
-    NoEcho: true
-  AuthHeaderValueForAdmin:
-    Description: "Enter the header value required for authentication between Admin Amplify and ALB."
     Type: String
     NoEcho: true
   # ALB からのヘルスチェックに応答するパス
@@ -186,6 +147,11 @@ Resources:
       UnhealthyThresholdCount: 2
       HealthCheckTimeoutSeconds: 5
       HealthCheckIntervalSeconds: 30
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
   ALBTargetGroupGreen:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn: InternetALB
@@ -201,22 +167,11 @@ Resources:
       UnhealthyThresholdCount: 2
       HealthCheckTimeoutSeconds: 5
       HealthCheckIntervalSeconds: 30
-  # Internal
-  InternalALBTargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    DependsOn: InternetALB
-    Properties:
-      Name: !Sub ${ProjectName}-${Environment}-internal-tg
-      TargetType: ip
-      Protocol: HTTP
-      Port: 80
-      VpcId: !Ref VPCID
-      HealthCheckProtocol: HTTP
-      HealthCheckPath: !Ref HealthCheckPath
-      HealthyThresholdCount: 5
-      UnhealthyThresholdCount: 2
-      HealthCheckTimeoutSeconds: 5
-      HealthCheckIntervalSeconds: 30
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
 
   # -------------------------------------
   # Elastic Load Balancer
@@ -226,7 +181,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Type: application
-      Name: !Sub ${ProjectName}-${Environment}-alb-fargate
+      Name: !Sub ${ProjectName}-${Environment}-alb-ecs
       Scheme: internet-facing
       LoadBalancerAttributes:
         - Key: "deletion_protection.enabled"
@@ -255,45 +210,11 @@ Resources:
         - Key: Environment
           Value: !Ref Environment
 
-  # Internal
-  InternalALB:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    Properties:
-      Type: application
-      Name: !Sub ${ProjectName}-${Environment}-internal-alb
-      Scheme: internal
-      LoadBalancerAttributes:
-        - Key: "deletion_protection.enabled"
-          Value: !Ref DeletionProtectionEnabled
-        - Key: "idle_timeout.timeout_seconds"
-          Value: !Ref IdleTimeoutSeconds
-        # ALB アクセスログを有効化する場合のみ
-        - Key: "access_logs.s3.enabled"
-          Value: !Ref AccessLogsEnabled
-        - !If
-          - IsEnabledAccessLogs
-          - Key: "access_logs.s3.bucket"
-            Value: !Join
-              - "-"
-              - - !Sub "${ProjectName}-${Environment}-internal-alb-access-logs"
-                - !Select [0, !Split ["-", !Select [2, !Split ["/", !Ref AWS::StackId]]]]
-          - !Ref AWS::NoValue
-      Subnets:
-        - !Ref InternalALBPrivateSubnet1
-        - !Ref InternalALBPrivateSubnet2
-      SecurityGroups:
-        - !Ref InternalALBSecurityGroupID
-      Tags:
-        - Key: ProjectName
-          Value: !Ref ProjectName
-        - Key: Environment
-          Value: !Ref Environment
-
   # -------------------------------------
   # Listener
   # -------------------------------------
   # Internet-Facing
-  ALBListenerHTTPS:
+  ALBListenerHTTP:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       DefaultActions:
@@ -303,11 +224,8 @@ Resources:
             StatusCode: 403
           Type: fixed-response
       LoadBalancerArn: !Ref InternetALB
-      Port: 443
-      Protocol: HTTPS
-      Certificates:
-        - CertificateArn: !Ref ACMCertificateArn
-      SslPolicy: !Ref ELBSecurityPolicy
+      Port: 80
+      Protocol: HTTP
   ALBListenerHTTPTest:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -315,26 +233,13 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref ALBTargetGroupBlue
       LoadBalancerArn: !Ref InternetALB
-      Port: 8080
+      Port: 8081
       Protocol: HTTP
-  # Internal
-  InternalALBListenerHTTPS:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      DefaultActions:
-        - Type: forward
-          TargetGroupArn: !Ref InternalALBTargetGroup
-      LoadBalancerArn: !Ref InternalALB
-      Port: 443
-      Protocol: HTTPS
-      Certificates:
-        - CertificateArn: !Ref ACMCertificateArn
-      SslPolicy: !Ref ELBSecurityPolicy
 
   # -------------------------------------
   # Listener Rule
   # -------------------------------------
-  ALBListenerRuleHTTPS1:
+  ALBListenerRuleHTTP1:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
       Actions:
@@ -350,11 +255,10 @@ Resources:
             HttpHeaderName: Origin
             Values:
               - !Sub https://${DomainNameForFront}
-              - !Sub https://${DomainNameForAdminFront}
-      ListenerArn: !Ref ALBListenerHTTPS
+      ListenerArn: !Ref ALBListenerHTTP
       Priority: 1
 
-  ALBListenerRuleHTTPS2:
+  ALBListenerRuleHTTP2:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
       Actions:
@@ -366,33 +270,9 @@ Resources:
             HttpHeaderName: !Ref AuthHeaderName
             Values:
               - !Ref AuthHeaderValue
-              - !Ref AuthHeaderValueForAdmin
-      ListenerArn: !Ref ALBListenerHTTPS
+      ListenerArn: !Ref ALBListenerHTTP
       Priority: 2
 
-  # -------------------------------------
-  # Route 53
-  # -------------------------------------
-  # Internet-Facing
-  ALBAliasRecord:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      HostedZoneId: !Ref HostZoneID
-      Name: !Ref DomainNameForAPI
-      Type: A
-      AliasTarget:
-        HostedZoneId: !GetAtt InternetALB.CanonicalHostedZoneID
-        DNSName: !GetAtt InternetALB.DNSName
-  # Internal
-  InternalALBAliasRecord:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      HostedZoneId: !Ref PrivateHostZoneID
-      Name: !Ref DomainNameForInternal
-      Type: A
-      AliasTarget:
-        HostedZoneId: !GetAtt InternalALB.CanonicalHostedZoneID
-        DNSName: !GetAtt InternalALB.DNSName
 
   # -------------------------------------
   # S3 Bucket For ALB Access Logs (Use only staging and production)
@@ -422,6 +302,12 @@ Resources:
           - Id: DeleteAfter365days
             Status: Enabled
             ExpirationInDays: 365
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
   LogsBucketPolicy:
     Condition: IsEnabledAccessLogs
     Type: AWS::S3::BucketPolicy
@@ -437,46 +323,6 @@ Resources:
             Action:
               - s3:PutObject
             Resource: !Sub arn:aws:s3:::${LogsBucket}/AWSLogs/${AWS::AccountId}/*
-  # Internal
-  InternalLogsBucket:
-    Condition: IsEnabledAccessLogs
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Join
-        - "-"
-        - - !Sub "${ProjectName}-${Environment}-internal-alb-access-logs"
-          - !Select [0, !Split ["-", !Select [2, !Split ["/", !Ref AWS::StackId]]]]
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      LifecycleConfiguration:
-        Rules:
-          - Id: DeleteAfter365days
-            Status: Enabled
-            ExpirationInDays: 365
-  InternalLogsBucketPolicy:
-    Condition: IsEnabledAccessLogs
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref InternalLogsBucket
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              # S3 バケットポリシーに使用する ELB Account ID
-              AWS: !FindInMap [RegionMap, !Ref AWS::Region, ELBAccountID]
-            Action:
-              - s3:PutObject
-            Resource: !Sub arn:aws:s3:::${InternalLogsBucket}/AWSLogs/${AWS::AccountId}/*
 
 # -------------------------------------
 # Outputs
@@ -494,7 +340,3 @@ Outputs:
     Value: !Ref ALBTargetGroupGreen
   ALBTargetGroupGreenName:
     Value: !GetAtt ALBTargetGroupGreen.TargetGroupName
-  DomainNameForAPI:
-    Value: !Ref DomainNameForAPI
-  DomainNameForInternal:
-    Value: !Ref DomainNameForInternal

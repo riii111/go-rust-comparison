@@ -76,6 +76,10 @@ Parameters:
     Description: "Enter the base64 Amplify basic auth credentials.(ex: Basic xxxxxxxxxxxxxxx)"
     Type: String
     NoEcho: true
+  ALBDomainName:
+    Description: "Enter the ALB domain name. (ex: xxxx.elb.amazonaws.com)"
+    Type: String
+    Default: ""
   CachePolicy:
     Description: "Select the CloudFront cache policy."
     Type: String
@@ -113,6 +117,8 @@ Parameters:
 Conditions:
   # WAFv2 の指定有無による条件
   NotEmptyWebACLArn: !Not [!Equals [!Ref WebACLArn, ""]]
+  # ALB の指定有無による条件
+  UseALBOrigin: !Not [!Equals [!Ref ALBDomainName, ""]]
 
 # -------------------------------------
 # Resources
@@ -146,6 +152,7 @@ Resources:
   # -------------------------------------
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
+    DependsOn: AccessLogsStorageBucket
     Properties:
       DistributionConfig:
         Origins:
@@ -158,6 +165,14 @@ Resources:
           OriginCustomHeaders:
             - HeaderName: Authorization
               HeaderValue: !Ref AuthHeaderValue
+        # ALBDomainName が指定されている場合は ALB を追加
+        - !If
+          - UseALBOrigin
+          - Id: ALB
+            DomainName: !Ref ALBDomainName  # ALB の DNS 名
+            CustomOriginConfig:
+              OriginProtocolPolicy: http-only
+          - !Ref AWS::NoValue
         Enabled: true
         Comment: "Amplify Hosting Distribution"
         DefaultCacheBehavior:
@@ -178,6 +193,15 @@ Resources:
               TargetOriginId: Amplify
               ViewerProtocolPolicy: redirect-to-https
               CachePolicyId: !Ref StaticFilesCachePolicy
+            # ALBDomainName が指定されている場合は ALB を追加
+            - !If
+              - UseALBOrigin
+              - PathPattern: "/api/*"
+                TargetOriginId: ALB
+                ViewerProtocolPolicy: redirect-to-https
+                CachePolicyId: !FindInMap [CachePolicyIds, CachingDisabled, Id]
+              - !Ref AWS::NoValue
+
         IPV6Enabled: false
         WebACLId: !If
           - NotEmptyWebACLArn

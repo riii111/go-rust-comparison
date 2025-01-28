@@ -82,15 +82,16 @@ Resources:
           Value: !Ref ProjectName
         - Key: Environment
           Value: !Ref Environment
-  ALBSGIngressHTTPS:
+  ALBSGIngressHTTP:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       GroupId: !Ref ALBSG
       IpProtocol: tcp
-      FromPort: 443
-      ToPort: 443
-      CidrIp: 0.0.0.0/0
-      Description: "from client"
+      FromPort: 80
+      ToPort: 80
+      # CloudFrontのIPアドレス範囲
+      SourcePrefixListId: pl-58a04531
+      Description: "Allow HTTP from CloudFront"
 
   # For ECS Fargate
   FargateSG:
@@ -114,16 +115,8 @@ Resources:
       FromPort: 80
       ToPort: 80
       SourceSecurityGroupId: !Ref ALBSG
-      Description: "from alb health check"
-  FargateSGIngressHTTPS:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !Ref FargateSG
-      IpProtocol: tcp
-      FromPort: 443
-      ToPort: 443
-      SourceSecurityGroupId: !Ref ALBSG
       Description: "from alb"
+
 
   # Use only when Blue/Green Deployment
   FargateSGIngressHTTPTest:
