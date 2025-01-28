@@ -35,6 +35,9 @@ func (u *OperatorUsecase) CreateOperator(req requests.CreateOperatorRequest) err
 		return ErrPasswordProcessing
 	}
 
+	// セキュリティ対策：パスワードをメモリから消去
+	req.Password = ""
+
 	// オペレーターモデルを作成
 	operator := &models.Operator{
 		Email:        req.Email,
