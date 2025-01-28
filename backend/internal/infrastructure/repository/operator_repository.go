@@ -8,26 +8,37 @@ import (
 	"gorm.io/gorm"
 )
 
+// データベースエラーに関する定数
 var (
 	ErrDuplicateEmail     = errors.New("既に登録されているメールアドレスです")
 	ErrForeignKeyViolated = errors.New("該当する店舗が存在しません")
 )
 
+// オペレーターリポジトリのインターフェース
+type IOperatorRepository interface {
+	Create(operator *models.Operator) error
+}
+
+// オペレーターリポジトリの構造体
 type OperatorRepository struct {
 	db *gorm.DB
 }
 
-func NewOperatorRepository() *OperatorRepository {
+// オペレーターリポジトリのインスタンスを生成
+func NewOperatorRepository() IOperatorRepository {
 	return &OperatorRepository{
 		db: database.DB,
 	}
 }
 
+// オペレーターを新規作成
 func (r *OperatorRepository) Create(operator *models.Operator) error {
 	if err := r.db.Create(operator).Error; err != nil {
+		// メールアドレスの重複チェック
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return ErrDuplicateEmail
 		}
+		// 外部キー制約違反のチェック
 		if errors.Is(err, gorm.ErrForeignKeyViolated) {
 			return ErrForeignKeyViolated
 		}

@@ -10,17 +10,21 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
 )
 
+// オペレーターハンドラーの構造体
 type OperatorHandler struct {
 	operatorUsecase *usecase.OperatorUsecase
 }
 
+// オペレーターハンドラーのコンストラクタ
 func NewOperatorHandler(operatorUsecase *usecase.OperatorUsecase) *OperatorHandler {
 	return &OperatorHandler{
 		operatorUsecase: operatorUsecase,
 	}
 }
 
+// オペレーターを新規作成するハンドラー
 func (h *OperatorHandler) CreateOperator(c *gin.Context) {
+	// リクエストボディをバインド
 	var req requests.CreateOperatorRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, responses.ErrorResponse{
@@ -30,8 +34,10 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 		return
 	}
 
+	// オペレーター作成処理を実行
 	err := h.operatorUsecase.CreateOperator(req)
 	if err != nil {
+		// エラーの種類に応じてレスポンスを返す
 		switch err {
 		case repository.ErrDuplicateEmail:
 			c.JSON(http.StatusConflict, responses.ErrorResponse{Error: repository.ErrDuplicateEmail.Error()})
@@ -49,6 +55,7 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 		return
 	}
 
+	// 成功レスポンスを返す
 	c.JSON(http.StatusCreated, responses.CreateOperatorResponse{
 		Message: "オペレーターの登録に成功しました",
 	})
