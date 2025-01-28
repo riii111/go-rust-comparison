@@ -34,12 +34,10 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 	if err != nil {
 		switch err {
 		case repository.ErrDuplicateEmail:
-			c.JSON(http.StatusConflict, responses.ErrorResponse{
-				Error: "このメールアドレスは既に登録されています",
-			})
+			c.JSON(http.StatusConflict, responses.ErrorResponse{Error: repository.ErrDuplicateEmail.Error()})
 		case usecase.ErrPasswordProcessing:
 			c.JSON(http.StatusUnprocessableEntity, responses.ErrorResponse{
-				Error: "パスワードの処理に失敗しました。パスワードの要件を確認してください",
+				Error: usecase.ErrPasswordProcessing.Error(),
 			})
 		default:
 			c.JSON(http.StatusUnprocessableEntity, responses.ErrorResponse{

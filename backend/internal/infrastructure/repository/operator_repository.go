@@ -2,11 +2,14 @@ package repository
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
 	"gorm.io/gorm"
+)
+
+var (
+	ErrDuplicateEmail = errors.New("既に登録されているメールアドレスです")
 )
 
 type OperatorRepository struct {
@@ -19,33 +22,22 @@ func NewOperatorRepository() *OperatorRepository {
 	}
 }
 
-// CreateOperator オペレーターを作成する
-func (r *OperatorRepository) CreateOperator(operator *models.Operator) error {
-	result := r.db.Create(operator)
-	if result.Error != nil {
-		// PostgreSQLのユニーク制約違反エラーをチェック
-		if strings.Contains(result.Error.Error(), "uni_operators_email") {
-			return ErrDuplicateEmail
-		}
-		return result.Error
+func (r *OperatorRepository) isEmailExists(email string) (bool, error) {
+	var count int64
+	if err := r.db.Model(&models.Operator{}).Where("email = ?", email).Count(&count).Error; err != nil {
+		return false, err
 	}
-	return nil
+	return count > 0, nil
 }
 
-// FindByEmail メールアドレスでオペレーターを検索する
-func (r *OperatorRepository) FindByEmail(email string) (*models.Operator, error) {
-	var operator models.Operator
-	result := r.db.Where("email = ?", email).First(&operator)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
-		return nil, result.Error
+func (r *OperatorRepository) Create(operator *models.Operator) error {
+	exists, err := r.isEmailExists(operator.Email)
+	if err != nil {
+		return err
 	}
-	return &operator, nil
-}
+	if exists {
+		return ErrDuplicateEmail
+	}
 
-// リポジトリ層で使用するエラー定義
-var (
-	ErrDuplicateEmail = errors.New("duplicate email")
-)
+	return r.db.Create(operator).Error
+}
