@@ -59,7 +59,7 @@ Parameters:
     ConstraintDescription: "Environment name must be selected."
     Default: dev
   ECSClusterName:
-    Description: "Enter the ECS cluster name. (ex: go-rust-comparison-cluster)"
+    Description: "Enter the ECS cluster name. (ex: go-rust-comparison-dev-cluster)"
     Type: String
   ECSProtectedSubnet1:
     Description: "Enter the Subnet ID for ECS in the selected VPC."
@@ -102,13 +102,13 @@ Parameters:
     Description: "Specify the IAM Role ARN required to execute the task. (ex: arn:aws:iam::012345678910:role/ECSTaskExecutionRole)"
     Type: String
   EntrypointPath:
-    Description: "Enter the path of the entrypoint to be executed at ECS task startup. (ex: /usr/local/bin/entrypoint.dev.sh)"
+    Description: "Enter the path of the entrypoint to be executed at ECS task startup. (ex: /usr/local/bin/entrypoint.sh)"
     Type: String
   # アプリケーション用の Dockerfile で設定しているワーキングディレクトリと揃える
   ApplicationRootPath:
-    Description: "Enter the application root path as defined in the Dockerfile. (ex: /go_rust_comparison)"
+    Description: "Enter the application root path as defined in the Dockerfile. (ex: /usr/local/go/src/go_rust_comparison/backend)"
     Type: String
-    Default: /go_rust_comparison
+    Default: /usr/local/go/src/go_rust_comparison/backend
   ALBTargetGroupArn:
     Description: "Enter the ALB Target Group ARN."
     Type: String
@@ -121,7 +121,7 @@ Parameters:
     Description: "Enter the ECR image URI for webserver."
     Type: String
   AppLogGroupName:
-    Description: "Enter the CloudWatch Logs log-group name for application. (ex: /ecs/go-rust-comparison/dev/back/gin)"
+    Description: "Enter the CloudWatch Logs log-group name for application. (ex: /ecs/go-rust-comparison/dev/back/golang)"
     Type: String
   WebLogGroupName:
     Description: "Enter the CloudWatch Logs log-group name for webserver. (ex: /ecs/go-rust-comparison/dev/back/nginx)"
@@ -168,46 +168,28 @@ Resources:
             # -------------------------------------
             # Specific Environment
             # -------------------------------------
-            - Name: DEBUG_FLAG
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/DEBUG_FLAG
-            - Name: DJANGO_SECRET_KEY
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/DJANGO_SECRET_KEY
-            - Name: DJANGO_ALLOWED_HOSTS
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/DJANGO_ALLOWED_HOSTS
-            - Name: DJANGO_SETTINGS_MODULE
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/DJANGO_SETTINGS_MODULE
-            - Name: MYSQL_ROOT_PASSWORD
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/MYSQL_ROOT_PASSWORD
-            - Name: MYSQL_DATABASE
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/MYSQL_DATABASE
-            - Name: MYSQL_USER
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/MYSQL_USER
-            - Name: MYSQL_PASSWORD
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/MYSQL_PASSWORD
-            - Name: MYSQL_HOST
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/MYSQL_HOST
-            - Name: MYSQL_PORT
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/MYSQL_PORT
-            - Name: TRUSTED_ORIGINS
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/TRUSTED_ORIGINS
-            - Name: CSRF_COOKIE_DOMAIN
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/CSRF_COOKIE_DOMAIN
-            - Name: AWS_DEFAULT_REGION
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/AWS_DEFAULT_REGION
-            - Name: AWS_SES_REGION_ENDPOINT
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/AWS_SES_REGION_ENDPOINT
-            - Name: FROM_FORM_EMAIL
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/FROM_FORM_EMAIL
-            - Name: FROM_ADMIN_EMAIL
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/FROM_ADMIN_EMAIL
-            - Name: BASE_URL
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/BASE_URL
-            - Name: SLACK_TEAM_ID
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/SLACK_TEAM_ID
-            - Name: SLACK_ENDPOINT_URL
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/SLACK_ENDPOINT_URL
-            - Name: LAMBDA_TOKEN
-              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/LAMBDA_TOKEN
+            - Name: POSTGRES_NAME
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/POSTGRES_NAME
+            - Name: POSTGRES_USER
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/POSTGRES_USER
+            - Name: POSTGRES_PASSWORD
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/POSTGRES_PASSWORD
+            - Name: POSTGRES_PORT
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/POSTGRES_PORT
+            - Name: POSTGRES_HOST
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/POSTGRES_HOST
+            - Name: CORS_ALLOW_ORIGINS
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/CORS_ALLOW_ORIGINS
+            - Name: CORS_ALLOW_METHODS
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/CORS_ALLOW_METHODS
+            - Name: CORS_ALLOW_HEADERS
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/CORS_ALLOW_HEADERS
+            - Name: CORS_EXPOSE_HEADERS
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/CORS_EXPOSE_HEADERS
+            - Name: CORS_ALLOW_CREDENTIALS
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/CORS_ALLOW_CREDENTIALS
+            - Name: CORS_MAX_AGE
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/CORS_MAX_AGE
           MountPoints:
             - SourceVolume: tmp-data
               ContainerPath: !Sub ${ApplicationRootPath}/tmp
