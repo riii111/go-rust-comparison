@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	ErrDuplicateEmail = errors.New("既に登録されているメールアドレスです")
+	ErrDuplicateEmail     = errors.New("既に登録されているメールアドレスです")
+	ErrForeignKeyViolated = errors.New("該当する店舗が存在しません")
 )
 
 type OperatorRepository struct {
@@ -22,22 +23,15 @@ func NewOperatorRepository() *OperatorRepository {
 	}
 }
 
-func (r *OperatorRepository) isEmailExists(email string) (bool, error) {
-	var count int64
-	if err := r.db.Model(&models.Operator{}).Where("email = ?", email).Count(&count).Error; err != nil {
-		return false, err
-	}
-	return count > 0, nil
-}
-
 func (r *OperatorRepository) Create(operator *models.Operator) error {
-	exists, err := r.isEmailExists(operator.Email)
-	if err != nil {
+	if err := r.db.Create(operator).Error; err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return ErrDuplicateEmail
+		}
+		if errors.Is(err, gorm.ErrForeignKeyViolated) {
+			return ErrForeignKeyViolated
+		}
 		return err
 	}
-	if exists {
-		return ErrDuplicateEmail
-	}
-
-	return r.db.Create(operator).Error
+	return nil
 }

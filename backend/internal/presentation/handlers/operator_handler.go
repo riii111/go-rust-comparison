@@ -35,6 +35,8 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 		switch err {
 		case repository.ErrDuplicateEmail:
 			c.JSON(http.StatusConflict, responses.ErrorResponse{Error: repository.ErrDuplicateEmail.Error()})
+		case repository.ErrForeignKeyViolated:
+			c.JSON(http.StatusConflict, responses.ErrorResponse{Error: repository.ErrForeignKeyViolated.Error()})
 		case usecase.ErrPasswordProcessing:
 			c.JSON(http.StatusUnprocessableEntity, responses.ErrorResponse{
 				Error: usecase.ErrPasswordProcessing.Error(),
