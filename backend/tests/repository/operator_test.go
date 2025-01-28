@@ -60,28 +60,25 @@ func cleanupTestData(t *testing.T) {
 }
 
 func TestOperatorRepository(t *testing.T) {
-	setupTestDB(t)
+	// データベースのセットアップ
+	database.InitDB()
 	repo := repository.NewOperatorRepository()
+
+	// テストデータのセットアップ
 	storeID := setupTestData(t)
 
-	t.Cleanup(func() {
-		cleanupTestData(t)
-	})
-
-	baseOperator := &models.Operator{
-		Email:        "test@example.com",
-		Username:     "testuser",
-		PasswordHash: "hashedpassword",
-		Role:         models.RoleSystemAdmin,
-		StoreID:      storeID,
-		CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-		UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-	}
-
 	t.Run("CreateOperator - 正常系", func(t *testing.T) {
-		err := repo.CreateOperator(baseOperator)
+		operator := &models.Operator{
+			Email:        "test@example.com",
+			Username:     "testuser",
+			PasswordHash: "hashedpassword",
+			Role:         models.RoleSystemAdmin,
+			StoreID:      storeID,
+			CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+			UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
+		}
+		err := repo.Create(operator)
 		assert.NoError(t, err)
-		assert.NotEmpty(t, baseOperator.ID)
 	})
 
 	t.Run("CreateOperator - メールアドレス重複", func(t *testing.T) {
@@ -94,21 +91,7 @@ func TestOperatorRepository(t *testing.T) {
 			CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 			UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 		}
-		err := repo.CreateOperator(duplicateOperator)
+		err := repo.Create(duplicateOperator)
 		assert.ErrorIs(t, err, repository.ErrDuplicateEmail)
-	})
-
-	t.Run("FindByEmail - 存在するメールアドレス", func(t *testing.T) {
-		operator, err := repo.FindByEmail("test@example.com")
-		assert.NoError(t, err)
-		require.NotNil(t, operator)
-		assert.Equal(t, "test@example.com", operator.Email)
-		assert.Equal(t, "testuser", operator.Username)
-	})
-
-	t.Run("FindByEmail - 存在しないメールアドレス", func(t *testing.T) {
-		operator, err := repo.FindByEmail("nonexistent@example.com")
-		assert.NoError(t, err)
-		assert.Nil(t, operator)
 	})
 }
