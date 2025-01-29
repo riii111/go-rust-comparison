@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -114,8 +113,6 @@ func (suite *StockHandlersSuite) TestCreateRequestBodyFailure() {
 
 	suite.stockHandler.CreateStock(ginContext)
 	suite.Assert().Equal(http.StatusBadRequest, w.Code)
-	fmt.Println("**************")
-	fmt.Println(w.Body.String())
 	suite.Assert().JSONEq(`{"error": "invalid request"}`, w.Body.String())
 }
 
