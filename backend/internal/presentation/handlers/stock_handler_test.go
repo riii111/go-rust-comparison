@@ -1,4 +1,4 @@
-package handlers
+package handlers_test
 
 import (
 	"encoding/json"
@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
+	"github.com/riii111/go-rust-comparison/internal/presentation/handlers"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -36,7 +37,7 @@ func (m *MockStockUseCase) Create(stock *models.Stock) (*models.Stock, error) {
 
 type StockHandlersSuite struct {
 	suite.Suite
-	stockHandler *StockHandler
+	stockHandler *handlers.StockHandler
 }
 
 func TestStockHandlersTestSuite(t *testing.T) {
@@ -46,12 +47,12 @@ func TestStockHandlersTestSuite(t *testing.T) {
 func (suite *StockHandlersSuite) TestCreate() {
 	mockUseCase := NewMockStockUseCase()
 
-	productId := uuid.New().String()
-	storeId := uuid.New().String()
+	productId, _ := uuid.NewV7()
+	storeId, _ := uuid.NewV7()
 	price := decimal.New(1000, 0)
 	inputStock := &models.Stock{
-		ProductID:   productId,
-		StoreID:     storeId,
+		ProductID:   productId.String(),
+		StoreID:     storeId.String(),
 		Size:        "large",
 		Color:       "red",
 		Quantity:    100,
@@ -59,12 +60,12 @@ func (suite *StockHandlersSuite) TestCreate() {
 		IsAvailable: true,
 	}
 
-	uuid := "0194a588-bd91-729e-bcfb-2d2e7b19e1ef"
+	Id, _ := uuid.NewV7()
 	now := time.Now()
 	mockUseCase.On("Create", inputStock).Return(&models.Stock{
-		ID:          uuid,
-		ProductID:   productId,
-		StoreID:     storeId,
+		ID:          Id.String(),
+		ProductID:   productId.String(),
+		StoreID:     storeId.String(),
 		Size:        "large",
 		Color:       "red",
 		Quantity:    100,
@@ -74,7 +75,7 @@ func (suite *StockHandlersSuite) TestCreate() {
 		UpdatedAt:   now,
 	}, nil)
 
-	suite.stockHandler = NewStockHandler(mockUseCase)
+	suite.stockHandler = handlers.NewStockHandler(mockUseCase)
 
 	w := httptest.NewRecorder()
 	ginContext, _ := gin.CreateTestContext(w)
@@ -119,12 +120,12 @@ func (suite *StockHandlersSuite) TestCreateRequestBodyFailure() {
 func (suite *StockHandlersSuite) TestCreateFailure() {
 	mockUseCase := NewMockStockUseCase()
 
-	productId := uuid.New().String()
-	storeId := uuid.New().String()
+	productId, _ := uuid.NewV7()
+	storeId, _ := uuid.NewV7()
 	price := decimal.New(1000, 0)
 	inputStock := &models.Stock{
-		ProductID:   productId,
-		StoreID:     storeId,
+		ProductID:   productId.String(),
+		StoreID:     storeId.String(),
 		Size:        "large",
 		Color:       "red",
 		Quantity:    100,
@@ -134,7 +135,7 @@ func (suite *StockHandlersSuite) TestCreateFailure() {
 
 	mockUseCase.On("Create", inputStock).Return(nil,
 		errors.New("invalid"))
-	suite.stockHandler = NewStockHandler(mockUseCase)
+	suite.stockHandler = handlers.NewStockHandler(mockUseCase)
 
 	w := httptest.NewRecorder()
 	ginContext, _ := gin.CreateTestContext(w)

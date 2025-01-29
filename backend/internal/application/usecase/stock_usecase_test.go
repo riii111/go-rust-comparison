@@ -1,10 +1,11 @@
-package usecase
+package usecase_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/mock"
@@ -29,7 +30,7 @@ func (m *mockStockRepository) Create(stock *models.Stock) (*models.Stock, error)
 
 type StockUseCaseSuite struct {
 	suite.Suite
-	stockUseCase *stockUserCase
+	stockUseCase usecase.StockUserCase
 }
 
 func TestStockUseCaseTestSuite(t *testing.T) {
@@ -38,13 +39,13 @@ func TestStockUseCaseTestSuite(t *testing.T) {
 
 func (suite *StockUseCaseSuite) TestCreate() {
 	mockStockRepository := NewMockStockRepository()
-	suite.stockUseCase = NewStockUseCase(mockStockRepository)
+	suite.stockUseCase = usecase.NewStockUseCase(mockStockRepository)
 
-	productId := uuid.New().String()
-	storeId := uuid.New().String()
+	productId, _ := uuid.NewV7()
+	storeId, _ := uuid.NewV7()
 	inputStock := &models.Stock{
-		ProductID:   productId,
-		StoreID:     storeId,
+		ProductID:   productId.String(),
+		StoreID:     storeId.String(),
 		Size:        "large",
 		Color:       "red",
 		Quantity:    100,
@@ -52,13 +53,13 @@ func (suite *StockUseCaseSuite) TestCreate() {
 		IsAvailable: true,
 	}
 
-	uuid := "0194a588-bd91-729e-bcfb-2d2e7b19e1ef"
+	Id, _ := uuid.NewV7()
 	now := time.Now()
 	// Mockの返り値を定義
 	mockStockRepository.On("Create", inputStock).Return(&models.Stock{
-		ID:          uuid,
-		ProductID:   productId,
-		StoreID:     storeId,
+		ID:          Id.String(),
+		ProductID:   productId.String(),
+		StoreID:     storeId.String(),
 		Size:        "large",
 		Color:       "red",
 		Quantity:    100,
