@@ -75,13 +75,13 @@ func generateTokenPair(user *models.Operator) (*TokenPair, error) {
 	// アクセストークンの署名
 	accessTokenString, err := accessToken.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
 	if err != nil {
-		return nil, fmt.Errorf("アクセストークンの署名に失敗しました: %w", err)
+		return nil, fmt.Errorf("アクセストークンの生成に失敗しました: %w", err)
 	}
 
 	// リフレッシュトークンの署名
 	refreshTokenString, err := refreshToken.SignedString([]byte(os.Getenv("JWT_REFRESH_SECRET_KEY")))
 	if err != nil {
-		return nil, fmt.Errorf("リフレッシュトークンの署名に失敗しました: %w", err)
+		return nil, fmt.Errorf("リフレッシュトークンの生成に失敗しました: %w", err)
 	}
 
 	return &TokenPair{
@@ -95,13 +95,13 @@ func authenticateUser(email, password string) (*models.Operator, error) {
 	var operator models.Operator
 	if err := database.DB.Where("email = ?", email).First(&operator).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("認証失敗")
+			return nil, fmt.Errorf("認証に失敗しました")
 		}
-		return nil, fmt.Errorf("データベースエラー: %w", err)
+		return nil, fmt.Errorf("データベースの処理中にエラーが発生しました: %w", err)
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(operator.PasswordHash), []byte(password)); err != nil {
-		return nil, fmt.Errorf("認証失敗")
+		return nil, fmt.Errorf("認証に失敗しました")
 	}
 
 	return &operator, nil
@@ -111,7 +111,7 @@ func authenticateUser(email, password string) (*models.Operator, error) {
 func Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		sendErrorResponse(c, http.StatusBadRequest, "無効なリクエストです")
+		sendErrorResponse(c, http.StatusBadRequest, "リクエストの形式が正しくありません")
 		return
 	}
 
@@ -127,7 +127,7 @@ func Login(c *gin.Context) {
 
 	tokenPair, err := generateTokenPair(operator)
 	if err != nil {
-		sendErrorResponse(c, http.StatusInternalServerError, "トークンの生成に失敗しました")
+		sendErrorResponse(c, http.StatusInternalServerError, "認証トークンの生成に失敗しました")
 		return
 	}
 
