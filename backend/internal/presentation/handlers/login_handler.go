@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -37,6 +38,15 @@ const (
 	refreshTokenDuration = 30 * 24 * time.Hour
 	cookiePath           = "/"
 )
+
+// カスタムエラー型の定義
+type AuthError struct {
+	message string
+}
+
+func (e *AuthError) Error() string {
+	return e.message
+}
 
 // エラーレスポンスを返す共通関数
 func sendErrorResponse(c *gin.Context, status int, message string) {
@@ -95,13 +105,16 @@ func authenticateUser(email, password string) (*models.Operator, error) {
 	var operator models.Operator
 	if err := database.DB.Where("email = ?", email).First(&operator).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, fmt.Errorf("認証に失敗しました")
+			log.Printf("認証に失敗しました")
+			return nil, &AuthError{}
 		}
-		return nil, fmt.Errorf("データベースの処理中にエラーが発生しました: %w", err)
+		log.Printf("データベースエラー: %s", err)
+		return nil, &AuthError{}
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(operator.PasswordHash), []byte(password)); err != nil {
-		return nil, fmt.Errorf("認証に失敗しました")
+		log.Printf("認証に失敗しました")
+		return nil, &AuthError{}
 	}
 
 	return &operator, nil
@@ -117,7 +130,7 @@ func Login(c *gin.Context) {
 
 	operator, err := authenticateUser(req.Email, req.Password)
 	if err != nil {
-		if err.Error() == "認証失敗" {
+		if _, ok := err.(*AuthError); ok {
 			sendErrorResponse(c, http.StatusUnauthorized, "メールアドレスまたはパスワードが正しくありません")
 			return
 		}
@@ -127,7 +140,7 @@ func Login(c *gin.Context) {
 
 	tokenPair, err := generateTokenPair(operator)
 	if err != nil {
-		sendErrorResponse(c, http.StatusInternalServerError, "認証トークンの生成に失敗しました")
+		sendErrorResponse(c, http.StatusInternalServerError, "エラーが発生しました")
 		return
 	}
 
