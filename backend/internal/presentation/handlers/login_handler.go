@@ -100,24 +100,24 @@ func Login(c *gin.Context) {
 
 	// アクセストークンをHTTPOnlyクッキーとして設定
 	c.SetCookie(
-		"access_token",
-		tokenPair.AccessToken,
-		3600*24, // 24時間
-		"/",
-		os.Getenv("DOMAIN"),
-		true, // HTTPSのみ
-		true, // JavaScriptからアクセス不可
+		"access_token",        // name: クッキーの名前
+		tokenPair.AccessToken, // value: クッキーの値
+		3600*24,               // maxAge: 有効期限（秒）: 24時間
+		"/",                   // path: パス: すべてのパスで利用可能
+		os.Getenv("DOMAIN"),   // domain: ドメイン: 環境変数から取得
+		true,                  // secure: HTTPSでのみ送信可能
+		true,                  // httpOnly: JavaScriptからアクセス不可
 	)
 
 	// リフレッシュトークンをHTTPOnlyクッキーとして設定
 	c.SetCookie(
-		"refresh_token",
-		tokenPair.RefreshToken,
-		3600*24*30, // 30日間
-		"/",
-		os.Getenv("DOMAIN"),
-		true, // HTTPSのみ
-		true, // JavaScriptからアクセス不可
+		"refresh_token",        // name: クッキーの名前
+		tokenPair.RefreshToken, // value: 	クッキーの値
+		3600*24*30,             // maxAge: 有効期限（秒）: 30日間
+		"/",                    // path: パス: すべてのパスで利用可能
+		os.Getenv("DOMAIN"),    // domain: ドメイン: 環境変数から取得
+		true,                   // secure: HTTPSでのみ送信可能
+		true,                   // httpOnly: JavaScriptからアクセス不可
 	)
 
 	// 成功レスポンスを返す
