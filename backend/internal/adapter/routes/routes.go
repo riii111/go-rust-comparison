@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
+	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
 	"github.com/riii111/go-rust-comparison/internal/presentation/handlers"
 )
 
@@ -13,7 +14,8 @@ func setupHealthRoutes(api *gin.RouterGroup) {
 
 func setupOperatorRoutes(api *gin.RouterGroup) {
 	operators := api.Group("/operators")
-	operatorUsecase := usecase.NewOperatorUsecase()
+	operatorRepo := repository.NewOperatorRepository()
+	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
 	operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
 	operators.POST("", operatorHandler.CreateOperator)
 }

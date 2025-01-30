@@ -7,6 +7,4 @@ type CreateOperatorRequest struct {
 	Role      string `json:"role" binding:"required,oneof=system_admin store_admin"`
 	StoreID   string `json:"store_id" binding:"required,uuid"`
 	AvatarURL string `json:"avatar_url" binding:"omitempty,url"`
-	CreatedBy string `json:"created_by" binding:"required,uuid"`
-	UpdatedBy string `json:"updated_by" binding:"omitempty,uuid"`
 }

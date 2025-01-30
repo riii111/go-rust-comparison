@@ -14,13 +14,18 @@ var (
 	ErrPasswordProcessing = errors.New("パスワードの処理に失敗しました。パスワードの要件を確認してください")
 )
 
+const (
+	// システムデフォルトのUUID
+	defaultSystemUUID = "00000000-0000-0000-0000-000000000000"
+)
+
 // オペレーターのユースケース構造体
 type OperatorUsecase struct {
-	operatorRepo repository.OperatorRepository
+	operatorRepo repository.IOperatorRepository
 }
 
 // オペレーターユースケースのコンストラクタ
-func NewOperatorUsecase(repo repository.OperatorRepository) *OperatorUsecase {
+func NewOperatorUsecase(repo repository.IOperatorRepository) *OperatorUsecase {
 	return &OperatorUsecase{
 		operatorRepo: repo,
 	}
@@ -28,10 +33,6 @@ func NewOperatorUsecase(repo repository.OperatorRepository) *OperatorUsecase {
 
 // オペレーターを新規作成するメソッド
 func (u *OperatorUsecase) CreateOperator(req requests.CreateOperatorRequest) error {
-	// 更新者が未設定の場合は作成者を設定
-	if req.UpdatedBy == "" {
-		req.UpdatedBy = req.CreatedBy
-	}
 
 	// パスワードをハッシュ化
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
@@ -53,8 +54,8 @@ func (u *OperatorUsecase) CreateOperator(req requests.CreateOperatorRequest) err
 		Role:         req.Role,
 		StoreID:      req.StoreID,
 		AvatarURL:    req.AvatarURL,
-		CreatedBy:    req.CreatedBy,
-		UpdatedBy:    req.CreatedBy,
+		CreatedBy:    defaultSystemUUID,
+		UpdatedBy:    defaultSystemUUID,
 	}
 
 	// リポジトリを通してオペレーターを保存
