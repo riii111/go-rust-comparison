@@ -1,18 +1,12 @@
 package handlers
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/riii111/go-rust-comparison/internal/adapter/database"
-	"github.com/riii111/go-rust-comparison/internal/domain/models"
-	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
+	"github.com/riii111/go-rust-comparison/internal/usecase"
 )
 
 // ログインリクエストの構造体
@@ -26,27 +20,12 @@ type LoginResponse struct {
 	Token string `json:"token"`
 }
 
-// アクセストークンとリフレッシュトークンのペアを保持する構造体
-type TokenPair struct {
-	AccessToken  string
-	RefreshToken string
-}
-
 // クッキーの設定に関する定数
 const (
 	accessTokenDuration  = 24 * time.Hour
 	refreshTokenDuration = 30 * 24 * time.Hour
 	cookiePath           = "/"
 )
-
-// カスタムエラー型の定義
-type AuthError struct {
-	message string
-}
-
-func (e *AuthError) Error() string {
-	return e.message
-}
 
 // エラーレスポンスを返す共通関数
 func sendErrorResponse(c *gin.Context, status int, message string) {
@@ -56,68 +35,14 @@ func sendErrorResponse(c *gin.Context, status int, message string) {
 // クッキーを設定する共通関数
 func setAuthCookie(c *gin.Context, name, value string, maxAge time.Duration) {
 	c.SetCookie(
-		name,                  // name: クッキーの名前
-		value,                 // value: クッキーの値
-		int(maxAge.Seconds()), // maxAge: クッキーの有効期限（秒単位）
-		cookiePath,            // path: クッキーが有効なパス（"/"の場合、全てのパスで有効）
-		os.Getenv("DOMAIN"),   // domain: クッキーが有効なドメイン
-		true,                  // secure: trueの場合、HTTPSでのみクッキーを送信
-		true,                  // httpOnly: trueの場合、JavaScriptからクッキーへのアクセスを禁止
+		name,
+		value,
+		int(maxAge.Seconds()),
+		cookiePath,
+		os.Getenv("DOMAIN"),
+		true,
+		true,
 	)
-}
-
-// ユーザー情報を基にJWTトークンペアを生成する関数
-func generateTokenPair(user *models.Operator) (*TokenPair, error) {
-	// アクセストークンの生成（24時間有効）
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":   user.ID,
-		"email": user.Email,
-		"role":  user.Role,
-		"exp":   time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	// リフレッシュトークンの生成（30日間有効）
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": user.ID,
-		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
-	})
-
-	// アクセストークンの署名
-	accessTokenString, err := accessToken.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
-	if err != nil {
-		return nil, fmt.Errorf("アクセストークンの生成に失敗しました: %w", err)
-	}
-
-	// リフレッシュトークンの署名
-	refreshTokenString, err := refreshToken.SignedString([]byte(os.Getenv("JWT_REFRESH_SECRET_KEY")))
-	if err != nil {
-		return nil, fmt.Errorf("リフレッシュトークンの生成に失敗しました: %w", err)
-	}
-
-	return &TokenPair{
-		AccessToken:  accessTokenString,
-		RefreshToken: refreshTokenString,
-	}, nil
-}
-
-// ユーザー認証を行う関数
-func authenticateUser(email, password string) (*models.Operator, error) {
-	var operator models.Operator
-	if err := database.DB.Where("email = ?", email).First(&operator).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			log.Printf("認証に失敗しました")
-			return nil, &AuthError{}
-		}
-		log.Printf("データベースエラー: %s", err)
-		return nil, &AuthError{}
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(operator.PasswordHash), []byte(password)); err != nil {
-		log.Printf("認証に失敗しました")
-		return nil, &AuthError{}
-	}
-
-	return &operator, nil
 }
 
 // ログイン処理を行うハンドラー関数
@@ -128,19 +53,14 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	operator, err := authenticateUser(req.Email, req.Password)
+	loginUseCase := usecase.NewLoginUseCase()
+	tokenPair, err := loginUseCase.Execute(req.Email, req.Password)
 	if err != nil {
-		if _, ok := err.(*AuthError); ok {
+		if _, ok := err.(*usecase.AuthError); ok {
 			sendErrorResponse(c, http.StatusUnauthorized, "メールアドレスまたはパスワードが正しくありません")
 			return
 		}
 		sendErrorResponse(c, http.StatusInternalServerError, "サーバーエラーが発生しました")
-		return
-	}
-
-	tokenPair, err := generateTokenPair(operator)
-	if err != nil {
-		sendErrorResponse(c, http.StatusInternalServerError, "エラーが発生しました")
 		return
 	}
 
