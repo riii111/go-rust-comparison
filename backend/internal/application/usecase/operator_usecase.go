@@ -40,6 +40,9 @@ func (u *OperatorUsecase) CreateOperator(req requests.CreateOperatorRequest) err
 	}
 
 	// セキュリティ対策：パスワードをメモリから消去
+	// TODO: パスワードをメモリから消去する処理を追加
+	// str := "password"        // 文字列（不変）
+	// bytes := []byte(str)     // バイトスライス（可変）
 	req.Password = ""
 
 	// オペレーターモデルを作成
