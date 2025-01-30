@@ -15,11 +15,15 @@ var (
 )
 
 // オペレーターのユースケース構造体
-type OperatorUsecase struct{}
+type OperatorUsecase struct {
+	operatorRepo repository.OperatorRepository
+}
 
 // オペレーターユースケースのコンストラクタ
-func NewOperatorUsecase() *OperatorUsecase {
-	return &OperatorUsecase{}
+func NewOperatorUsecase(repo repository.OperatorRepository) *OperatorUsecase {
+	return &OperatorUsecase{
+		operatorRepo: repo,
+	}
 }
 
 // オペレーターを新規作成するメソッド
@@ -51,6 +55,5 @@ func (u *OperatorUsecase) CreateOperator(req requests.CreateOperatorRequest) err
 	}
 
 	// リポジトリを通してオペレーターを保存
-	operatorRepo := repository.NewOperatorRepository()
-	return operatorRepo.Create(operator)
+	return u.operatorRepo.Create(operator)
 }
