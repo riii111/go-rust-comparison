@@ -31,6 +31,31 @@ type TokenPair struct {
 	RefreshToken string
 }
 
+// クッキーの設定に関する定数
+const (
+	accessTokenDuration  = 24 * time.Hour
+	refreshTokenDuration = 30 * 24 * time.Hour
+	cookiePath           = "/"
+)
+
+// エラーレスポンスを返す共通関数
+func sendErrorResponse(c *gin.Context, status int, message string) {
+	c.JSON(status, gin.H{"error": message})
+}
+
+// クッキーを設定する共通関数
+func setAuthCookie(c *gin.Context, name, value string, maxAge time.Duration) {
+	c.SetCookie(
+		name,                  // name: クッキーの名前
+		value,                 // value: クッキーの値
+		int(maxAge.Seconds()), // maxAge: クッキーの有効期限（秒単位）
+		cookiePath,            // path: クッキーが有効なパス（"/"の場合、全てのパスで有効）
+		os.Getenv("DOMAIN"),   // domain: クッキーが有効なドメイン
+		true,                  // secure: trueの場合、HTTPSでのみクッキーを送信
+		true,                  // httpOnly: trueの場合、JavaScriptからクッキーへのアクセスを禁止
+	)
+}
+
 // ユーザー情報を基にJWTトークンペアを生成する関数
 func generateTokenPair(user *models.Operator) (*TokenPair, error) {
 	// アクセストークンの生成（24時間有効）
@@ -65,63 +90,49 @@ func generateTokenPair(user *models.Operator) (*TokenPair, error) {
 	}, nil
 }
 
+// ユーザー認証を行う関数
+func authenticateUser(email, password string) (*models.Operator, error) {
+	var operator models.Operator
+	if err := database.DB.Where("email = ?", email).First(&operator).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("認証失敗")
+		}
+		return nil, fmt.Errorf("データベースエラー: %w", err)
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(operator.PasswordHash), []byte(password)); err != nil {
+		return nil, fmt.Errorf("認証失敗")
+	}
+
+	return &operator, nil
+}
+
 // ログイン処理を行うハンドラー関数
 func Login(c *gin.Context) {
-	// リクエストのバリデーション
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "無効なリクエストです"})
+		sendErrorResponse(c, http.StatusBadRequest, "無効なリクエストです")
 		return
 	}
 
-	// メールアドレスを使用してユーザーを検索
-	var operator models.Operator
-	if err := database.DB.Where("email = ?", req.Email).First(&operator).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "メールアドレスまたはパスワードが正しくありません"})
+	operator, err := authenticateUser(req.Email, req.Password)
+	if err != nil {
+		if err.Error() == "認証失敗" {
+			sendErrorResponse(c, http.StatusUnauthorized, "メールアドレスまたはパスワードが正しくありません")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "サーバーエラーが発生しました"})
+		sendErrorResponse(c, http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
-	// パスワードのハッシュを比較して認証
-	if err := bcrypt.CompareHashAndPassword([]byte(operator.PasswordHash), []byte(req.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "メールアドレスまたはパスワードが正しくありません"})
-		return
-	}
-
-	// JWTトークンペアを生成
-	tokenPair, err := generateTokenPair(&operator)
+	tokenPair, err := generateTokenPair(operator)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "トークンの生成に失敗しました"})
+		sendErrorResponse(c, http.StatusInternalServerError, "トークンの生成に失敗しました")
 		return
 	}
 
-	// アクセストークンをHTTPOnlyクッキーとして設定
-	c.SetCookie(
-		"access_token",        // name: クッキーの名前
-		tokenPair.AccessToken, // value: クッキーの値
-		3600*24,               // maxAge: 有効期限（秒）: 24時間
-		"/",                   // path: パス: すべてのパスで利用可能
-		os.Getenv("DOMAIN"),   // domain: ドメイン: 環境変数から取得
-		true,                  // secure: HTTPSでのみ送信可能
-		true,                  // httpOnly: JavaScriptからアクセス不可
-	)
+	setAuthCookie(c, "access_token", tokenPair.AccessToken, accessTokenDuration)
+	setAuthCookie(c, "refresh_token", tokenPair.RefreshToken, refreshTokenDuration)
 
-	// リフレッシュトークンをHTTPOnlyクッキーとして設定
-	c.SetCookie(
-		"refresh_token",        // name: クッキーの名前
-		tokenPair.RefreshToken, // value: 	クッキーの値
-		3600*24*30,             // maxAge: 有効期限（秒）: 30日間
-		"/",                    // path: パス: すべてのパスで利用可能
-		os.Getenv("DOMAIN"),    // domain: ドメイン: 環境変数から取得
-		true,                   // secure: HTTPSでのみ送信可能
-		true,                   // httpOnly: JavaScriptからアクセス不可
-	)
-
-	// 成功レスポンスを返す
-	c.JSON(http.StatusOK, gin.H{
-		"message": "ログインに成功しました",
-	})
+	c.JSON(http.StatusOK, gin.H{"message": "ログインに成功しました"})
 }
