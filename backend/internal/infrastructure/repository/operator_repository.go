@@ -10,7 +10,7 @@ import (
 
 // データベースエラーに関する定数
 var (
-	ErrDuplicateEmail     = errors.New("既に登録されているメールアドレスです")
+	ErrDuplicateEmail     = errors.New("アカウント登録に失敗しました")
 	ErrForeignKeyViolated = errors.New("該当する店舗が存在しません")
 )
 
