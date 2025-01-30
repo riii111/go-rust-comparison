@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -54,9 +55,12 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 				Error: usecase.ErrPasswordProcessing.Error(),
 			})
 		default:
-			c.JSON(http.StatusUnprocessableEntity, responses.ErrorResponse{
-				Error: "オペレーターの登録に失敗しました。入力内容を確認してください",
+			// エラーの種類が不明な場合
+			c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
+				Error: "システムエラーが発生しました。しばらく時間をおいて再度お試しください",
 			})
+			// エラーログの出力
+			log.Printf("サーバーエラー: %v", err)
 		}
 		return
 	}
