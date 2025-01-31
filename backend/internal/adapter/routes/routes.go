@@ -9,45 +9,44 @@ import (
 )
 
 // 認証が必要なルートのセットアップ
-func setupAuthRoutes(api *gin.RouterGroup) {
-	auth := api.Group("")
-	{
-		auth.POST("/login", handlers.Login)
-	}
+func setupAuthRoutes(api *gin.RouterGroup, protected *gin.RouterGroup) {
+	// 認証不要のルート
+	api.POST("/login", handlers.Login)
 
-	protected := api.Group("")
-	protected.Use(middleware.AuthMiddleware())
-	{
-		protected.POST("/logout", handlers.Logout)
-	}
+	// 認証が必要なルート
+	protected.POST("/logout", handlers.Logout)
 }
 
 // ヘルスチェックルートのセットアップ
 func setupHealthRoutes(api *gin.RouterGroup) {
-	protected := api.Group("/health")
-	protected.Use(middleware.AuthMiddleware())
+	health := api.Group("/health")
 	{
-		protected.GET("", handlers.HealthCheck)
+		health.GET("", handlers.HealthCheck)
 	}
 }
 
 // オペレータールートのセットアップ
-func setupOperatorRoutes(api *gin.RouterGroup) {
-	protected := api.Group("/operators")
-	protected.Use(middleware.AuthMiddleware())
+func setupOperatorRoutes(protected *gin.RouterGroup) {
+	operators := protected.Group("/operators")
 
 	operatorRepo := repository.NewOperatorRepository()
 	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
 	operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
-	protected.POST("", operatorHandler.CreateOperator)
+	operators.POST("", operatorHandler.CreateOperator)
 }
 
 // メインのルーティング設定関数
 func SetupRoutes(r *gin.Engine) {
 	api := r.Group("/api")
+
+	// 認証が不要なルート
+	setupHealthRoutes(api)
+
+	// 認証が必要なルート
+	protected := api.Group("")
+	protected.Use(middleware.AuthMiddleware())
 	{
-		setupAuthRoutes(api)
-		setupHealthRoutes(api)
-		setupOperatorRoutes(api)
+		setupAuthRoutes(api, protected)
+		setupOperatorRoutes(protected)
 	}
 }
