@@ -11,6 +11,7 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
+	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
 	"github.com/riii111/go-rust-comparison/internal/presentation/handlers"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
@@ -22,7 +23,8 @@ func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 
-	operatorUsecase := usecase.NewOperatorUsecase()
+	operatorRepo := repository.NewOperatorRepository()
+	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
 	operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
 
 	api := r.Group("/api")
@@ -82,12 +84,11 @@ func TestCreateOperator(t *testing.T) {
 		{
 			name: "正常系：オペレーター作成成功",
 			request: requests.CreateOperatorRequest{
-				Email:     "test@example.com",
-				Username:  "testuser",
-				Password:  "Password1!",
-				Role:      "system_admin",
-				StoreID:   "550e8400-e29b-41d4-a716-446655440000",
-				CreatedBy: "550e8400-e29b-41d4-a716-446655440001",
+				Email:    "test@example.com",
+				Username: "testuser",
+				Password: "Password1!",
+				Role:     "system_admin",
+				StoreID:  "550e8400-e29b-41d4-a716-446655440000",
 			},
 			expectedStatus: http.StatusCreated,
 			expectedBody: responses.CreateOperatorResponse{
@@ -97,12 +98,11 @@ func TestCreateOperator(t *testing.T) {
 		{
 			name: "異常系：無効なメールアドレス",
 			request: requests.CreateOperatorRequest{
-				Email:     "invalid-email",
-				Username:  "testuser",
-				Password:  "Password1!",
-				Role:      "system_admin",
-				StoreID:   "550e8400-e29b-41d4-a716-446655440000",
-				CreatedBy: "550e8400-e29b-41d4-a716-446655440001",
+				Email:    "invalid-email",
+				Username: "testuser",
+				Password: "Password1!",
+				Role:     "system_admin",
+				StoreID:  "550e8400-e29b-41d4-a716-446655440000",
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody: responses.ErrorResponse{
@@ -112,12 +112,11 @@ func TestCreateOperator(t *testing.T) {
 		{
 			name: "異常系：パスワード要件不足",
 			request: requests.CreateOperatorRequest{
-				Email:     "test@example.com",
-				Username:  "testuser",
-				Password:  "weak",
-				Role:      "system_admin",
-				StoreID:   "550e8400-e29b-41d4-a716-446655440000",
-				CreatedBy: "550e8400-e29b-41d4-a716-446655440001",
+				Email:    "test@example.com",
+				Username: "testuser",
+				Password: "weak",
+				Role:     "system_admin",
+				StoreID:  "550e8400-e29b-41d4-a716-446655440000",
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody: responses.ErrorResponse{
@@ -127,12 +126,11 @@ func TestCreateOperator(t *testing.T) {
 		{
 			name: "異常系：無効なロール",
 			request: requests.CreateOperatorRequest{
-				Email:     "test@example.com",
-				Username:  "testuser",
-				Password:  "Password1!",
-				Role:      "invalid_role",
-				StoreID:   "550e8400-e29b-41d4-a716-446655440000",
-				CreatedBy: "550e8400-e29b-41d4-a716-446655440001",
+				Email:    "test@example.com",
+				Username: "testuser",
+				Password: "Password1!",
+				Role:     "invalid_role",
+				StoreID:  "550e8400-e29b-41d4-a716-446655440000",
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody: responses.ErrorResponse{
@@ -142,12 +140,11 @@ func TestCreateOperator(t *testing.T) {
 		{
 			name: "異常系：無効なUUID",
 			request: requests.CreateOperatorRequest{
-				Email:     "test@example.com",
-				Username:  "testuser",
-				Password:  "Password1!",
-				Role:      "system_admin",
-				StoreID:   "invalid-uuid",
-				CreatedBy: "550e8400-e29b-41d4-a716-446655440001",
+				Email:    "test@example.com",
+				Username: "testuser",
+				Password: "Password1!",
+				Role:     "system_admin",
+				StoreID:  "invalid-uuid",
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody: responses.ErrorResponse{

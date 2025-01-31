@@ -39,8 +39,8 @@ func setupTestData(t *testing.T) string {
 		ZipCode:       "150-0001",
 		Description:   "テスト用の店舗です",
 		IsActive:      true,
-		CreatedBy:     "550e8400-e29b-41d4-a716-446655440001",
-		UpdatedBy:     "550e8400-e29b-41d4-a716-446655440001",
+		CreatedBy:     "00000000-0000-0000-0000-000000000000",
+		UpdatedBy:     "00000000-0000-0000-0000-000000000000",
 	}
 
 	err := database.DB.Create(store).Error
@@ -69,7 +69,9 @@ func TestCreateOperator(t *testing.T) {
 	// テスト終了時のクリーンアップを確実に実行
 	defer cleanupTestData(t)
 
-	operatorUsecase := usecase.NewOperatorUsecase()
+	// オペレーターリポジトリを作成し、usecaseに注入
+	operatorRepo := repository.NewOperatorRepository()
+	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
 
 	tests := []struct {
 		name    string
@@ -79,36 +81,33 @@ func TestCreateOperator(t *testing.T) {
 		{
 			name: "正常系：オペレーター作成成功",
 			request: requests.CreateOperatorRequest{
-				Email:     "test@example.com",
-				Username:  "testuser",
-				Password:  "Password1!",
-				Role:      models.RoleSystemAdmin,
-				StoreID:   "550e8400-e29b-41d4-a716-446655440000",
-				CreatedBy: "550e8400-e29b-41d4-a716-446655440001",
+				Email:    "test@example.com",
+				Username: "testuser",
+				Password: "Password1!",
+				Role:     models.RoleSystemAdmin,
+				StoreID:  "550e8400-e29b-41d4-a716-446655440000",
 			},
 			wantErr: nil,
 		},
 		{
 			name: "異常系：メールアドレス重複",
 			request: requests.CreateOperatorRequest{
-				Email:     "test@example.com",
-				Username:  "testuser2",
-				Password:  "Password1!",
-				Role:      models.RoleSystemAdmin,
-				StoreID:   "550e8400-e29b-41d4-a716-446655440000",
-				CreatedBy: "550e8400-e29b-41d4-a716-446655440001",
+				Email:    "test@example.com",
+				Username: "testuser2",
+				Password: "Password1!",
+				Role:     models.RoleSystemAdmin,
+				StoreID:  "550e8400-e29b-41d4-a716-446655440000",
 			},
 			wantErr: repository.ErrDuplicateEmail,
 		},
 		{
 			name: "異常系：存在しない店舗ID",
 			request: requests.CreateOperatorRequest{
-				Email:     "test@example.com",
-				Username:  "testuser",
-				Password:  "Password1!",
-				Role:      models.RoleSystemAdmin,
-				StoreID:   "550e8400-e29b-41d4-a716-446655440999",
-				CreatedBy: "550e8400-e29b-41d4-a716-446655440001",
+				Email:    "test@example.com",
+				Username: "testuser",
+				Password: "Password1!",
+				Role:     models.RoleSystemAdmin,
+				StoreID:  "550e8400-e29b-41d4-a716-446655440999",
 			},
 			wantErr: repository.ErrForeignKeyViolated,
 		},
@@ -141,7 +140,6 @@ func TestCreateOperator(t *testing.T) {
 				assert.Equal(t, tt.request.Username, operator.Username)
 				assert.Equal(t, tt.request.Role, operator.Role)
 				assert.Equal(t, tt.request.StoreID, operator.StoreID)
-				assert.Equal(t, tt.request.CreatedBy, operator.CreatedBy)
 			}
 		})
 	}
