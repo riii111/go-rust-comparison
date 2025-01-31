@@ -47,11 +47,11 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 		// エラーの種類に応じてレスポンスを返す
 		switch err {
 		case repository.ErrDuplicateEmail:
-			c.JSON(http.StatusConflict, responses.ErrorResponse{Error: repository.ErrDuplicateEmail.Error()})
+			c.JSON(http.StatusBadRequest, responses.ErrorResponse{Error: repository.ErrDuplicateEmail.Error()})
 		case repository.ErrForeignKeyViolated:
-			c.JSON(http.StatusConflict, responses.ErrorResponse{Error: repository.ErrForeignKeyViolated.Error()})
+			c.JSON(http.StatusBadRequest, responses.ErrorResponse{Error: repository.ErrForeignKeyViolated.Error()})
 		case usecase.ErrPasswordProcessing:
-			c.JSON(http.StatusUnprocessableEntity, responses.ErrorResponse{
+			c.JSON(http.StatusBadRequest, responses.ErrorResponse{
 				Error: usecase.ErrPasswordProcessing.Error(),
 			})
 		default:
