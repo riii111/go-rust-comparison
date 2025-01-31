@@ -10,20 +10,11 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 func init() {
 	// データベース接続の初期化を先に行う
 	database.InitDB()
-
-	// その後、ロガーの設定を変更
-	if database.DB != nil {
-		database.DB, _ = gorm.Open(database.DB.Dialector, &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Silent),
-		})
-	}
 }
 
 func setupTestData(t *testing.T) string {
@@ -136,10 +127,30 @@ func TestCreateOperator(t *testing.T) {
 				err = database.DB.Where("email = ?", tt.request.Email).First(&operator).Error
 				require.NoError(t, err)
 
-				assert.Equal(t, tt.request.Email, operator.Email)
-				assert.Equal(t, tt.request.Username, operator.Username)
-				assert.Equal(t, tt.request.Role, operator.Role)
-				assert.Equal(t, tt.request.StoreID, operator.StoreID)
+				// 比較用の構造体を作成
+				expected := models.Operator{
+					ID:           operator.ID,      // 自動生成される値はそのまま使用
+					Email:        tt.request.Email, // リクエストの値を使用
+					Username:     tt.request.Username,
+					Role:         tt.request.Role,
+					StoreID:      tt.request.StoreID,
+					PasswordHash: operator.PasswordHash, // DBから取得した値をそのまま使用
+					AvatarURL:    operator.AvatarURL,
+					CreatedBy:    operator.CreatedBy,
+					UpdatedBy:    operator.UpdatedBy,
+					DeletedBy:    operator.DeletedBy,
+					CreatedAt:    operator.CreatedAt,
+					UpdatedAt:    operator.UpdatedAt,
+					DeletedAt:    operator.DeletedAt,
+				}
+				// 構造体全体をチェック
+				assert.Equal(t, expected, operator)
+
+				// フィールドごとにチェック
+				// assert.Equal(t, tt.request.Email, operator.Email)
+				// assert.Equal(t, tt.request.Username, operator.Username)
+				// assert.Equal(t, tt.request.Role, operator.Role)
+				// assert.Equal(t, tt.request.StoreID, operator.StoreID)
 			}
 		})
 	}
