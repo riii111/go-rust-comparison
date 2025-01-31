@@ -45,8 +45,6 @@ func TestStockHandlersTestSuite(t *testing.T) {
 }
 
 func (suite *StockHandlersSuite) TestCreate() {
-	mockUseCase := NewMockStockUseCase()
-
 	productId, _ := uuid.NewV7()
 	storeId, _ := uuid.NewV7()
 	price := decimal.New(1000, 0)
@@ -62,6 +60,7 @@ func (suite *StockHandlersSuite) TestCreate() {
 
 	Id, _ := uuid.NewV7()
 	now := time.Now()
+	mockUseCase := NewMockStockUseCase()
 	mockUseCase.On("Create", inputStock).Return(&models.Stock{
 		ID:          Id.String(),
 		ProductID:   productId.String(),
@@ -77,11 +76,12 @@ func (suite *StockHandlersSuite) TestCreate() {
 
 	suite.stockHandler = handlers.NewStockHandler(mockUseCase)
 
+	stockJson, _ := json.Marshal(inputStock)
+	req, _ := http.NewRequest(http.MethodPost, "/api/stocks", strings.NewReader(string(stockJson)))
+	req.Header.Add("Content-Type", "application/json")
+
 	w := httptest.NewRecorder()
 	ginContext, _ := gin.CreateTestContext(w)
-	stockJson, _ := json.Marshal(inputStock)
-	req, _ := http.NewRequest("POST", "/stock", strings.NewReader(string(stockJson)))
-	req.Header.Add("Content-Type", "application/json")
 	ginContext.Request = req
 
 	suite.stockHandler.CreateStock(ginContext)
@@ -105,11 +105,11 @@ func (suite *StockHandlersSuite) TestCreate() {
 }
 
 func (suite *StockHandlersSuite) TestCreateRequestBodyFailure() {
+	req, _ := http.NewRequest(http.MethodPost, "/api/stocks", nil)
+	req.Header.Add("Content-Type", "application/json")
+
 	w := httptest.NewRecorder()
 	ginContext, _ := gin.CreateTestContext(w)
-
-	req, _ := http.NewRequest("POST", "/stock", nil)
-	req.Header.Add("Content-Type", "application/json")
 	ginContext.Request = req
 
 	suite.stockHandler.CreateStock(ginContext)
@@ -118,8 +118,6 @@ func (suite *StockHandlersSuite) TestCreateRequestBodyFailure() {
 }
 
 func (suite *StockHandlersSuite) TestCreateFailure() {
-	mockUseCase := NewMockStockUseCase()
-
 	productId, _ := uuid.NewV7()
 	storeId, _ := uuid.NewV7()
 	price := decimal.New(1000, 0)
@@ -133,15 +131,18 @@ func (suite *StockHandlersSuite) TestCreateFailure() {
 		IsAvailable: true,
 	}
 
+	mockUseCase := NewMockStockUseCase()
 	mockUseCase.On("Create", inputStock).Return(nil,
 		errors.New("invalid"))
+
 	suite.stockHandler = handlers.NewStockHandler(mockUseCase)
+
+	stockJson, _ := json.Marshal(inputStock)
+	req, _ := http.NewRequest(http.MethodPost, "/api/stocks", strings.NewReader(string(stockJson)))
+	req.Header.Add("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
 	ginContext, _ := gin.CreateTestContext(w)
-	stockJson, _ := json.Marshal(inputStock)
-	req, _ := http.NewRequest("POST", "/stock", strings.NewReader(string(stockJson)))
-	req.Header.Add("Content-Type", "application/json")
 	ginContext.Request = req
 
 	suite.stockHandler.CreateStock(ginContext)
