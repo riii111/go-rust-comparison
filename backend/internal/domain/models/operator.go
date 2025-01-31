@@ -21,12 +21,12 @@ type Operator struct {
 	Username     string         `gorm:"not null" json:"username" validate:"required"`
 	PasswordHash string         `gorm:"not null" json:"password_hash" validate:"required,password"`
 	Role         string         `gorm:"not null" json:"role" validate:"required,oneof=system_admin store_admin"`
-	StoreID      string         `gorm:"type:uuid" json:"store_id" validate:"required,uuid"`
+	StoreID      string         `gorm:"type:uuid;not null" json:"store_id" validate:"required,uuid"`
 	AvatarURL    string         `json:"avatar_url" validate:"omitempty,url"`
-	CreatedBy    string         `gorm:"type:uuid" json:"created_by" validate:"required,uuid"`
+	CreatedBy    string         `gorm:"type:uuid;not null" json:"created_by" validate:"required,uuid"`
 	UpdatedBy    string         `gorm:"type:uuid" json:"updated_by" validate:"required,uuid"`
-	DeletedBy    string         `gorm:"type:uuid" json:"deleted_by" validate:"omitempty,uuid"`
-	CreatedAt    time.Time      `gorm:"autoCreateTime" json:"created_at"`
+	DeletedBy    *string        `gorm:"type:uuid" json:"deleted_by,omitempty" validate:"omitempty,uuid"`
+	CreatedAt    time.Time      `gorm:"autoCreateTime;not null" json:"created_at"`
 	UpdatedAt    time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 	Store        Store          `gorm:"foreignKey:StoreID" json:"store"`
