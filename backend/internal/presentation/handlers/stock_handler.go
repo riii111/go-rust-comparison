@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
-	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
+	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 )
 
 type StockHandler struct {
@@ -18,7 +18,7 @@ func NewStockHandler(stockUserCase usecase.StockUserCase) *StockHandler {
 }
 
 func (s *StockHandler) CreateStock(c *gin.Context) {
-	var requestBody responses.CreateStockInput
+	var requestBody requests.CreateStockInput
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

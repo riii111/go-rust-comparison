@@ -1,4 +1,4 @@
-package responses
+package requests
 
 import (
 	"github.com/shopspring/decimal"
