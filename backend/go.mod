@@ -11,6 +11,8 @@ require (
 	gorm.io/gorm v1.25.12
 )
 
+require github.com/stretchr/objx v0.5.2 // indirect
+
 require (
 	github.com/bytedance/sonic v1.12.4 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
