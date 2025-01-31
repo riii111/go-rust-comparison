@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
 	"gorm.io/gorm"
 )
@@ -15,7 +14,7 @@ type stockRepository struct {
 }
 
 func NewStockRepository(db *gorm.DB) StockRepository {
-	return &stockRepository{db: database.DB}
+	return &stockRepository{db: db}
 }
 
 func (s *stockRepository) Create(stock *models.Stock) (*models.Stock, error) {
