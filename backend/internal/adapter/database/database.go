@@ -45,7 +45,9 @@ func InitDB() {
 	config := getDBConfig()
 	dsn := config.buildDSN()
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		TranslateError: true, // エラー翻訳機能を有効化
+	})
 	if err != nil {
 		log.Fatalf("データベース接続失敗: %v", err)
 	}

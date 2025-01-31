@@ -2,35 +2,38 @@ package main
 
 import (
 	"log"
-	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/adapter/middleware"
-	"github.com/riii111/go-rust-comparison/internal/application/usecase"
-	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
-	"github.com/riii111/go-rust-comparison/internal/presentation/handlers"
+
+	"github.com/riii111/go-rust-comparison/internal/adapter/routes"
 )
 
 func main() {
+	// 環境変数DEBUGに基づいてGinモードを設定
+	if os.Getenv("DEBUG") == "true" {
+		gin.SetMode(gin.DebugMode)
+		log.Println("Ginをデバッグモードで起動します")
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+		log.Println("Ginをリリースモードで起動します")
+	}
+
+	// データベース初期化
+	database.InitDB()
+
+	// Ginエンジンの初期化
 	r := gin.Default()
 
-	database.InitDB()
-	stockRep := repository.NewStockRepository(database.DB)
-	stockUserCase := usecase.NewStockUseCase(stockRep)
-	stockHan := handlers.NewStockHandler(stockUserCase)
+	// CORSミドルウェアの設定
+	r.Use(middleware.CORSConfig())
 
-	r.POST("/stock", stockHan.CreateStock)
+	// ルーティングの設定
+	routes.SetupRoutes(r)
 
-	middleware.CORSConfig()
-
-	// ヘルスチェックエンドポイント
-	r.GET("/api/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"msg": "ok",
-		})
-	})
-
+	// サーバーの起動
 	if err := r.Run(":8000"); err != nil {
 		log.Fatalf("サーバの起動に失敗しました: %v", err)
 	}
