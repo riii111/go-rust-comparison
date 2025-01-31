@@ -21,7 +21,8 @@ func main() {
 
 	// 店舗のシードデータを作成
 	stores := seed.CreateStoreSeedData()
-	storeIDs := make(map[string]string) // 店舗名とIDのマッピング
+	// 店舗名とIDのマッピング
+	storeIDs := make(map[string]string)
 	successCount := 0
 
 	for _, store := range stores {
