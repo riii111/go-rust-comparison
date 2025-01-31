@@ -43,20 +43,13 @@ func cleanupTestData(t *testing.T) {
 	}
 
 	tx := database.DB.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
+	defer tx.Rollback()
 
 	err := tx.Exec("TRUNCATE TABLE operators CASCADE").Error
 	require.NoError(t, err, "オペレーターデータの削除に失敗しました")
 
 	err = tx.Exec("TRUNCATE TABLE stores CASCADE").Error
 	require.NoError(t, err, "店舗データの削除に失敗しました")
-
-	err = tx.Commit().Error
-	require.NoError(t, err, "トランザクションのコミットに失敗しました")
 }
 
 func TestOperatorRepository(t *testing.T) {
