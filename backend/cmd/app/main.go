@@ -2,10 +2,7 @@ package main
 
 import (
 	"log"
-<<<<<<< HEAD
-=======
 	"os"
->>>>>>> develop
 
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
