@@ -2,8 +2,7 @@ package usecase
 
 import (
 	"context"
-	"fmt"
-	"log"
+	"errors"
 	"os"
 	"time"
 
@@ -20,13 +19,11 @@ type LoginUseCase interface {
 
 type loginUseCase struct {
 	loginRepository repository.LoginRepository
-	logger          *log.Logger
 }
 
 func NewLoginUseCase(loginRepository repository.LoginRepository) LoginUseCase {
 	return &loginUseCase{
 		loginRepository: loginRepository,
-		logger:          log.New(os.Stdout, "[LoginUseCase] ", log.LstdFlags),
 	}
 }
 
@@ -35,13 +32,10 @@ type TokenPair struct {
 	RefreshToken string
 }
 
-type AuthError struct {
-	message string
-}
-
-func (e *AuthError) Error() string {
-	return e.message
-}
+var (
+	ErrInvalidCredentials = errors.New("メールアドレスまたはパスワードが正しくありません")
+	ErrSystemError        = errors.New("システムエラーが発生しました")
+)
 
 func (u *loginUseCase) Execute(ctx context.Context, email, password string) (*TokenPair, error) {
 	operator, err := u.authenticateUser(ctx, email, password)
@@ -55,17 +49,14 @@ func (u *loginUseCase) Execute(ctx context.Context, email, password string) (*To
 func (u *loginUseCase) authenticateUser(ctx context.Context, email, password string) (*models.Operator, error) {
 	operator, err := u.loginRepository.FindOperatorByEmail(ctx, email)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			u.logger.Printf("認証失敗: ユーザーが見つかりません - email: %s", email)
-			return nil, &AuthError{message: "認証に失敗しました"}
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrInvalidCredentials
 		}
-		u.logger.Printf("データベースエラー: %v", err)
-		return nil, fmt.Errorf("データベース検索エラー: %w", err)
+		return nil, ErrSystemError
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(operator.PasswordHash), []byte(password)); err != nil {
-		u.logger.Printf("認証失敗: パスワードが一致しません - email: %s", email)
-		return nil, &AuthError{message: "認証に失敗しました"}
+		return nil, ErrInvalidCredentials
 	}
 
 	return operator, nil
@@ -86,14 +77,12 @@ func (u *loginUseCase) generateTokenPair(user *models.Operator) (*TokenPair, err
 
 	accessTokenString, err := accessToken.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
 	if err != nil {
-		log.Printf("アクセストークンの生成に失敗しました: %v", err)
-		return nil, fmt.Errorf("%w", err)
+		return nil, ErrSystemError
 	}
 
 	refreshTokenString, err := refreshToken.SignedString([]byte(os.Getenv("JWT_REFRESH_SECRET_KEY")))
 	if err != nil {
-		log.Printf("リフレッシュトークンの生成に失敗しました: %v", err)
-		return nil, fmt.Errorf("%w", err)
+		return nil, ErrSystemError
 	}
 
 	return &TokenPair{

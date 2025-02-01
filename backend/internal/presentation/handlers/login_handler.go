@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -23,20 +24,21 @@ const (
 // エラー種別の定義
 var (
 	ErrInvalidRequest = errors.New("リクエストの形式が正しくありません")
-	ErrAuthentication = errors.New("メールアドレスまたはパスワードが正しくありません")
-	ErrInternalServer = errors.New("サーバーエラーが発生しました")
 )
 
 // クッキーを設定する共通関数
+// name: クッキーの名前（access_token または refresh_token）
+// value: クッキーの値（JWTトークン）
+// maxAge: クッキーの有効期限（アクセストークンは24時間、リフレッシュトークンは30日）
 func setAuthCookie(c *gin.Context, name, value string, maxAge time.Duration) {
 	c.SetCookie(
-		name,
-		value,
-		int(maxAge.Seconds()),
-		cookiePath,
-		os.Getenv("DOMAIN"),
-		true,
-		true,
+		name,                  // クッキー名
+		value,                 // クッキーの値
+		int(maxAge.Seconds()), // 有効期限（秒）
+		cookiePath,            // パス（"/"）
+		os.Getenv("DOMAIN"),   // ドメイン
+		true,                  // セキュアクッキー（HTTPS接続のみ）
+		true,                  // HTTPOnly（JavaScriptからアクセス不可）
 	)
 }
 
@@ -62,12 +64,7 @@ func (h *LoginHandler) Login(c *gin.Context) {
 
 	tokenPair, err := h.loginUseCase.Execute(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
-		switch err.(type) {
-		case *usecase.AuthError:
-			h.handleError(c, ErrAuthentication)
-		default:
-			h.handleError(c, ErrInternalServer)
-		}
+		h.handleError(c, err)
 		return
 	}
 
@@ -78,17 +75,21 @@ func (h *LoginHandler) Login(c *gin.Context) {
 }
 
 func (h *LoginHandler) handleError(c *gin.Context, err error) {
-	// デフォルト値を設定
-	status := http.StatusInternalServerError
-	message := ErrInternalServer.Error()
-	switch err {
-	case ErrInvalidRequest:
-		status = http.StatusBadRequest
-		message = err.Error()
-	case ErrAuthentication:
+	var (
+		status  = http.StatusInternalServerError
+		message = usecase.ErrSystemError.Error()
+	)
+
+	// エラーログを出力
+	log.Printf("エラーが発生しました: %v", err)
+
+	switch {
+	case errors.Is(err, usecase.ErrInvalidCredentials):
 		status = http.StatusUnauthorized
-		message = err.Error()
-	case ErrInternalServer:
+		message = usecase.ErrInvalidCredentials.Error()
+	case errors.Is(err, ErrInvalidRequest):
+		status = http.StatusBadRequest
+		message = ErrInvalidRequest.Error()
 	}
 
 	c.JSON(status, responses.ErrorResponse{
