@@ -82,10 +82,9 @@ func (h *LoginHandler) Login(c *gin.Context) {
 	}
 
 	h.setAuthCookies(c, tokenPair)
-	response := responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.ApiResponse{
 		Message: "ログインに成功しました",
-	}
-	c.JSON(http.StatusOK, response)
+	})
 }
 
 func (h *LoginHandler) handleError(c *gin.Context, errType string, err error) {
