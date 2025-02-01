@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/riii111/go-rust-comparison/internal/adapter/database"
+	"github.com/riii111/go-rust-comparison/internal/adapter/repository"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -17,10 +17,12 @@ type LoginUseCase interface {
 	Execute(email, password string) (*TokenPair, error)
 }
 
-type loginUseCase struct{}
+type loginUseCase struct {
+	loginRepository repository.LoginRepository
+}
 
-func NewLoginUseCase() LoginUseCase {
-	return &loginUseCase{}
+func NewLoginUseCase(loginRepository repository.LoginRepository) LoginUseCase {
+	return &loginUseCase{loginRepository: loginRepository}
 }
 
 type TokenPair struct {
@@ -46,8 +48,8 @@ func (u *loginUseCase) Execute(email, password string) (*TokenPair, error) {
 }
 
 func (u *loginUseCase) authenticateUser(email, password string) (*models.Operator, error) {
-	var operator models.Operator
-	if err := database.DB.Where("email = ?", email).First(&operator).Error; err != nil {
+	operator, err := u.loginRepository.FindOperatorByEmail(email)
+	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			log.Printf("認証に失敗しました")
 			return nil, &AuthError{}
@@ -61,7 +63,7 @@ func (u *loginUseCase) authenticateUser(email, password string) (*models.Operato
 		return nil, &AuthError{}
 	}
 
-	return &operator, nil
+	return operator, nil
 }
 
 func (u *loginUseCase) generateTokenPair(user *models.Operator) (*TokenPair, error) {
