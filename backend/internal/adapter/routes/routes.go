@@ -17,8 +17,8 @@ func setupPublicRoutes(api *gin.RouterGroup) {
 	}
 
 	// ログインルート
-	loginRepository := repository.NewLoginRepository()
-	loginUseCase := usecase.NewLoginUseCase(loginRepository)
+	loginRepo := repository.NewLoginRepository()
+	loginUseCase := usecase.NewLoginUseCase(loginRepo)
 	loginHandler := handlers.NewLoginHandler(loginUseCase)
 	api.POST("/login", loginHandler.Login)
 }
