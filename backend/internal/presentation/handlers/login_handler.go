@@ -18,7 +18,9 @@ import (
 const (
 	accessTokenDuration  = 24 * time.Hour
 	refreshTokenDuration = 30 * 24 * time.Hour
-	cookiePath           = "/"
+	cookiePath           = "/"  // クッキーが有効なパス
+	cookieSecure         = true // true: HTTPSのみ
+	cookieHttpOnly       = true // true: JavaScriptからアクセス不可
 )
 
 // エラー種別の定義
@@ -27,18 +29,15 @@ var (
 )
 
 // クッキーを設定する共通関数
-// name: クッキーの名前（access_token または refresh_token）
-// value: クッキーの値（JWTトークン）
-// maxAge: クッキーの有効期限（アクセストークンは24時間、リフレッシュトークンは30日）
 func setAuthCookie(c *gin.Context, name, value string, maxAge time.Duration) {
 	c.SetCookie(
-		name,                  // クッキー名
-		value,                 // クッキーの値
-		int(maxAge.Seconds()), // 有効期限（秒）
-		cookiePath,            // パス（"/"）
-		os.Getenv("DOMAIN"),   // ドメイン
-		true,                  // セキュアクッキー（HTTPS接続のみ）
-		true,                  // HTTPOnly（JavaScriptからアクセス不可）
+		name,                  // Name: クッキー名
+		value,                 // Value: クッキーの値
+		int(maxAge.Seconds()), // MaxAge: 有効期限（秒）
+		cookiePath,            // Path: クッキーの有効範囲
+		os.Getenv("DOMAIN"),   // Domain: クッキーが有効なドメイン
+		cookieSecure,          // Secure: HTTPSのみ
+		cookieHttpOnly,        // HttpOnly: JSからのアクセス制限
 	)
 }
 
