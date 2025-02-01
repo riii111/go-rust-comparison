@@ -5,6 +5,8 @@ import (
 	"os"
 	"time"
 
+	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
@@ -19,23 +21,11 @@ const (
 )
 
 // エラー種別の定義
-const (
-	ErrInvalidRequest = "invalid_request"
-	ErrAuthentication = "authentication_error"
-	ErrInternalServer = "internal_server_error"
+var (
+	ErrInvalidRequest = errors.New("リクエストの形式が正しくありません")
+	ErrAuthentication = errors.New("メールアドレスまたはパスワードが正しくありません")
+	ErrInternalServer = errors.New("サーバーエラーが発生しました")
 )
-
-// エラーメッセージの定義
-var errorMessages = map[string]string{
-	ErrInvalidRequest: "リクエストの形式が正しくありません",
-	ErrAuthentication: "メールアドレスまたはパスワードが正しくありません",
-	ErrInternalServer: "サーバーエラーが発生しました",
-}
-
-// エラーレスポンスを返す共通関数
-func sendErrorResponse(c *gin.Context, status int, message string) {
-	c.JSON(status, gin.H{"error": message})
-}
 
 // クッキーを設定する共通関数
 func setAuthCookie(c *gin.Context, name, value string, maxAge time.Duration) {
@@ -66,7 +56,7 @@ func NewLoginHandler(loginUseCase usecase.LoginUseCase) *LoginHandler {
 func (h *LoginHandler) Login(c *gin.Context) {
 	var req requests.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		h.handleError(c, ErrInvalidRequest, err)
+		h.handleError(c, ErrInvalidRequest)
 		return
 	}
 
@@ -74,9 +64,9 @@ func (h *LoginHandler) Login(c *gin.Context) {
 	if err != nil {
 		switch err.(type) {
 		case *usecase.AuthError:
-			h.handleError(c, ErrAuthentication, err)
+			h.handleError(c, ErrAuthentication)
 		default:
-			h.handleError(c, ErrInternalServer, err)
+			h.handleError(c, ErrInternalServer)
 		}
 		return
 	}
@@ -87,15 +77,18 @@ func (h *LoginHandler) Login(c *gin.Context) {
 	})
 }
 
-func (h *LoginHandler) handleError(c *gin.Context, errType string, err error) {
+func (h *LoginHandler) handleError(c *gin.Context, err error) {
 	status := http.StatusInternalServerError
-	switch errType {
+	switch err {
 	case ErrInvalidRequest:
 		status = http.StatusBadRequest
 	case ErrAuthentication:
 		status = http.StatusUnauthorized
 	}
-	sendErrorResponse(c, status, errorMessages[errType])
+	c.JSON(status, responses.ErrorResponse{
+		Error:   err.Error(),
+		Details: err.Error(),
+	})
 }
 
 func (h *LoginHandler) setAuthCookies(c *gin.Context, tokenPair *usecase.TokenPair) {

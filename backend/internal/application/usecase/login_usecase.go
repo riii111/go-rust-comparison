@@ -49,7 +49,7 @@ func (u *loginUseCase) Execute(ctx context.Context, email, password string) (*To
 		return nil, err
 	}
 
-	return u.generateTokenPair(ctx, operator)
+	return u.generateTokenPair(operator)
 }
 
 func (u *loginUseCase) authenticateUser(ctx context.Context, email, password string) (*models.Operator, error) {
@@ -71,7 +71,7 @@ func (u *loginUseCase) authenticateUser(ctx context.Context, email, password str
 	return operator, nil
 }
 
-func (u *loginUseCase) generateTokenPair(ctx context.Context, user *models.Operator) (*TokenPair, error) {
+func (u *loginUseCase) generateTokenPair(user *models.Operator) (*TokenPair, error) {
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":   user.ID,
 		"email": user.Email,
