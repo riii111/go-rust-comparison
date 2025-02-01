@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/riii111/go-rust-comparison/internal/adapter/repository"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
+	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )

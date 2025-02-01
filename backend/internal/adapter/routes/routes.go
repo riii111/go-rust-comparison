@@ -10,8 +10,13 @@ import (
 
 // 認証が必要なルートのセットアップ
 func setupAuthRoutes(api *gin.RouterGroup, protected *gin.RouterGroup) {
+	// LoginHandlerの初期化
+	loginRepository := repository.NewLoginRepository()
+	loginUseCase := usecase.NewLoginUseCase(loginRepository)
+	loginHandler := handlers.NewLoginHandler(loginUseCase)
+
 	// 認証不要のルート
-	api.POST("/login", handlers.Login)
+	api.POST("/login", loginHandler.Login)
 
 	// 認証が必要なルート
 	protected.POST("/logout", handlers.Logout)
@@ -28,7 +33,6 @@ func setupHealthRoutes(api *gin.RouterGroup) {
 // オペレータールートのセットアップ
 func setupOperatorRoutes(protected *gin.RouterGroup) {
 	operators := protected.Group("/operators")
-
 	operatorRepo := repository.NewOperatorRepository()
 	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
 	operatorHandler := handlers.NewOperatorHandler(operatorUsecase)

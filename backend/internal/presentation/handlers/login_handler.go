@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/riii111/go-rust-comparison/internal/usecase"
+	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 )
 
 // ログインリクエストの構造体
@@ -45,16 +45,27 @@ func setAuthCookie(c *gin.Context, name, value string, maxAge time.Duration) {
 	)
 }
 
-// ログイン処理を行うハンドラー関数
-func Login(c *gin.Context) {
+// LoginHandlerの構造体を追加
+type LoginHandler struct {
+	loginUseCase usecase.LoginUseCase
+}
+
+// NewLoginHandlerコンストラクタを追加
+func NewLoginHandler(loginUseCase usecase.LoginUseCase) *LoginHandler {
+	return &LoginHandler{
+		loginUseCase: loginUseCase,
+	}
+}
+
+// Loginメソッドを構造体のメソッドとして定義
+func (h *LoginHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		sendErrorResponse(c, http.StatusBadRequest, "リクエストの形式が正しくありません")
 		return
 	}
 
-	loginUseCase := usecase.NewLoginUseCase()
-	tokenPair, err := loginUseCase.Execute(req.Email, req.Password)
+	tokenPair, err := h.loginUseCase.Execute(req.Email, req.Password)
 	if err != nil {
 		if _, ok := err.(*usecase.AuthError); ok {
 			sendErrorResponse(c, http.StatusUnauthorized, "メールアドレスまたはパスワードが正しくありません")
