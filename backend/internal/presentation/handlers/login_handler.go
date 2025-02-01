@@ -7,18 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
+	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
+	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
 )
-
-// ログインリクエストの構造体
-type LoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required"`
-}
-
-// ログインレスポンスの構造体
-type LoginResponse struct {
-	Token string `json:"token"`
-}
 
 // クッキーの設定に関する定数
 const (
@@ -26,6 +17,20 @@ const (
 	refreshTokenDuration = 30 * 24 * time.Hour
 	cookiePath           = "/"
 )
+
+// エラー種別の定義
+const (
+	ErrInvalidRequest = "invalid_request"
+	ErrAuthentication = "authentication_error"
+	ErrInternalServer = "internal_server_error"
+)
+
+// エラーメッセージの定義
+var errorMessages = map[string]string{
+	ErrInvalidRequest: "リクエストの形式が正しくありません",
+	ErrAuthentication: "メールアドレスまたはパスワードが正しくありません",
+	ErrInternalServer: "サーバーエラーが発生しました",
+}
 
 // エラーレスポンスを返す共通関数
 func sendErrorResponse(c *gin.Context, status int, message string) {
@@ -59,24 +64,42 @@ func NewLoginHandler(loginUseCase usecase.LoginUseCase) *LoginHandler {
 
 // Loginメソッドを構造体のメソッドとして定義
 func (h *LoginHandler) Login(c *gin.Context) {
-	var req LoginRequest
+	var req requests.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		sendErrorResponse(c, http.StatusBadRequest, "リクエストの形式が正しくありません")
+		h.handleError(c, ErrInvalidRequest, err)
 		return
 	}
 
-	tokenPair, err := h.loginUseCase.Execute(req.Email, req.Password)
+	tokenPair, err := h.loginUseCase.Execute(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
-		if _, ok := err.(*usecase.AuthError); ok {
-			sendErrorResponse(c, http.StatusUnauthorized, "メールアドレスまたはパスワードが正しくありません")
-			return
+		switch err.(type) {
+		case *usecase.AuthError:
+			h.handleError(c, ErrAuthentication, err)
+		default:
+			h.handleError(c, ErrInternalServer, err)
 		}
-		sendErrorResponse(c, http.StatusInternalServerError, "サーバーエラーが発生しました")
 		return
 	}
 
+	h.setAuthCookies(c, tokenPair)
+	response := responses.ApiResponse{
+		Message: "ログインに成功しました",
+	}
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *LoginHandler) handleError(c *gin.Context, errType string, err error) {
+	status := http.StatusInternalServerError
+	switch errType {
+	case ErrInvalidRequest:
+		status = http.StatusBadRequest
+	case ErrAuthentication:
+		status = http.StatusUnauthorized
+	}
+	sendErrorResponse(c, status, errorMessages[errType])
+}
+
+func (h *LoginHandler) setAuthCookies(c *gin.Context, tokenPair *usecase.TokenPair) {
 	setAuthCookie(c, "access_token", tokenPair.AccessToken, accessTokenDuration)
 	setAuthCookie(c, "refresh_token", tokenPair.RefreshToken, refreshTokenDuration)
-
-	c.JSON(http.StatusOK, gin.H{"message": "ログインに成功しました"})
 }

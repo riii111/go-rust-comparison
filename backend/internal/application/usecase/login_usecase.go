@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -14,15 +15,19 @@ import (
 )
 
 type LoginUseCase interface {
-	Execute(email, password string) (*TokenPair, error)
+	Execute(ctx context.Context, email, password string) (*TokenPair, error)
 }
 
 type loginUseCase struct {
 	loginRepository repository.LoginRepository
+	logger          *log.Logger
 }
 
 func NewLoginUseCase(loginRepository repository.LoginRepository) LoginUseCase {
-	return &loginUseCase{loginRepository: loginRepository}
+	return &loginUseCase{
+		loginRepository: loginRepository,
+		logger:          log.New(os.Stdout, "[LoginUseCase] ", log.LstdFlags),
+	}
 }
 
 type TokenPair struct {
@@ -38,35 +43,35 @@ func (e *AuthError) Error() string {
 	return e.message
 }
 
-func (u *loginUseCase) Execute(email, password string) (*TokenPair, error) {
-	operator, err := u.authenticateUser(email, password)
+func (u *loginUseCase) Execute(ctx context.Context, email, password string) (*TokenPair, error) {
+	operator, err := u.authenticateUser(ctx, email, password)
 	if err != nil {
 		return nil, err
 	}
 
-	return u.generateTokenPair(operator)
+	return u.generateTokenPair(ctx, operator)
 }
 
-func (u *loginUseCase) authenticateUser(email, password string) (*models.Operator, error) {
-	operator, err := u.loginRepository.FindOperatorByEmail(email)
+func (u *loginUseCase) authenticateUser(ctx context.Context, email, password string) (*models.Operator, error) {
+	operator, err := u.loginRepository.FindOperatorByEmail(ctx, email)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			log.Printf("認証に失敗しました")
-			return nil, &AuthError{}
+			u.logger.Printf("認証失敗: ユーザーが見つかりません - email: %s", email)
+			return nil, &AuthError{message: "認証に失敗しました"}
 		}
-		log.Printf("データベースエラー: %s", err)
-		return nil, &AuthError{}
+		u.logger.Printf("データベースエラー: %v", err)
+		return nil, fmt.Errorf("データベース検索エラー: %w", err)
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(operator.PasswordHash), []byte(password)); err != nil {
-		log.Printf("認証に失敗しました")
-		return nil, &AuthError{}
+		u.logger.Printf("認証失敗: パスワードが一致しません - email: %s", email)
+		return nil, &AuthError{message: "認証に失敗しました"}
 	}
 
 	return operator, nil
 }
 
-func (u *loginUseCase) generateTokenPair(user *models.Operator) (*TokenPair, error) {
+func (u *loginUseCase) generateTokenPair(ctx context.Context, user *models.Operator) (*TokenPair, error) {
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":   user.ID,
 		"email": user.Email,

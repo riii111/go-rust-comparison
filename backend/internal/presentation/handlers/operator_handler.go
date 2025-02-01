@@ -66,7 +66,7 @@ func (h *OperatorHandler) CreateOperator(c *gin.Context) {
 	}
 
 	// 成功レスポンスを返す
-	c.JSON(http.StatusCreated, responses.CreateOperatorResponse{
+	c.JSON(http.StatusCreated, responses.ApiResponse{
 		Message: "オペレーターの登録に成功しました",
 	})
 }
