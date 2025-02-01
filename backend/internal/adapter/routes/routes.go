@@ -8,30 +8,27 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/presentation/handlers"
 )
 
-// 認証が必要なルートのセットアップ
-func setupAuthRoutes(api *gin.RouterGroup, protected *gin.RouterGroup) {
-	// LoginHandlerの初期化
-	loginRepository := repository.NewLoginRepository()
-	loginUseCase := usecase.NewLoginUseCase(loginRepository)
-	loginHandler := handlers.NewLoginHandler(loginUseCase)
-
-	// 認証不要のルート
-	api.POST("/login", loginHandler.Login)
-
-	// 認証が必要なルート
-	protected.POST("/logout", handlers.Logout)
-}
-
-// ヘルスチェックルートのセットアップ
-func setupHealthRoutes(api *gin.RouterGroup) {
+// 認証が不要なパブリックルートのセットアップ
+func setupPublicRoutes(api *gin.RouterGroup) {
+	// ヘルスチェックルート
 	health := api.Group("/health")
 	{
 		health.GET("", handlers.HealthCheck)
 	}
+
+	// ログインルート
+	loginRepository := repository.NewLoginRepository()
+	loginUseCase := usecase.NewLoginUseCase(loginRepository)
+	loginHandler := handlers.NewLoginHandler(loginUseCase)
+	api.POST("/login", loginHandler.Login)
 }
 
-// オペレータールートのセットアップ
-func setupOperatorRoutes(protected *gin.RouterGroup) {
+// 認証が必要なプライベートルートのセットアップ
+func setupPrivateRoutes(protected *gin.RouterGroup) {
+	// ログアウト
+	protected.POST("/logout", handlers.Logout)
+
+	// オペレーター関連
 	operators := protected.Group("/operators")
 	operatorRepo := repository.NewOperatorRepository()
 	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
@@ -43,14 +40,11 @@ func setupOperatorRoutes(protected *gin.RouterGroup) {
 func SetupRoutes(r *gin.Engine) {
 	api := r.Group("/api")
 
-	// 認証が不要なルート
-	setupHealthRoutes(api)
+	// 認証が不要なパブリックルート
+	setupPublicRoutes(api)
 
-	// 認証が必要なルート
+	// 認証が必要なプライベートルート
 	protected := api.Group("")
 	protected.Use(middleware.AuthMiddleware())
-	{
-		setupAuthRoutes(api, protected)
-		setupOperatorRoutes(protected)
-	}
+	setupPrivateRoutes(protected)
 }
