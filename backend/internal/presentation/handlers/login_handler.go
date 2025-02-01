@@ -78,16 +78,21 @@ func (h *LoginHandler) Login(c *gin.Context) {
 }
 
 func (h *LoginHandler) handleError(c *gin.Context, err error) {
+	// デフォルト値を設定
 	status := http.StatusInternalServerError
+	message := ErrInternalServer.Error()
 	switch err {
 	case ErrInvalidRequest:
 		status = http.StatusBadRequest
+		message = err.Error()
 	case ErrAuthentication:
 		status = http.StatusUnauthorized
+		message = err.Error()
+	case ErrInternalServer:
 	}
+
 	c.JSON(status, responses.ErrorResponse{
-		Error:   err.Error(),
-		Details: err.Error(),
+		Error: message,
 	})
 }
 
