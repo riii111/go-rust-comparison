@@ -8,6 +8,7 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/adapter/middleware"
 	"github.com/riii111/go-rust-comparison/internal/adapter/routes"
+    "github.com/riii111/go-rust-comparison/internal/presentation/handlers"
 )
 
 func main() {
@@ -29,12 +30,9 @@ func main() {
 	// CORSミドルウェアの設定
 	r.Use(middleware.CORSConfig())
 
-	// ルーティングの設定
-	routes.SetupRoutes(r)
-
     // ProductHandlerの初期化
     productHandler := handlers.NewProductHandler(database.DB)
-    routes.SetupRouter(r, productHandler)
+    routes.SetupRoutes(r, productHandler)
 
 	// サーバーの起動
 	if err := r.Run(":8000"); err != nil {

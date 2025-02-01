@@ -25,7 +25,7 @@ func setupProductRoutes(api *gin.RouterGroup, productHandler *handlers.ProductHa
 }
 
 // メインのルーティング設定関数
-func SetupRoutes(r *gin.Engine) {
+func SetupRoutes(r *gin.Engine, productHandler *handlers.ProductHandler) {
 	api := r.Group("/api")
 	{
 		setupHealthRoutes(api)
