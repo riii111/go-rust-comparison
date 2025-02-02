@@ -22,8 +22,7 @@ const (
 
 // クッキー設定の定数
 const (
-	//accessTokenDuration  = 24 * time.Hour
-	accessTokenDuration  = 5 * time.Second
+	accessTokenDuration  = 24 * time.Hour
 	refreshTokenDuration = 30 * 24 * time.Hour
 	cookiePath           = "/"  // クッキーが有効なパス
 	cookieSecure         = true // true: HTTPSのみ
