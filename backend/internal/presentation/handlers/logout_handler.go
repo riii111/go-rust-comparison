@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
 )
 
 // クッキー名の定数定義
@@ -36,7 +37,7 @@ func Logout(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "ログアウトしました",
+	c.JSON(http.StatusOK, responses.ApiResponse{
+		Message: "ログアウトしました",
 	})
 }
