@@ -7,7 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func removeCookie(c *gin.Context, cookieName string) {
+// クッキー名の定数定義
+const (
+	AccessTokenCookie  = "access_token"
+	RefreshTokenCookie = "refresh_token"
+)
+
+func removeCookie(c *gin.Context, cookieName string) error {
+
 	c.SetCookie(
 		cookieName,          // name: クッキーの名前
 		"",                  // value: クッキーの値（空文字で削除）
@@ -17,12 +24,17 @@ func removeCookie(c *gin.Context, cookieName string) {
 		true,                // secure: HTTPSでのみ送信可能
 		true,                // httpOnly: JavaScriptからアクセス不可
 	)
+	return nil
 }
 
 func Logout(c *gin.Context) {
-	// 各トークンのCookieを削除
-	removeCookie(c, "access_token")
-	removeCookie(c, "refresh_token")
+	// 両方のトークンを削除
+	for _, cookieName := range []string{AccessTokenCookie, RefreshTokenCookie} {
+		if err := removeCookie(c, cookieName); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "ログアウト処理に失敗しました"})
+			return
+		}
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "ログアウトしました",
