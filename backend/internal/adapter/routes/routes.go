@@ -9,9 +9,9 @@ import (
 )
 
 // 認証が不要なパブリックルートのセットアップ
-func setupPublicRoutes(api *gin.RouterGroup) {
+func setupPublicRoutes(publicRoutes *gin.RouterGroup) {
 	// ヘルスチェックルート
-	health := api.Group("/health")
+	health := publicRoutes.Group("/health")
 	{
 		health.GET("", handlers.HealthCheck)
 	}
@@ -20,16 +20,16 @@ func setupPublicRoutes(api *gin.RouterGroup) {
 	loginRepo := repository.NewLoginRepository()
 	loginUseCase := usecase.NewLoginUseCase(loginRepo)
 	loginHandler := handlers.NewLoginHandler(loginUseCase)
-	api.POST("/login", loginHandler.Login)
+	publicRoutes.POST("/login", loginHandler.Login)
 }
 
 // 認証が必要なプライベートルートのセットアップ
-func setupPrivateRoutes(protected *gin.RouterGroup) {
+func setupPrivateRoutes(privateRoutes *gin.RouterGroup) {
 	// ログアウト
-	protected.POST("/logout", handlers.Logout)
+	privateRoutes.POST("/logout", handlers.Logout)
 
 	// オペレーター関連
-	operators := protected.Group("/operators")
+	operators := privateRoutes.Group("/operators")
 	operatorRepo := repository.NewOperatorRepository()
 	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
 	operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
@@ -38,13 +38,13 @@ func setupPrivateRoutes(protected *gin.RouterGroup) {
 
 // メインのルーティング設定関数
 func SetupRoutes(r *gin.Engine) {
-	api := r.Group("/api")
+	publicRoutes := r.Group("/api")
 
 	// 認証が不要なパブリックルート
-	setupPublicRoutes(api)
+	setupPublicRoutes(publicRoutes)
 
 	// 認証が必要なプライベートルート
-	protected := api.Group("")
-	protected.Use(middleware.AuthMiddleware())
-	setupPrivateRoutes(protected)
+	privateRoutes := publicRoutes.Group("")
+	privateRoutes.Use(middleware.AuthMiddleware())
+	setupPrivateRoutes(privateRoutes)
 }

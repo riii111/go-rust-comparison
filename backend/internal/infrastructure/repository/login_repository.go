@@ -14,31 +14,39 @@ var (
 	ErrSystemError        = errors.New("システムエラーが発生しました")
 )
 
+// インターフェースの定義
 type LoginRepository interface {
 	FindOperatorByEmail(ctx context.Context, email string) (*models.Operator, error)
 }
 
+// loginRepository構造体の定義
 type loginRepository struct {
-	db *gorm.DB
+	db *gorm.DB // データベース接続を保持
 }
 
+// 新しいLoginRepositoryを作成
 func NewLoginRepository() LoginRepository {
 	return &loginRepository{
-		db: database.DB,
+		db: database.DB, // データベース接続を初期化
 	}
 }
 
+// メールアドレスでオペレーターを検索するメソッド
 func (r *loginRepository) FindOperatorByEmail(ctx context.Context, email string) (*models.Operator, error) {
 	var operator models.Operator
 
+	// データベースからメールアドレスでオペレーターを検索
 	if err := r.db.WithContext(ctx).
 		Where("email = ?", email).
 		First(&operator).Error; err != nil {
+		// レコードが見つからない場合のエラーハンドリング
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, ErrInvalidCredentials
 		}
+		// その他のエラーの場合
 		return nil, ErrSystemError
 	}
 
+	// オペレーターが見つかった場合
 	return &operator, nil
 }

@@ -29,7 +29,6 @@ const (
 	cookieHttpOnly       = true // true: JavaScriptからアクセス不可
 )
 
-// エラー種別の定義
 var (
 	ErrInvalidRequest = errors.New("リクエストの形式が正しくありません")
 )
@@ -59,7 +58,7 @@ func NewLoginHandler(loginUseCase usecase.LoginUseCase) *LoginHandler {
 	}
 }
 
-// Loginメソッドを構造体のメソッドとして定義
+// ユーザーのログイン処理を行う
 func (h *LoginHandler) Login(c *gin.Context) {
 	var req requests.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -79,6 +78,7 @@ func (h *LoginHandler) Login(c *gin.Context) {
 	})
 }
 
+// エラーを処理し、適切なHTTPレスポンスを返す
 func (h *LoginHandler) handleError(c *gin.Context, err error) {
 	var (
 		status  = http.StatusInternalServerError
@@ -103,6 +103,7 @@ func (h *LoginHandler) handleError(c *gin.Context, err error) {
 	})
 }
 
+// 認証トークンをクッキーに設定する
 func (h *LoginHandler) setAuthCookies(c *gin.Context, tokenPair *usecase.TokenPair) {
 	setAuthCookie(c, AccessTokenCookieName, tokenPair.AccessToken, accessTokenDuration)
 	setAuthCookie(c, RefreshTokenCookieName, tokenPair.RefreshToken, refreshTokenDuration)
