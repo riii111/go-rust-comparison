@@ -12,10 +12,11 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
 )
 
-// パッケージレベルでエラーを定義
 var (
 	ErrAuthentication = errors.New("認証が必要です")
 )
+
+var jwtSecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 
 // 認証が必要なエンドポイントに使用するミドルウェア
 func AuthMiddleware() gin.HandlerFunc {
@@ -44,30 +45,34 @@ func validateToken(tokenString string) (jwt.MapClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrSignatureInvalid
 		}
-		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
+		return jwtSecretKey, nil
 	})
 
 	if err != nil {
+		log.Printf("トークンの解析エラー: %v", err)
 		return nil, err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
+		log.Println("トークンが無効であるかクレームの取得に失敗しました")
 		return nil, ErrAuthentication
 	}
 
 	return claims, nil
 }
 
-// 共通のエラーハンドリングロジックを提供
+// handleError は共通のエラーハンドリングロジックを提供
 func handleError(c *gin.Context, err error) {
-	status := http.StatusUnauthorized
-	message := ErrAuthentication.Error()
+	// エラーの種類に応じたロギング
+	if errors.Is(err, jwt.ErrSignatureInvalid) {
+		log.Printf("署名エラーが発生しました: %v", err)
+	} else {
+		log.Printf("認証エラーが発生しました: %v", err)
+	}
 
-	log.Printf("認証エラー - タイプ: %T, 詳細: %v", err, err)
-
-	c.JSON(status, responses.ErrorResponse{
-		Error: message,
+	c.JSON(http.StatusUnauthorized, responses.ErrorResponse{
+		Error: ErrAuthentication.Error(),
 	})
 	c.Abort()
 }
