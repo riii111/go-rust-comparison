@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"errors"
 	"log"
 	"os"
 	"time"
@@ -11,7 +10,6 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
 	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type LoginUseCase interface {
@@ -50,10 +48,7 @@ func (u *loginUseCase) Execute(ctx context.Context, email, password string) (*To
 func (u *loginUseCase) authenticateUser(ctx context.Context, email, password string) (*models.Operator, error) {
 	operator, err := u.loginRepository.FindOperatorByEmail(ctx, email)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrInvalidCredentials
-		}
-		return nil, ErrSystemError
+		return nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(operator.PasswordHash), []byte(password)); err != nil {
