@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"log"
 	"os"
 	"time"
 
@@ -33,8 +34,8 @@ type TokenPair struct {
 }
 
 var (
-	ErrInvalidCredentials = errors.New("メールアドレスまたはパスワードが正しくありません")
-	ErrSystemError        = errors.New("システムエラーが発生しました")
+	ErrInvalidCredentials = repository.ErrInvalidCredentials
+	ErrSystemError        = repository.ErrSystemError
 )
 
 func (u *loginUseCase) Execute(ctx context.Context, email, password string) (*TokenPair, error) {
@@ -56,6 +57,7 @@ func (u *loginUseCase) authenticateUser(ctx context.Context, email, password str
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(operator.PasswordHash), []byte(password)); err != nil {
+		log.Printf("認証に失敗しました")
 		return nil, ErrInvalidCredentials
 	}
 
@@ -77,11 +79,13 @@ func (u *loginUseCase) generateTokenPair(user *models.Operator) (*TokenPair, err
 
 	accessTokenString, err := accessToken.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
 	if err != nil {
+		log.Printf("アクセストークンの生成に失敗しました: %v", err)
 		return nil, ErrSystemError
 	}
 
 	refreshTokenString, err := refreshToken.SignedString([]byte(os.Getenv("JWT_REFRESH_SECRET_KEY")))
 	if err != nil {
+		log.Printf("リフレッシュトークンの生成に失敗しました: %v", err)
 		return nil, ErrSystemError
 	}
 

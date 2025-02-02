@@ -14,7 +14,13 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
 )
 
-// クッキーの設定に関する定数
+// 認証関連の定数
+const (
+	AccessTokenCookieName  = "access_token"
+	RefreshTokenCookieName = "refresh_token"
+)
+
+// クッキー設定の定数
 const (
 	accessTokenDuration  = 24 * time.Hour
 	refreshTokenDuration = 30 * 24 * time.Hour
@@ -83,12 +89,13 @@ func (h *LoginHandler) handleError(c *gin.Context, err error) {
 	log.Printf("エラーが発生しました: %v", err)
 
 	switch {
-	case errors.Is(err, usecase.ErrInvalidCredentials):
-		status = http.StatusUnauthorized
-		message = usecase.ErrInvalidCredentials.Error()
 	case errors.Is(err, ErrInvalidRequest):
 		status = http.StatusBadRequest
 		message = ErrInvalidRequest.Error()
+	case errors.Is(err, usecase.ErrInvalidCredentials):
+		status = http.StatusUnauthorized
+		message = usecase.ErrInvalidCredentials.Error()
+
 	}
 
 	c.JSON(status, responses.ErrorResponse{
@@ -97,6 +104,6 @@ func (h *LoginHandler) handleError(c *gin.Context, err error) {
 }
 
 func (h *LoginHandler) setAuthCookies(c *gin.Context, tokenPair *usecase.TokenPair) {
-	setAuthCookie(c, "access_token", tokenPair.AccessToken, accessTokenDuration)
-	setAuthCookie(c, "refresh_token", tokenPair.RefreshToken, refreshTokenDuration)
+	setAuthCookie(c, AccessTokenCookieName, tokenPair.AccessToken, accessTokenDuration)
+	setAuthCookie(c, RefreshTokenCookieName, tokenPair.RefreshToken, refreshTokenDuration)
 }
