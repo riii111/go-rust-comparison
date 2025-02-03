@@ -26,7 +26,7 @@ func NewProductUsecase(productRepo repository.IProductRepository) *ProductUsecas
 func (u *ProductUsecase) CreateProduct(req requests.CreateProductRequest, userID string) error {
 
 	// 価格が0以下の場合はエラーを返す
-    if req.Price <= 0 {
+    if req.Price.LessThanOrEqual(decimal.Zero) {
         return ErrInvalidPrice
     }
 
@@ -34,7 +34,7 @@ func (u *ProductUsecase) CreateProduct(req requests.CreateProductRequest, userID
         Name:         req.Name,
         Description:  req.Description,
         MaterialInfo: req.MaterialInfo,
-        BasePrice:    decimal.NewFromFloat(req.Price),
+        BasePrice:    req.Price,
         Category:     req.Category,
         ImageURLs:    pq.StringArray(req.ImageURLs),
         CreatedBy:    userID,
