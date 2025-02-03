@@ -51,9 +51,13 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
             c.JSON(http.StatusBadRequest, responses.ErrorResponse{
                 Error: repository.ErrProductCreateFailed.Error(),
             })
-        case usecase.ErrInvalidPrice:
+        case usecase.ErrPriceZeroOrNegative:
             c.JSON(http.StatusBadRequest, responses.ErrorResponse{
-                Error: usecase.ErrInvalidPrice.Error(),
+                Error: usecase.ErrPriceZeroOrNegative.Error(),
+            })
+        case usecase.ErrPriceTooHigh:
+            c.JSON(http.StatusBadRequest, responses.ErrorResponse{
+                Error: usecase.ErrPriceTooHigh.Error(),
             })
         default:
             // エラーの種類が不明な場合

@@ -9,8 +9,13 @@ import (
     "github.com/shopspring/decimal"
 )
 
+// 上限値は一旦、1000万に
+const maxPriceValue = 1000000
+
 var (
-    ErrInvalidPrice = errors.New("無効な価格です")
+	MaxPrice             = decimal.NewFromInt(maxPriceValue)
+	ErrPriceTooHigh = errors.New("価格は1000万円以下で入力してください")
+    ErrPriceZeroOrNegative = errors.New("価格は0円より大きい値を入力してください")
 )
 
 type ProductUsecase struct {
@@ -24,10 +29,13 @@ func NewProductUsecase(productRepo repository.IProductRepository) *ProductUsecas
 }
 
 func (u *ProductUsecase) CreateProduct(req requests.CreateProductRequest, userID string) error {
-
+	// 価格が上限を超える場合はエラーを返す
+    if req.Price.GreaterThan(MaxPrice) {
+        return ErrPriceTooHigh
+    }
 	// 価格が0以下の場合はエラーを返す
     if req.Price.LessThanOrEqual(decimal.Zero) {
-        return ErrInvalidPrice
+        return ErrPriceZeroOrNegative
     }
 
     product := &models.Product{
