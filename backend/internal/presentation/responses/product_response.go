@@ -1,5 +1,3 @@
 package responses
 
-type CreateProductResponse struct {
-    Message string `json:"message"`
-}
+// product関連のレスポンス構造体

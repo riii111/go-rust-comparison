@@ -1,7 +1,12 @@
 // 共通で使用するレスポンスはここで定義
 package responses
 
-// ErrorResponse エラー時のレスポンス
+// 標準的な成功レスポンス
+type StandardResponse struct {
+    Message string `json:"message"`
+}
+
+// エラー時のレスポンス
 type ErrorResponse struct {
 	Error   string `json:"error"`
 	Details string `json:"details,omitempty"`

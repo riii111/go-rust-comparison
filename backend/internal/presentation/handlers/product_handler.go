@@ -66,7 +66,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
         return
     }
         
-    c.JSON(http.StatusCreated, responses.CreateProductResponse{
+    c.JSON(http.StatusCreated, responses.StandardResponse{
         Message: "商品の作成に成功しました",
     })
 }
