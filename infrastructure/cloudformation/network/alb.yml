@@ -233,7 +233,7 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref ALBTargetGroupBlue
       LoadBalancerArn: !Ref InternetALB
-      Port: 8081
+      Port: 8080
       Protocol: HTTP
 
   # -------------------------------------

@@ -68,8 +68,8 @@ Resources:
           output = [
               {
                 "IpProtocol": "tcp",
-                "FromPort": 8081,
-                "ToPort": 8081,
+                "FromPort": 8080,
+                "ToPort": 8080,
                 "CidrIp": ip,
                 "Description": desc
               }
@@ -116,7 +116,15 @@ Resources:
       ToPort: 80
       SourceSecurityGroupId: !Ref ALBSG
       Description: "from alb"
-
+  FargateSGIngressHTTPS:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref FargateSG
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId: !Ref VPCEndpointSG
+      Description: "Allow HTTPS from VPC Endpoint"
 
   # Use only when Blue/Green Deployment
   FargateSGIngressHTTPTest:
@@ -124,8 +132,8 @@ Resources:
     Properties:
       GroupId: !Ref FargateSG
       IpProtocol: tcp
-      FromPort: 8081
-      ToPort: 8081
+      FromPort: 8080
+      ToPort: 8080
       SourceSecurityGroupId: !Ref ALBSG
       Description: "from alb (for blue/green deployment)"
   # For RDS (MySQL)
@@ -151,6 +159,39 @@ Resources:
       ToPort: 3306
       SourceSecurityGroupId: !Ref FargateSG
       Description: "from fargate"
+
+  # For VPC Endpoint
+  VPCEndpointSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPCID
+      GroupName: !Sub ${ProjectName}-${Environment}-vpce-sg
+      GroupDescription: "Security Group For VPC Endpoint"
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-vpce-sg
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  VPCEndpointSGIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref VPCEndpointSG
+      SourceSecurityGroupId: !Ref FargateSG
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      Description: "Allow HTTPS from VPC"
+  VPCEndpointSGEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref VPCEndpointSG
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      DestinationSecurityGroupId: !Ref FargateSG
+      Description: "Allow HTTPS response to ECS Fargate"
 
 
 # -------------------------------------
