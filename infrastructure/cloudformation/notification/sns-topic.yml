@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "SNS Topic Stack"
+
+# -------------------------------------
+# Resources
+# -------------------------------------
+Resources:
+  # -------------------------------------
+  # SNS Topic
+  # -------------------------------------
+  # アラート通知用
+  AlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: go-rust-comparison-alert
+      TopicName: go-rust-comparison-alert
+
+  # -------------------------------------
+  # SNS Topic Policy
+  # -------------------------------------
+  AlertTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AlertSNSPolicy
+            Effect: Allow
+            Principal:
+              Service:
+                - cloudwatch.amazonaws.com
+            Action:
+              - sns:Publish
+            Resource: !Ref AlertTopic
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+      Topics:
+        - !Ref AlertTopic
+
+  # -------------------------------------
+  # SNS Subscription
+  # -------------------------------------
+  # TODO:将来的にAWSChatBotよりSlack通知に変更するため、一時的にメール通知にしています
+  AlertSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: test@test.com
+      Protocol: email
+      TopicArn: !Ref AlertTopic
+
+
+# -------------------------------------
+# Outputs
+# -------------------------------------
+Outputs:
+  AlertTopicArn:
+    Value: !Ref AlertTopic
