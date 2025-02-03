@@ -9,7 +9,6 @@ import (
 
 // データベースエラーに関する定数
 var (
-    ErrProductStockNotFound = errors.New("商品の在庫情報が設定されていません")
     ErrProductCreateFailed = errors.New("商品の登録に失敗しました")
 )
 
@@ -29,10 +28,10 @@ func NewProductRepository() IProductRepository {
 
 func (r *ProductRepository) Create(product *models.Product) error {
     if err := r.db.Create(product).Error; err != nil {
-		// TODO: Stockとの関連チェックが実装したらテストする
-        if errors.Is(err, gorm.ErrForeignKeyViolated) {
-            return ErrProductStockNotFound
-        }
+		// TODO: products テーブルの created_by/updated_byに外部キー制約のエラーハンドリングを追加
+		// if errors.Is(err, gorm.ErrForeignKeyViolated) {
+        //                 return fmt.Errorf("該当するoperatorが存在: %w", err)
+        // }
         return ErrProductCreateFailed
     }
     return nil
