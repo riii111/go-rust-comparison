@@ -136,13 +136,13 @@ Resources:
       ToPort: 8080
       SourceSecurityGroupId: !Ref ALBSG
       Description: "from alb (for blue/green deployment)"
-  # For RDS (MySQL)
-  RDSForMySQLSG:
+  # For RDS (PostgreSQL)
+  RDSForPostgreSQLSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref VPCID
       GroupName: !Sub ${ProjectName}-${Environment}-rds-sg
-      GroupDescription: "Security Group For RDS (MySQL)"
+      GroupDescription: "Security Group For RDS (PostgreSQL)"
       Tags:
         - Key: Name
           Value: !Sub ${ProjectName}-${Environment}-rds-sg
@@ -150,13 +150,13 @@ Resources:
           Value: !Ref ProjectName
         - Key: Environment
           Value: !Ref Environment
-  RDSForMySQLSGIngress:
+  RDSForPostgreSQLSGIngress:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      GroupId: !Ref RDSForMySQLSG
+      GroupId: !Ref RDSForPostgreSQLSG
       IpProtocol: tcp
-      FromPort: 3306
-      ToPort: 3306
+      FromPort: 5432
+      ToPort: 5432
       SourceSecurityGroupId: !Ref FargateSG
       Description: "from fargate"
 
@@ -204,6 +204,6 @@ Outputs:
   FargateSG:
     Description: "Security Group For ECS Fargate"
     Value: !Ref FargateSG
-  RDSForMySQLSG:
-    Description: "Security Group For RDS (MySQL)"
-    Value: !Ref RDSForMySQLSG
+  RDSForPostgreSQLSG:
+    Description: "Security Group For RDS (PostgreSQL)"
+    Value: !Ref RDSForPostgreSQLSG

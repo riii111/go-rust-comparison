@@ -58,7 +58,7 @@ Parameters:
     Description: "Select the PostgreSQL engine minor version."
     Type: String
   DBName:
-    Description: "Enter the database name. (ex: go_ruts_comparison_development)"
+    Description: "Enter the database name. (ex: go_rust_comparison_dev)"
     Type: String
   DBMasterUserName:
     Description: "Enter the master username, following your company's naming rule. (ref: https://pj100.esa.io/posts/9475)"

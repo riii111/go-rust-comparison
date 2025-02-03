@@ -89,7 +89,7 @@ Parameters:
   HealthCheckPath:
     Description: "Enter the path respond to health checks from ALB."
     Type: String
-    Default: /api/health
+    Default: /back/health
   # 削除保護
   DeletionProtectionEnabled:
     Description: "Select whether to enable deletion protection."

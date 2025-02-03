@@ -1,4 +1,4 @@
-FROM --platform=linux/x86_64 golang:1.23.3
+FROM golang:1.23.3
 
 WORKDIR /usr/local/go/src/go_rust_comparison/backend
 

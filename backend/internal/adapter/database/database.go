@@ -34,9 +34,10 @@ func getDBConfig() *DBConfig {
 
 // DSN文字列を生成
 func (c *DBConfig) buildDSN() string {
+	sslmode := os.Getenv("POSTGRES_SSLMODE")
 	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		c.User, c.Password, c.Host, c.Port, c.DBName,
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		c.User, c.Password, c.Host, c.Port, c.DBName, sslmode,
 	)
 }
 
