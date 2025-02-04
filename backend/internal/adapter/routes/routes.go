@@ -28,12 +28,17 @@ func setupPrivateRoutes(privateRoutes *gin.RouterGroup) {
 	// ログアウト
 	privateRoutes.POST("/logout", handlers.Logout)
 
-	// オペレーター関連
-	operators := privateRoutes.Group("/operators")
-	operatorRepo := repository.NewOperatorRepository()
-	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
-	operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
-	operators.POST("", operatorHandler.CreateOperator)
+	// システム管理者専用のプライベートルート
+	adminRoutes := privateRoutes.Group("")
+	adminRoutes.Use(middleware.SystemAdminOnly())
+	{
+
+		// オペレーター関連
+		operatorRepo := repository.NewOperatorRepository()
+		operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
+		operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
+		adminRoutes.POST("/operators", operatorHandler.CreateOperator)
+	}
 }
 
 // メインのルーティング設定関数
