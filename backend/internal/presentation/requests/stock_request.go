@@ -12,6 +12,4 @@ type CreateStockInput struct {
 	Quantity    uint            `json:"quantity" binding:"required"`
 	Price       decimal.Decimal `json:"price" binding:"required"`
 	IsAvailable bool            `json:"is_available" binding:"required"`
-	CreatedBy   *string         `json:"created_by" binding:""`
-	UpdatedBy   *string         `json:"updated_by" binding:""`
 }
