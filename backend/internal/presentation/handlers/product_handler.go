@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
-	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
 	"log"
@@ -46,10 +45,6 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	if err := h.productUsecase.CreateProduct(req, userID); err != nil {
 		// エラーの種類に応じてレスポンスを返す
 		switch err {
-		case repository.ErrProductCreateFailed:
-			c.JSON(http.StatusBadRequest, responses.ErrorResponse{
-				Error: repository.ErrProductCreateFailed.Error(),
-			})
 		case usecase.ErrPriceZeroOrNegative:
 			c.JSON(http.StatusBadRequest, responses.ErrorResponse{
 				Error: usecase.ErrPriceZeroOrNegative.Error(),
@@ -61,7 +56,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		default:
 			// エラーの種類が不明な場合
 			c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
-				Error: "システムエラーが発生しました。しばらく時間をおいて再度お試しください",
+				Error: "商品の登録に失敗しました。しばらく時間をおいて再度お試しください。",
 			})
 			// エラーログの出力
 			log.Printf("サーバーエラー: %v", err)

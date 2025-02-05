@@ -10,7 +10,7 @@ import (
 )
 
 // 上限値は一旦、1000万に
-const maxPriceValue = 1000000
+const maxPriceValue = 10000000
 
 var (
 	MaxPrice               = decimal.NewFromInt(maxPriceValue)
