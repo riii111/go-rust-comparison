@@ -29,8 +29,8 @@ func main() {
 	// CORSミドルウェアの設定
 	r.Use(middleware.CORSConfig())
 
-    // ルーティングの設定
-    routes.SetupRoutes(r)
+	// ルーティングの設定
+	routes.SetupRoutes(r)
 
 	// サーバーの起動
 	if err := r.Run(":8000"); err != nil {
