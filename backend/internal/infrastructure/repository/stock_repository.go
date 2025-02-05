@@ -18,9 +18,6 @@ func NewStockRepository(db *gorm.DB) StockRepository {
 }
 
 func (s *stockRepository) Create(stock *models.Stock) (*models.Stock, error) {
-	// UUID生成
-	stock.BeforeCreate(s.db)
-
 	if err := s.db.Create(stock).Error; err != nil {
 		return nil, err
 	}
