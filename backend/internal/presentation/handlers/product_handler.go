@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
@@ -26,16 +27,21 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	var req requests.CreateProductRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		errorResponse := responses.ErrorResponse{
-			Error: "入力内容に誤りがあります。確認して再度お試しください",
+		// レスポンスのバリデーションエラーの場合
+		if ve, ok := err.(validator.ValidationErrors); ok {
+			// バリデーションエラーメッセージの取得
+			if message, exists := requests.ValidationErrors[ve[0].Tag()]; exists {
+				c.JSON(http.StatusBadRequest, responses.ErrorResponse{
+					Error: message,
+				})
+				return
+			}
 		}
 
-		// デバッグモードの場合のみエラー詳細を追加
-		if gin.Mode() == gin.DebugMode {
-			errorResponse.Details = err.Error()
-		}
-
-		c.JSON(http.StatusBadRequest, errorResponse)
+		// その他のバインドエラー
+		c.JSON(http.StatusBadRequest, responses.ErrorResponse{
+			Error: "入力内容に誤りがあります",
+		})
 		return
 	}
 
@@ -43,25 +49,12 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	userID := "00000000-0000-0000-0000-000000000000"
 
 	if err := h.productUsecase.CreateProduct(req, userID); err != nil {
-		// エラーの種類に応じてレスポンスを返す
-		switch err {
-		case usecase.ErrPriceZeroOrNegative:
-			c.JSON(http.StatusBadRequest, responses.ErrorResponse{
-				Error: usecase.ErrPriceZeroOrNegative.Error(),
-			})
-		case usecase.ErrPriceTooHigh:
-			c.JSON(http.StatusBadRequest, responses.ErrorResponse{
-				Error: usecase.ErrPriceTooHigh.Error(),
-			})
-		default:
-			// エラーの種類が不明な場合
-			c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
-				Error: "商品の登録に失敗しました。しばらく時間をおいて再度お試しください。",
-			})
-			// エラーログの出力
-			log.Printf("サーバーエラー: %v", err)
-		}
-		return
+		// エラーの種類が不明な場合
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
+			Error: "商品の登録に失敗しました。しばらく時間をおいて再度お試しください。",
+		})
+		// エラーログの出力
+		log.Printf("サーバーエラー: %v", err)
 	}
 
 	c.JSON(http.StatusCreated, responses.StandardResponse{
