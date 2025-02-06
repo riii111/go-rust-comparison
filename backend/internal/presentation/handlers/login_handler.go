@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
+	"github.com/riii111/go-rust-comparison/internal/presentation/consts"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
 )
@@ -18,15 +19,6 @@ import (
 const (
 	AccessTokenCookieName  = "access_token"
 	RefreshTokenCookieName = "refresh_token"
-)
-
-// クッキー設定の定数
-const (
-	accessTokenDuration  = 24 * time.Hour
-	refreshTokenDuration = 30 * 24 * time.Hour
-	cookiePath           = "/"  // クッキーが有効なパス
-	cookieSecure         = true // true: HTTPSのみ
-	cookieHttpOnly       = true // true: JavaScriptからアクセス不可
 )
 
 var (
@@ -39,10 +31,10 @@ func setAuthCookie(c *gin.Context, name, value string, maxAge time.Duration) {
 		name,                  // Name: クッキー名
 		value,                 // Value: クッキーの値
 		int(maxAge.Seconds()), // MaxAge: 有効期限（秒）
-		cookiePath,            // Path: クッキーの有効範囲
+		consts.CookiePath,     // Path: クッキーの有効範囲
 		os.Getenv("DOMAIN"),   // Domain: クッキーが有効なドメイン
-		cookieSecure,          // Secure: HTTPSのみ
-		cookieHttpOnly,        // HttpOnly: JSからのアクセス制限
+		consts.CookieSecure,   // Secure: HTTPSのみ
+		consts.CookieHttpOnly, // HttpOnly: JSからのアクセス制限
 	)
 }
 
@@ -105,6 +97,6 @@ func (h *LoginHandler) handleError(c *gin.Context, err error) {
 
 // 認証トークンをクッキーに設定する
 func (h *LoginHandler) setAuthCookies(c *gin.Context, tokenPair *usecase.TokenPair) {
-	setAuthCookie(c, AccessTokenCookieName, tokenPair.AccessToken, accessTokenDuration)
-	setAuthCookie(c, RefreshTokenCookieName, tokenPair.RefreshToken, refreshTokenDuration)
+	setAuthCookie(c, AccessTokenCookieName, tokenPair.AccessToken, consts.AccessTokenDuration)
+	setAuthCookie(c, RefreshTokenCookieName, tokenPair.RefreshToken, consts.RefreshTokenDuration)
 }
