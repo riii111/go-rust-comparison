@@ -28,6 +28,8 @@ func main() {
 
 	// CORSミドルウェアの設定
 	r.Use(middleware.CORSConfig())
+	// レート制限ミドルウェアの設定
+	r.Use(middleware.RateLimit())
 
 	// ルーティングの設定
 	routes.SetupRoutes(r)
