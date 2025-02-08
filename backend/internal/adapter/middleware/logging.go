@@ -48,16 +48,11 @@ func parseResponseBody(body []byte) string {
 
 // LoggingMiddleware APIのリクエストとレスポンスをロギングするミドルウェア
 func LoggingMiddleware(logger *zap.Logger) gin.HandlerFunc {
-	// スキップするパスを定数として定義
-	var skipPaths = []string{
-		".js",
-		"/api/docs/",
-		"/api/schema/",
-	}
-
 	return func(c *gin.Context) {
-		// スキップパスのチェックを関数化
-		if shouldSkipLogging(c.Request.URL.Path, skipPaths) {
+		// 静的ファイルやドキュメントへのリクエストはスキップ
+		if strings.HasSuffix(c.Request.URL.Path, ".js") ||
+			c.Request.URL.Path == "/api/docs/" ||
+			c.Request.URL.Path == "/api/schema/" {
 			c.Next()
 			return
 		}
@@ -107,16 +102,6 @@ func LoggingMiddleware(logger *zap.Logger) gin.HandlerFunc {
 			logger.Warn(message, resultFields...)
 		}
 	}
-}
-
-// shouldSkipLogging ロギングをスキップすべきパスかどうかを判定する
-func shouldSkipLogging(path string, skipPaths []string) bool {
-	for _, skip := range skipPaths {
-		if strings.HasSuffix(path, skip) {
-			return true
-		}
-	}
-	return false
 }
 
 // getUserInfo ユーザー情報を取得する
