@@ -8,12 +8,24 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/adapter/middleware"
 	"github.com/riii111/go-rust-comparison/internal/adapter/routes"
+	"go.uber.org/zap"
 )
 
 func main() {
+	// zapロガーの初期化
+	logger, err := zap.NewProduction()
+	if err != nil {
+		log.Fatalf("ロガーの初期化に失敗しました: %v", err)
+	}
+	defer logger.Sync()
+
 	// 環境変数DEBUGに基づいてGinモードを設定
 	if os.Getenv("DEBUG") == "true" {
 		gin.SetMode(gin.DebugMode)
+		logger, err = zap.NewDevelopment()
+		if err != nil {
+			log.Fatalf("開発用ロガーの初期化に失敗しました: %v", err)
+		}
 		log.Println("Ginをデバッグモードで起動します")
 	} else {
 		gin.SetMode(gin.ReleaseMode)
@@ -28,6 +40,7 @@ func main() {
 
 	// CORSミドルウェアの設定
 	r.Use(middleware.CORSConfig())
+	r.Use(middleware.LoggingMiddleware(logger))
 
 	// ルーティングの設定
 	routes.SetupRoutes(r)
