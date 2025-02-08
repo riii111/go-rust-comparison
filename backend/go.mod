@@ -7,9 +7,12 @@ require (
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.10.0
+	go.uber.org/zap v1.27.0
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
 )
+
+require go.uber.org/multierr v1.10.0 // indirect
 
 require (
 	github.com/bytedance/sonic v1.12.4 // indirect
