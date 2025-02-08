@@ -11,8 +11,8 @@ import (
 
 const (
 	// デフォルトのレート制限設定
-	defaultRequestsPerMinute = 30  // 1分間に30リクエスト
-	defaultBurst             = 5    // 同時に最大5リクエストまで
+	defaultRequestsPerMinute = 30 // 1分間に30リクエスト
+	defaultBurst             = 5  // 同時に最大5リクエストまで
 
 	// エラーメッセージ
 	errRateLimitExceeded = "リクエスト制限を超えました。しばらく待ってから再度お試しください。"
@@ -120,8 +120,8 @@ func RateLimit() gin.HandlerFunc {
 
 // # テスト用
 // 連続リクエストを送信
-for i in {1..70}; do
-    curl -i http://localhost:8000/api/health
-    echo "Request $i"
-    sleep 0.1
-done
+// for i in {1..70}; do
+//     curl -i http://localhost:8000/api/health
+//     echo "Request $i"
+//     sleep 0.1
+// done
