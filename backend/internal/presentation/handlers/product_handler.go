@@ -32,16 +32,23 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 			validationErrors := make(map[string]string)
 
 			for _, fieldError := range ve {
-				// エラー発生したフィールド名を取得
 				field := fieldError.Field()
-				// エラーの種類(requiredやprice_range)を取得
 				tag := fieldError.Tag()
 
-				// カスタムバリデーションエラーのチェック
-				if message, exists := requests.ValidationErrors[tag]; exists {
-					validationErrors[field] = message
-				} else {
-					validationErrors[field] = field + "を入力してください"
+				// フィールド名を日本語に変換する
+				jpfieldName, exists := requests.FieldNames[field]
+				if !exists {
+					jpfieldName = field
+				}
+
+				switch tag {
+				case "required":
+					validationErrors[field] = jpfieldName + requests.ErrMsgRequired
+				case "price_range":
+					validationErrors[field] = requests.ErrMsgPriceRange
+				// 念の為defaultを設定
+				default:
+					validationErrors[field] = fieldError.Error()
 				}
 			}
 

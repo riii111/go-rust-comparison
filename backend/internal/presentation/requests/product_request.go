@@ -6,6 +6,20 @@ import (
 )
 
 const maxPriceValue = 10000000
+const (
+	ErrMsgRequired   = "を入力してください"
+	ErrMsgPriceRange = "価格は0〜1000万円以下で入力してください"
+)
+
+// フィールド名の日本語
+var FieldNames = map[string]string{
+	"Name":         "商品名",
+	"Description":  "商品説明",
+	"MaterialInfo": "素材情報",
+	"Price":        "価格",
+	"Category":     "カテゴリー",
+	"ImageURLs":    "商品画像",
+}
 
 type CreateProductRequest struct {
 	Name         string          `json:"name" binding:"required"`
@@ -29,5 +43,6 @@ func validatePriceRange(fl validator.FieldLevel) bool {
 }
 
 var ValidationErrors = map[string]string{
-	"price_range": "価格は0〜1000万円以下で入力してください",
+	"required":    ErrMsgRequired,
+	"price_range": ErrMsgPriceRange,
 }
