@@ -8,6 +8,7 @@ type StandardResponse struct {
 
 // エラー時のレスポンス
 type ErrorResponse struct {
-	Error   string `json:"error"`
-	Details string `json:"details,omitempty"`
+	Error   string            `json:"error,omitempty"`
+	Errors  map[string]string `json:"errors,omitempty"`
+	Details string            `json:"details,omitempty"`
 }

@@ -29,16 +29,28 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		// レスポンスのバリデーションエラーの場合
 		if ve, ok := err.(validator.ValidationErrors); ok {
-			// バリデーションエラーメッセージの取得
-			if message, exists := requests.ValidationErrors[ve[0].Tag()]; exists {
-				c.JSON(http.StatusBadRequest, responses.ErrorResponse{
-					Error: message,
-				})
-				return
+			validationErrors := make(map[string]string)
+
+			for _, fieldError := range ve {
+				// エラー発生したフィールド名を取得
+				field := fieldError.Field()
+				// エラーの種類(requiredやprice_range)を取得
+				tag := fieldError.Tag()
+
+				// カスタムバリデーションエラーのチェック
+				if message, exists := requests.ValidationErrors[tag]; exists {
+					validationErrors[field] = message
+				} else {
+					validationErrors[field] = field + "を入力してください"
+				}
 			}
+
+			c.JSON(http.StatusBadRequest, responses.ErrorResponse{
+				Errors: validationErrors,
+			})
+			return
 		}
 
-		// その他のバインドエラー
 		c.JSON(http.StatusBadRequest, responses.ErrorResponse{
 			Error: "入力内容に誤りがあります",
 		})
