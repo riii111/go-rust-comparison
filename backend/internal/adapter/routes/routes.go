@@ -20,11 +20,20 @@ func setupOperatorRoutes(api *gin.RouterGroup) {
 	operators.POST("", operatorHandler.CreateOperator)
 }
 
+func setupProductRoutes(api *gin.RouterGroup) {
+	products := api.Group("/products")
+	productRepo := repository.NewProductRepository()
+	productUsecase := usecase.NewProductUsecase(productRepo)
+	productHandler := handlers.NewProductHandler(productUsecase)
+	products.POST("", productHandler.CreateProduct)
+}
+
 // メインのルーティング設定関数
 func SetupRoutes(r *gin.Engine) {
 	api := r.Group("/api")
 	{
 		setupHealthRoutes(api)
 		setupOperatorRoutes(api)
+		setupProductRoutes(api)
 	}
 }
