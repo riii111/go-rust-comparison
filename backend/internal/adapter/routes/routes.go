@@ -21,6 +21,13 @@ func setupPublicRoutes(publicRoutes *gin.RouterGroup) {
 	loginUseCase := usecase.NewLoginUseCase(loginRepo)
 	loginHandler := handlers.NewLoginHandler(loginUseCase)
 	publicRoutes.POST("/login", loginHandler.Login)
+
+	// 商品関連
+	productRepo := repository.NewProductRepository()
+	productUsecase := usecase.NewProductUsecase(productRepo)
+	productHandler := handlers.NewProductHandler(productUsecase)
+	publicRoutes.POST("/products", productHandler.CreateProduct)
+}
 }
 
 // 認証が必要なプライベートルートのセットアップ
