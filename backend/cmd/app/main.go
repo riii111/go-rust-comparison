@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -8,8 +11,6 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/adapter/middleware"
 	"github.com/riii111/go-rust-comparison/internal/adapter/routes"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
-	"log"
-	"os"
 )
 
 func main() {

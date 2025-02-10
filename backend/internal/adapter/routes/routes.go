@@ -28,7 +28,6 @@ func setupPublicRoutes(publicRoutes *gin.RouterGroup) {
 	productHandler := handlers.NewProductHandler(productUsecase)
 	publicRoutes.POST("/products", productHandler.CreateProduct)
 }
-}
 
 // 認証が必要なプライベートルートのセットアップ
 func setupPrivateRoutes(privateRoutes *gin.RouterGroup) {
