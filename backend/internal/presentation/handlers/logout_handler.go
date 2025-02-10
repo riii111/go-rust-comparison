@@ -37,7 +37,7 @@ func Logout(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.StandardResponse{
 		Message: "ログアウトしました",
 	})
 }

@@ -65,7 +65,7 @@ func (h *LoginHandler) Login(c *gin.Context) {
 	}
 
 	h.setAuthCookies(c, tokenPair)
-	c.JSON(http.StatusOK, responses.ApiResponse{
+	c.JSON(http.StatusOK, responses.StandardResponse{
 		Message: "ログインに成功しました",
 	})
 }
