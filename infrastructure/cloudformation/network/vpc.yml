@@ -207,12 +207,13 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
+      # プロジェクトにより考慮する必要あり
       LifecycleConfiguration:
         Rules:
-          - Id: TransitionToGlacierAfter365Days
+          - Id: TransitionToGlacierAfter90Days
             Status: Enabled
             Transitions:
-              - TransitionInDays: 365
+              - TransitionInDays: 90
                 StorageClass: GLACIER
           - Id: ExpireAfter5Years
             Status: Enabled
