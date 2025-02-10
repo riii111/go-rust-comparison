@@ -27,14 +27,18 @@ var (
 
 // クッキーを設定する共通関数
 func setAuthCookie(c *gin.Context, name, value string, maxAge time.Duration) {
+	domain := os.Getenv("DOMAIN")
+	secure := os.Getenv("COOKIE_SECURE") == "true"
+	httpOnly := os.Getenv("COOKIE_HTTP_ONLY") == "true"
+
 	c.SetCookie(
 		name,                  // Name: クッキー名
 		value,                 // Value: クッキーの値
 		int(maxAge.Seconds()), // MaxAge: 有効期限（秒）
 		consts.CookiePath,     // Path: クッキーの有効範囲
-		os.Getenv("DOMAIN"),   // Domain: クッキーが有効なドメイン
-		consts.CookieSecure,   // Secure: HTTPSのみ
-		consts.CookieHttpOnly, // HttpOnly: JSからのアクセス制限
+		domain,                // Domain: クッキーが有効なドメイン
+		secure,                // Secure: HTTPSのみ
+		httpOnly,              // HttpOnly: JSからのアクセス制限
 	)
 }
 
