@@ -3,7 +3,6 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"errors"
@@ -15,31 +14,24 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
 )
 
-// 認証関連の定数
-const (
-	AccessTokenCookieName  = "access_token"
-	RefreshTokenCookieName = "refresh_token"
-)
-
 var (
 	ErrInvalidRequest = errors.New("リクエストの形式が正しくありません")
 )
 
 // クッキーを設定する共通関数
 func setAuthCookie(c *gin.Context, name, value string, maxAge time.Duration) {
-	domain := os.Getenv("DOMAIN")
-	secure := os.Getenv("COOKIE_SECURE") == "true"
-	httpOnly := os.Getenv("COOKIE_HTTP_ONLY") == "true"
+	config := consts.NewCookieConfig()
 
 	c.SetCookie(
 		name,                  // Name: クッキー名
 		value,                 // Value: クッキーの値
 		int(maxAge.Seconds()), // MaxAge: 有効期限（秒）
 		consts.CookiePath,     // Path: クッキーの有効範囲
-		domain,                // Domain: クッキーが有効なドメイン
-		secure,                // Secure: HTTPSのみ
-		httpOnly,              // HttpOnly: JSからのアクセス制限
+		config.Domain,         // Domain: クッキーが有効なドメイン
+		config.Secure,         // Secure: HTTPSのみ
+		config.HttpOnly,       // HttpOnly: JSからのアクセス制限
 	)
+	c.SetSameSite(config.SameSite) // SameSite属性を別途設定
 }
 
 // LoginHandlerの構造体を追加
@@ -101,6 +93,6 @@ func (h *LoginHandler) handleError(c *gin.Context, err error) {
 
 // 認証トークンをクッキーに設定する
 func (h *LoginHandler) setAuthCookies(c *gin.Context, tokenPair *usecase.TokenPair) {
-	setAuthCookie(c, AccessTokenCookieName, tokenPair.AccessToken, consts.AccessTokenDuration)
-	setAuthCookie(c, RefreshTokenCookieName, tokenPair.RefreshToken, consts.RefreshTokenDuration)
+	setAuthCookie(c, consts.AccessTokenCookieName, tokenPair.AccessToken, consts.AccessTokenDuration)
+	setAuthCookie(c, consts.RefreshTokenCookieName, tokenPair.RefreshToken, consts.RefreshTokenDuration)
 }
