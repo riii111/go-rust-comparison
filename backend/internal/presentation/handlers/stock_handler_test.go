@@ -118,7 +118,7 @@ func (suite *StockHandlersSuite) TestCreateRequestBodyFailure() {
 
 	suite.stockHandler.CreateStock(ginContext)
 	suite.Assert().Equal(http.StatusBadRequest, w.Code)
-	suite.Assert().JSONEq(`{"error": "invalid request"}`, w.Body.String())
+	suite.Assert().JSONEq(`{"error": "入力内容に誤りがあります"}`, w.Body.String())
 }
 
 func (suite *StockHandlersSuite) TestCreateFailure() {
@@ -134,7 +134,7 @@ func (suite *StockHandlersSuite) TestCreateFailure() {
 
 	mockUseCase := NewMockStockUseCase()
 	mockUseCase.On("Create", inputStock).Return(nil,
-		errors.New("登録失敗"))
+		errors.New("システムエラーが発生しました。しばらく時間をおいて再度お試しください"))
 
 	suite.stockHandler = handlers.NewStockHandler(mockUseCase)
 
@@ -149,5 +149,5 @@ func (suite *StockHandlersSuite) TestCreateFailure() {
 	suite.stockHandler.CreateStock(ginContext)
 
 	suite.Assert().Equal(http.StatusInternalServerError, w.Code)
-	suite.Assert().JSONEq(`{"error":"登録失敗"}`, w.Body.String())
+	suite.Assert().JSONEq(`{"error":"システムエラーが発生しました。しばらく時間をおいて再度お試しください"}`, w.Body.String())
 }
