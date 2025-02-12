@@ -15,7 +15,7 @@ func setupHealthRoutes(api *gin.RouterGroup) {
 
 func setupOperatorRoutes(api *gin.RouterGroup) {
 	operators := api.Group("/operators")
-	operatorRepo := repository.NewOperatorRepository()
+	operatorRepo := repository.NewOperatorRepository(database.DB)
 	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
 	operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
 	operators.POST("", operatorHandler.CreateOperator)
@@ -32,7 +32,7 @@ func setupStockRoutes(api *gin.RouterGroup) {
 
 func setupProductRoutes(api *gin.RouterGroup) {
 	products := api.Group("/products")
-	productRepo := repository.NewProductRepository()
+	productRepo := repository.NewProductRepository(database.DB)
 	productUsecase := usecase.NewProductUsecase(productRepo)
 	productHandler := handlers.NewProductHandler(productUsecase)
 	products.POST("", productHandler.CreateProduct)
