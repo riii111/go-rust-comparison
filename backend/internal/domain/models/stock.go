@@ -17,13 +17,11 @@ type Stock struct {
 	Quantity    uint            `gorm:"not null" json:"quantity" validate:"required"`
 	Price       decimal.Decimal `gorm:"type:decimal(10,2);not null" json:"price" validate:"required"`
 	IsAvailable bool            `gorm:"not null" json:"is_available" validate:"required"`
-	CreatedBy   *string         `gorm:"type:uuid" json:"created_by" validate:"required,uuid"`
-	UpdatedBy   *string         `gorm:"type:uuid" json:"updated_by" validate:"required,uuid"`
+	CreatedBy   string          `gorm:"type:uuid" json:"created_by" validate:"required,uuid"`
+	UpdatedBy   string          `gorm:"type:uuid" json:"updated_by" validate:"required,uuid"`
 	CreatedAt   time.Time       `json:"created_at"`
 	UpdatedAt   time.Time       `json:"updated_at"`
 }
-
-// *をつけないと、falsyな値が入る。*をつけたらnullが入る。
 
 // レコード作成前にUUID v7を自動生成する
 func (s *Stock) BeforeCreate(tx *gorm.DB) error {
