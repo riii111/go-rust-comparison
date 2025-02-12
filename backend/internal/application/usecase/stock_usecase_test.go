@@ -37,33 +37,37 @@ func TestStockUseCaseTestSuite(t *testing.T) {
 	suite.Run(t, new(StockUseCaseSuite))
 }
 
+var (
+	ID, _        = uuid.NewV7()
+	productID, _ = uuid.NewV7()
+	storeID, _   = uuid.NewV7()
+	price        = decimal.New(1000, 0)
+	now          = time.Now()
+)
+
 func (suite *StockUseCaseSuite) TestCreate() {
 	mockStockRepository := NewMockStockRepository()
 	suite.stockUseCase = usecase.NewStockUseCase(mockStockRepository)
 
-	productId, _ := uuid.NewV7()
-	storeId, _ := uuid.NewV7()
 	inputStock := &models.Stock{
-		ProductID:   productId.String(),
-		StoreID:     storeId.String(),
+		ProductID:   productID.String(),
+		StoreID:     storeID.String(),
 		Size:        "large",
 		Color:       "red",
 		Quantity:    100,
-		Price:       decimal.New(1000, 0),
+		Price:       price,
 		IsAvailable: true,
 	}
 
-	Id, _ := uuid.NewV7()
-	now := time.Now()
 	// Mockの返り値を定義
 	mockStockRepository.On("Create", inputStock).Return(&models.Stock{
-		ID:          Id.String(),
-		ProductID:   productId.String(),
-		StoreID:     storeId.String(),
+		ID:          ID.String(),
+		ProductID:   productID.String(),
+		StoreID:     storeID.String(),
 		Size:        "large",
 		Color:       "red",
 		Quantity:    100,
-		Price:       decimal.New(1000, 0),
+		Price:       price,
 		IsAvailable: true,
 		CreatedAt:   now,
 		UpdatedAt:   now,
