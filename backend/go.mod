@@ -11,14 +11,18 @@ require (
 	gorm.io/gorm v1.25.12
 )
 
-require github.com/lib/pq v1.10.9
+require (
+	github.com/aws/aws-sdk-go v1.55.6
+	github.com/lib/pq v1.10.9
+	github.com/minio/minio-go/v7 v7.0.85
+)
 
 require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
-	github.com/minio/minio-go/v7 v7.0.85 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 )
 

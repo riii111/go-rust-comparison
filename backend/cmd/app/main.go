@@ -26,10 +26,10 @@ func main() {
 	// データベース初期化
 	database.InitDB()
 
-	// MinIOストレージの初期化
-	minioStorage, err := storage.NewMinioStorage()
+	// ストレージ(MinIO,s3)の初期化
+	storageClient, err := storage.NewMinioStorage()
 	if err != nil {
-		log.Fatalf("minioの初期化に失敗しました: %v", err)
+		log.Fatalf("ストレージの初期化に失敗しました: %v", err)
 	}
 
 	// Ginエンジンの初期化
@@ -44,7 +44,7 @@ func main() {
 	r.Use(middleware.CORSConfig())
 
 	// ルーティングの設定
-	routes.SetupRoutes(r, minioStorage)
+	routes.SetupRoutes(r, storageClient)
 
 	// サーバーの起動
 	if err := r.Run(":8000"); err != nil {
