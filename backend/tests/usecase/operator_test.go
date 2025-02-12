@@ -61,7 +61,7 @@ func TestCreateOperator(t *testing.T) {
 	defer cleanupTestData(t)
 
 	// オペレーターリポジトリを作成し、usecaseに注入
-	operatorRepo := repository.NewOperatorRepository()
+	operatorRepo := repository.NewOperatorRepository(database.DB)
 	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
 
 	tests := []struct {

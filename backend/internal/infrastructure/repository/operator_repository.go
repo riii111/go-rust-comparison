@@ -3,7 +3,6 @@ package repository
 import (
 	"errors"
 
-	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
 	"gorm.io/gorm"
 )
@@ -25,9 +24,9 @@ type OperatorRepository struct {
 }
 
 // オペレーターリポジトリのインスタンスを生成
-func NewOperatorRepository() IOperatorRepository {
+func NewOperatorRepository(db *gorm.DB) IOperatorRepository {
 	return &OperatorRepository{
-		db: database.DB,
+		db: db,
 	}
 }
 

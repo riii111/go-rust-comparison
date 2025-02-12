@@ -23,7 +23,7 @@ func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 
-	operatorRepo := repository.NewOperatorRepository()
+	operatorRepo := repository.NewOperatorRepository(database.DB)
 	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
 	operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
 
