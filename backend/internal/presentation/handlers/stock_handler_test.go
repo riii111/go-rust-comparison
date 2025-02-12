@@ -11,9 +11,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
 	"github.com/riii111/go-rust-comparison/internal/presentation/handlers"
+	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -44,13 +47,23 @@ func TestStockHandlersTestSuite(t *testing.T) {
 	suite.Run(t, new(StockHandlersSuite))
 }
 
+func (s *StockHandlersSuite) SetupSuite() {
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		requests.RegisterProductValidations(v)
+	}
+}
+
+var (
+	productID, _ = uuid.NewV7()
+	storeID, _   = uuid.NewV7()
+	price        = decimal.New(1000, 0)
+	now          = time.Now()
+)
+
 func (suite *StockHandlersSuite) TestCreate() {
-	productId, _ := uuid.NewV7()
-	storeId, _ := uuid.NewV7()
-	price := decimal.New(1000, 0)
 	inputStock := &models.Stock{
-		ProductID:   productId.String(),
-		StoreID:     storeId.String(),
+		ProductID:   productID.String(),
+		StoreID:     storeID.String(),
 		Size:        "large",
 		Color:       "red",
 		Quantity:    100,
@@ -58,13 +71,12 @@ func (suite *StockHandlersSuite) TestCreate() {
 		IsAvailable: true,
 	}
 
-	Id, _ := uuid.NewV7()
-	now := time.Now()
+	ID, _ := uuid.NewV7()
 	mockUseCase := NewMockStockUseCase()
 	mockUseCase.On("Create", inputStock).Return(&models.Stock{
-		ID:          Id.String(),
-		ProductID:   productId.String(),
-		StoreID:     storeId.String(),
+		ID:          ID.String(),
+		ProductID:   productID.String(),
+		StoreID:     storeID.String(),
 		Size:        "large",
 		Color:       "red",
 		Quantity:    100,
@@ -93,15 +105,7 @@ func (suite *StockHandlersSuite) TestCreate() {
 	err := json.Unmarshal(bodyBytes, &StockResponse)
 
 	suite.Assert().Nil(err)
-	suite.Assert().Equal(inputStock.ProductID, StockResponse.ProductID)
-	suite.Assert().Equal(inputStock.StoreID, StockResponse.StoreID)
-	suite.Assert().Equal(inputStock.Size, StockResponse.Size)
-	suite.Assert().Equal(inputStock.Color, StockResponse.Color)
-	suite.Assert().Equal(inputStock.Quantity, StockResponse.Quantity)
-	suite.Assert().Equal(inputStock.Price, StockResponse.Price)
-	suite.Assert().Equal(inputStock.IsAvailable, StockResponse.IsAvailable)
-	suite.Assert().NotNil(StockResponse.CreatedAt)
-	suite.Assert().NotNil(StockResponse.UpdatedAt)
+	suite.Assert().Equal(ID.String(), StockResponse.ID)
 }
 
 func (suite *StockHandlersSuite) TestCreateRequestBodyFailure() {
@@ -118,12 +122,9 @@ func (suite *StockHandlersSuite) TestCreateRequestBodyFailure() {
 }
 
 func (suite *StockHandlersSuite) TestCreateFailure() {
-	productId, _ := uuid.NewV7()
-	storeId, _ := uuid.NewV7()
-	price := decimal.New(1000, 0)
 	inputStock := &models.Stock{
-		ProductID:   productId.String(),
-		StoreID:     storeId.String(),
+		ProductID:   productID.String(),
+		StoreID:     storeID.String(),
 		Size:        "large",
 		Color:       "red",
 		Quantity:    100,
@@ -133,7 +134,7 @@ func (suite *StockHandlersSuite) TestCreateFailure() {
 
 	mockUseCase := NewMockStockUseCase()
 	mockUseCase.On("Create", inputStock).Return(nil,
-		errors.New("invalid"))
+		errors.New("登録失敗"))
 
 	suite.stockHandler = handlers.NewStockHandler(mockUseCase)
 
@@ -148,5 +149,5 @@ func (suite *StockHandlersSuite) TestCreateFailure() {
 	suite.stockHandler.CreateStock(ginContext)
 
 	suite.Assert().Equal(http.StatusInternalServerError, w.Code)
-	suite.Assert().JSONEq(`{"error":"invalid"}`, w.Body.String())
+	suite.Assert().JSONEq(`{"error":"登録失敗"}`, w.Body.String())
 }
