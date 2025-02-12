@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
+	"github.com/riii111/go-rust-comparison/internal/infrastructure/storage"
 	"github.com/riii111/go-rust-comparison/internal/presentation/handlers"
 )
 
@@ -20,20 +21,21 @@ func setupOperatorRoutes(api *gin.RouterGroup) {
 	operators.POST("", operatorHandler.CreateOperator)
 }
 
-func setupProductRoutes(api *gin.RouterGroup) {
+func setupProductRoutes(api *gin.RouterGroup, storage storage.Storage) {
 	products := api.Group("/products")
 	productRepo := repository.NewProductRepository()
 	productUsecase := usecase.NewProductUsecase(productRepo)
-	productHandler := handlers.NewProductHandler(productUsecase)
+	productHandler := handlers.NewProductHandler(productUsecase, storage)
 	products.POST("", productHandler.CreateProduct)
+	products.POST("/upload", productHandler.UploadImage)
 }
 
 // メインのルーティング設定関数
-func SetupRoutes(r *gin.Engine) {
+func SetupRoutes(r *gin.Engine, storage storage.Storage) {
 	api := r.Group("/api")
 	{
 		setupHealthRoutes(api)
 		setupOperatorRoutes(api)
-		setupProductRoutes(api)
+		setupProductRoutes(api, storage)
 	}
 }

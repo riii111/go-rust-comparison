@@ -7,6 +7,7 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/adapter/middleware"
 	"github.com/riii111/go-rust-comparison/internal/adapter/routes"
+	"github.com/riii111/go-rust-comparison/internal/infrastructure/storage"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"log"
 	"os"
@@ -25,6 +26,12 @@ func main() {
 	// データベース初期化
 	database.InitDB()
 
+	// MinIOストレージの初期化
+	minioStorage, err := storage.NewMinioStorage()
+	if err != nil {
+		log.Fatalf("minioの初期化に失敗しました: %v", err)
+	}
+
 	// Ginエンジンの初期化
 	r := gin.Default()
 
@@ -37,7 +44,7 @@ func main() {
 	r.Use(middleware.CORSConfig())
 
 	// ルーティングの設定
-	routes.SetupRoutes(r)
+	routes.SetupRoutes(r, minioStorage)
 
 	// サーバーの起動
 	if err := r.Run(":8000"); err != nil {
