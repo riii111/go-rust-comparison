@@ -61,21 +61,11 @@ Parameters:
     Description: "Enter the database name. (ex: go_rust_comparison_dev)"
     Type: String
   DBMasterUserName:
-    Description: "Enter the master username, following your company's naming rule. (ref: https://pj100.esa.io/posts/9475)"
-    Type: String
-    NoEcho: true
-    MinLength: 1
-    MaxLength: 16
-    AllowedPattern: "^[a-zA-Z][a-zA-Z_0-9]*"
-    ConstraintDescription: "Must begin with a letter and contain only alphanumeric characters."
+    Description: "Enter the master username parameter store."
+    Type: AWS::SSM::Parameter::Value<String>
   DBMasterUserPassword:
-    Description: "Enter the master password."
-    Type: String
-    NoEcho: true
-    MinLength: 10
-    MaxLength: 41
-    AllowedPattern: "^[a-zA-Z0-9]*"
-    ConstraintDescription: "Must contain only alphanumeric characters."
+    Description: "Enter the master password parameter store."
+    Type: AWS::SSM::Parameter::Value<String>
   DBInstanceClass:
     Description: "Select the DB Instance class."
     Type: String
@@ -113,7 +103,7 @@ Parameters:
   BackupRetentionPeriod:
     Description: "Select the retention period for backup data."
     Type: String
-    Default: 3
+    Default: 7
     AllowedValues: [0, 1, 3, 7, 14, 21, 31, 35]
   CopyTagsToSnapshot:
     Description: "Select the enable snapshot."
