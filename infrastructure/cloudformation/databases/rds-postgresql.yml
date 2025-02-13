@@ -58,14 +58,15 @@ Parameters:
     Description: "Select the PostgreSQL engine minor version."
     Type: String
   DBName:
-    Description: "Enter the database name. (ex: go_rust_comparison_dev)"
-    Type: String
+    Description: "Enter the database name from parameter store."
+    Type: AWS::SSM::Parameter::Value<String>
   DBMasterUserName:
-    Description: "Enter the master username parameter store."
+    Description: "Enter the master username from parameter store."
     Type: AWS::SSM::Parameter::Value<String>
   DBMasterUserPassword:
-    Description: "Enter the master password parameter store."
-    Type: AWS::SSM::Parameter::Value<String>
+    Description: "Enter the master password from parameter store.(ex: {{resolve:ssm-secure:parameter-name:version}} )"
+    Type: String
+    NoEcho: true
   DBInstanceClass:
     Description: "Select the DB Instance class."
     Type: String
