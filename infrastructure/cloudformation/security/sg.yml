@@ -115,6 +115,15 @@ Resources:
       ToPort: 80
       SourceSecurityGroupId: !Ref ALBSG
       Description: "from alb"
+  FargateSGIngressHTTPS:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref FargateSG
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId: !Ref VPCEndpointSG
+      Description: "Allow HTTPS from VPC Endpoint for Fargate access"
   # Use only when Blue/Green Deployment
   FargateSGIngressHTTPTest:
     Type: AWS::EC2::SecurityGroupIngress
@@ -172,6 +181,15 @@ Resources:
       FromPort: 443
       ToPort: 443
       Description: "Allow HTTPS from VPC"
+  VPCEndpointSGEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref VPCEndpointSG
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      DestinationSecurityGroupId: !Ref FargateSG
+      Description: "Allow HTTPS response to ECS Fargate"
 
 
 # -------------------------------------
