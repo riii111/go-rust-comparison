@@ -2,9 +2,7 @@ package models
 
 import (
 	"time"
-	"unicode"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -45,55 +43,4 @@ func (o *Operator) BeforeCreate(tx *gorm.DB) error {
 
 	o.ID = id.String()
 	return nil
-}
-
-// パスワードの最小文字数
-const minPasswordLength = 8
-
-// カスタムバリデーション関数を登録
-func RegisterCustomValidations(v *validator.Validate) {
-	v.RegisterValidation("password", validatePassword)
-}
-
-// パスワードバリデーション関数
-// パスワードは以下の条件を満たす必要があります:
-// - 8文字以上であること
-// - 大文字を1文字以上含むこと
-// - 小文字を1文字以上含むこと
-// - 数字を1文字以上含むこと
-// - 記号を1文字以上含むこと
-func validatePassword(fl validator.FieldLevel) bool {
-	password := fl.Field().String()
-
-	if len(password) < minPasswordLength {
-		return false
-	}
-
-	return hasRequiredCharacterTypes(password)
-}
-
-// パスワードに必要な文字種が含まれているかチェックする
-func hasRequiredCharacterTypes(password string) bool {
-	var (
-		hasUpper, hasLower, hasNumber, hasSymbol bool
-	)
-
-	for _, char := range password {
-		switch {
-		case unicode.IsUpper(char):
-			hasUpper = true
-		case unicode.IsLower(char):
-			hasLower = true
-		case unicode.IsNumber(char):
-			hasNumber = true
-		case unicode.IsPunct(char) || unicode.IsSymbol(char):
-			hasSymbol = true
-		}
-
-		if hasUpper && hasLower && hasNumber && hasSymbol {
-			return true
-		}
-	}
-
-	return false
 }

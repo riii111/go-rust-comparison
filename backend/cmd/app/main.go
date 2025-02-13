@@ -31,6 +31,7 @@ func main() {
 
 	// カスタムバリデーションの登録
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		requests.RegisterOperatorValidations(v)
 		requests.RegisterProductValidations(v)
 	}
 
