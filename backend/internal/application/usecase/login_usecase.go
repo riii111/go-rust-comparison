@@ -73,10 +73,9 @@ func (u *loginUseCase) generateTokenPair(user *models.Operator) (*TokenPair, err
 
 	// アクセストークンを生成
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":   user.ID,
-		"email": user.Email,
-		"role":  user.Role,
-		"exp":   now.Add(consts.AccessTokenDuration).Unix(),
+		"sub":  user.ID,
+		"role": user.Role,
+		"exp":  now.Add(consts.AccessTokenDuration).Unix(),
 	})
 
 	// リフレッシュトークンを生成
