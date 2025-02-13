@@ -16,8 +16,8 @@ const (
 const (
 	CookiePath = "/" // クッキーが有効なパス
 
-	AccessTokenCookieName  = "access_token"  // アクセストークンのクッキー名
-	RefreshTokenCookieName = "refresh_token" // リフレッシュトークンのクッキー名
+	AccessTokenCookie  = "access_token"  // アクセストークン
+	RefreshTokenCookie = "refresh_token" // リフレッシュトークン
 )
 
 // CookieConfig クッキーの共通設定を保持する構造体

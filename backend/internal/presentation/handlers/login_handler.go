@@ -93,6 +93,6 @@ func (h *LoginHandler) handleError(c *gin.Context, err error) {
 
 // 認証トークンをクッキーに設定する
 func (h *LoginHandler) setAuthCookies(c *gin.Context, tokenPair *usecase.TokenPair) {
-	setAuthCookie(c, consts.AccessTokenCookieName, tokenPair.AccessToken, consts.AccessTokenDuration)
-	setAuthCookie(c, consts.RefreshTokenCookieName, tokenPair.RefreshToken, consts.RefreshTokenDuration)
+	setAuthCookie(c, consts.AccessTokenCookie, tokenPair.AccessToken, consts.AccessTokenDuration)
+	setAuthCookie(c, consts.RefreshTokenCookie, tokenPair.RefreshToken, consts.RefreshTokenDuration)
 }

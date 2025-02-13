@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 	"os"
+	"strings"
 
 	"errors"
 	"log"
@@ -21,15 +22,21 @@ var jwtSecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 // 認証が必要なエンドポイントに使用するミドルウェア
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// クッキーからトークンを取得
-		tokenString, err := c.Cookie("access_token")
-		if err != nil {
-			// トークン取得エラー時の処理
-			handleError(c, err)
+		// Authorizationヘッダーを取得
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			handleError(c, ErrAuthentication)
 			return
 		}
 
-		// トークンを検証し、クレームを取得
+		// Bearer スキームの確認
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			handleError(c, ErrAuthentication)
+			return
+		}
+
+		tokenString := parts[1]
 		claims, err := validateToken(tokenString)
 		if err != nil {
 			// トークン検証エラー時の処理
