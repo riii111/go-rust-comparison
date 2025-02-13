@@ -8,8 +8,8 @@ import (
 
 // Token関連の定数
 const (
-	AccessTokenDuration  = 1 * time.Hour       // 1時間
-	RefreshTokenDuration = 24 * 30 * time.Hour // 30日
+	AccessTokenDuration  = 30 * time.Minute // 30分
+	RefreshTokenDuration = 12 * time.Hour   // 12時間
 )
 
 // Cookie関連の定数
