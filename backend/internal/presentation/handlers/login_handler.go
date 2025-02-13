@@ -81,9 +81,8 @@ func (h *LoginHandler) handleError(c *gin.Context, err error) {
 		status = http.StatusBadRequest
 		message = ErrInvalidRequest.Error()
 	case errors.Is(err, usecase.ErrInvalidCredentials):
-		status = http.StatusUnauthorized
+		status = http.StatusBadRequest
 		message = usecase.ErrInvalidCredentials.Error()
-
 	}
 
 	c.JSON(status, responses.ErrorResponse{
