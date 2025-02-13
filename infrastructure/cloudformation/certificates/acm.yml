@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "ACM Certificate Stack"
+
+# -------------------------------------
+# Metadata
+# -------------------------------------
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Project Configuration"
+        Parameters:
+          - ProjectName
+          - Environment
+      - Label:
+          default: "Route 53 Configuration"
+        Parameters:
+          - DomainName
+          - HostZoneID
+
+# -------------------------------------
+# Parameters
+# -------------------------------------
+Parameters:
+  ProjectName:
+    Description: "Enter the project name. (ex: go-rust-comparison)"
+    Type: String
+    MinLength: 1
+    ConstraintDescription: "ProjectName must be entered."
+    Default: go-rust-comparison
+  Environment:
+    Description: "Select a environment name."
+    Type: String
+    AllowedValues:
+      - dev
+      - stg
+      - prd
+    ConstraintDescription: "Environment name must be selected."
+    Default: dev
+  DomainName:
+    Description: "Enter the domain name. (CNAME) (ex: go-rust-comparison.funtechlab.com)"
+    Type: String
+  HostZoneID:
+    Description: "Enter the Route 53 Hosted Zone ID."
+    Type: AWS::Route53::HostedZone::Id
+
+# -------------------------------------
+# Resources
+# -------------------------------------
+Resources:
+  # -------------------------------------
+  # ACM
+  # -------------------------------------
+  ACMPublicCertificate:
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref DomainName
+      DomainValidationOptions:
+        - DomainName: !Ref DomainName
+          HostedZoneId: !Ref HostZoneID
+      SubjectAlternativeNames:
+        - !Sub "*.${DomainName}"
+      ValidationMethod: DNS
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+# -------------------------------------
+# Outputs
+# -------------------------------------
+Outputs:
+  ACMPublicCertificateArn:
+    Value: !Ref ACMPublicCertificate
+  DomainName:
+    Value: !Ref DomainName
+  HostZoneID:
+    Value: !Ref HostZoneID
