@@ -9,6 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
 	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
+	"github.com/riii111/go-rust-comparison/internal/presentation/consts"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -68,18 +69,20 @@ func (u *loginUseCase) authenticateUser(ctx context.Context, email, password str
 
 // アクセストークンとリフレッシュトークンを生成
 func (u *loginUseCase) generateTokenPair(user *models.Operator) (*TokenPair, error) {
-	// アクセストークンを生成します。
+	now := time.Now()
+
+	// アクセストークンを生成
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":   user.ID,
 		"email": user.Email,
 		"role":  user.Role,
-		"exp":   time.Now().Add(time.Hour * 24).Unix(),
+		"exp":   now.Add(consts.AccessTokenDuration).Unix(),
 	})
 
 	// リフレッシュトークンを生成
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
-		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+		"exp": now.Add(consts.RefreshTokenDuration).Unix(),
 	})
 
 	// アクセストークンを署名
