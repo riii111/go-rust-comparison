@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "ECR Stack"
+
+# -------------------------------------
+# Metadata
+# -------------------------------------
+Metadata:
+  AWS::CloudFormation::Interface:
+    # パラメータの並び順
+    ParameterGroups:
+      - Label:
+          default: "Project Configuration"
+        Parameters:
+          - ProjectName
+          - Environment
+      - Label:
+          default: "ECR Configuration"
+        Parameters:
+          - BackendAppRepositorySuffix
+          - BackendWebRepositorySuffix
+          - ImageTagMutability
+
+# -------------------------------------
+# Parameters
+# -------------------------------------
+Parameters:
+  ProjectName:
+    Description: "Enter the project name. (ex: go-rust-comparison)"
+    Type: String
+    Default: go-rust-comparison
+    ConstraintDescription: "ProjectName must be entered."
+    MinLength: 1
+  Environment:
+    Description: "Select the environment name."
+    Type: String
+    AllowedValues:
+      - dev
+      - stg
+      - prd
+    ConstraintDescription: "Environment name must be selected."
+    Default: dev
+  BackendAppRepositorySuffix:
+    Description: "Repository name suffix of the application container image. (ex: golang)"
+    Type: String
+    Default: golang
+  BackendWebRepositorySuffix:
+    Description: "Repository name suffix of the webserver container image. (ex: nginx)"
+    Type: String
+    Default: nginx
+  ImageTagMutability:
+    Description: "Select a ECR image mutability."
+    Type: String
+    Default: MUTABLE
+    AllowedValues: [MUTABLE, IMMUTABLE]
+
+# -------------------------------------
+# Resources
+# -------------------------------------
+Resources:
+  BackendAppRepository:
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub ${ProjectName}/${Environment}/back/${BackendAppRepositorySuffix}
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      ImageTagMutability: !Ref ImageTagMutability
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-ecr
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  BackendWebRepository:
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub ${ProjectName}/${Environment}/back/${BackendWebRepositorySuffix}
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      ImageTagMutability: !Ref ImageTagMutability
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-${Environment}-ecr
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+# -------------------------------------
+# Outputs
+# -------------------------------------
+Outputs:
+  BackendAppRepository:
+    Value: !Ref BackendAppRepository
+  BackendWebRepository:
+    Value: !Ref BackendWebRepository
