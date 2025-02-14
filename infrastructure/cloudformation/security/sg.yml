@@ -180,7 +180,7 @@ Resources:
       IpProtocol: tcp
       FromPort: 443
       ToPort: 443
-      Description: "Allow HTTPS from VPC"
+      Description: "Allow HTTPS from ECS Fargate"
   VPCEndpointSGEgress:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
