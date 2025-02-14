@@ -30,8 +30,8 @@ func NewMockStockUseCase() *MockStockUseCase {
 	return &MockStockUseCase{}
 }
 
-func (m *MockStockUseCase) Create(stock *models.Stock) (*models.Stock, error) {
-	args := m.Called(stock)
+func (m *MockStockUseCase) Create(requestBody *requests.CreateStockRequest) (*models.Stock, error) {
+	args := m.Called(requestBody)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -58,10 +58,7 @@ var (
 	storeID, _   = uuid.NewV7()
 	price        = decimal.New(1000, 0)
 	now          = time.Now()
-)
-
-func (suite *StockHandlersSuite) TestCreate() {
-	inputStock := &models.Stock{
+	requestBody  = &requests.CreateStockRequest{
 		ProductID:   productID.String(),
 		StoreID:     storeID.String(),
 		Size:        "large",
@@ -70,10 +67,12 @@ func (suite *StockHandlersSuite) TestCreate() {
 		Price:       price,
 		IsAvailable: true,
 	}
+)
 
+func (suite *StockHandlersSuite) TestCreate() {
 	ID, _ := uuid.NewV7()
 	mockUseCase := NewMockStockUseCase()
-	mockUseCase.On("Create", inputStock).Return(&models.Stock{
+	mockUseCase.On("Create", requestBody).Return(&models.Stock{
 		ID:          ID.String(),
 		ProductID:   productID.String(),
 		StoreID:     storeID.String(),
@@ -88,7 +87,7 @@ func (suite *StockHandlersSuite) TestCreate() {
 
 	suite.stockHandler = handlers.NewStockHandler(mockUseCase)
 
-	stockJson, _ := json.Marshal(inputStock)
+	stockJson, _ := json.Marshal(requestBody)
 	req, _ := http.NewRequest(http.MethodPost, "/api/stocks", strings.NewReader(string(stockJson)))
 	req.Header.Add("Content-Type", "application/json")
 
@@ -117,28 +116,19 @@ func (suite *StockHandlersSuite) TestCreateRequestBodyFailure() {
 	ginContext.Request = req
 
 	suite.stockHandler.CreateStock(ginContext)
+
 	suite.Assert().Equal(http.StatusBadRequest, w.Code)
 	suite.Assert().JSONEq(`{"error": "入力内容に誤りがあります"}`, w.Body.String())
 }
 
 func (suite *StockHandlersSuite) TestCreateFailure() {
-	inputStock := &models.Stock{
-		ProductID:   productID.String(),
-		StoreID:     storeID.String(),
-		Size:        "large",
-		Color:       "red",
-		Quantity:    100,
-		Price:       price,
-		IsAvailable: true,
-	}
-
 	mockUseCase := NewMockStockUseCase()
-	mockUseCase.On("Create", inputStock).Return(nil,
+	mockUseCase.On("Create", requestBody).Return(nil,
 		errors.New("システムエラーが発生しました。しばらく時間をおいて再度お試しください"))
 
 	suite.stockHandler = handlers.NewStockHandler(mockUseCase)
 
-	stockJson, _ := json.Marshal(inputStock)
+	stockJson, _ := json.Marshal(requestBody)
 	req, _ := http.NewRequest(http.MethodPost, "/api/stocks", strings.NewReader(string(stockJson)))
 	req.Header.Add("Content-Type", "application/json")
 

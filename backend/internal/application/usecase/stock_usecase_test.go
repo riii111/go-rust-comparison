@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
+	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -49,7 +50,7 @@ func (suite *StockUseCaseSuite) TestCreate() {
 	mockStockRepository := NewMockStockRepository()
 	suite.stockUseCase = usecase.NewStockUseCase(mockStockRepository)
 
-	inputStock := &models.Stock{
+	requestBody := &requests.CreateStockRequest{
 		ProductID:   productID.String(),
 		StoreID:     storeID.String(),
 		Size:        "large",
@@ -59,31 +60,41 @@ func (suite *StockUseCaseSuite) TestCreate() {
 		IsAvailable: true,
 	}
 
+	stock := &models.Stock{
+		ProductID:   requestBody.ProductID,
+		StoreID:     requestBody.StoreID,
+		Size:        requestBody.Size,
+		Color:       requestBody.Color,
+		Quantity:    requestBody.Quantity,
+		Price:       requestBody.Price,
+		IsAvailable: requestBody.IsAvailable,
+	}
+
 	// Mockの返り値を定義
-	mockStockRepository.On("Create", inputStock).Return(&models.Stock{
+	mockStockRepository.On("Create", stock).Return(&models.Stock{
 		ID:          ID.String(),
-		ProductID:   productID.String(),
-		StoreID:     storeID.String(),
-		Size:        "large",
-		Color:       "red",
-		Quantity:    100,
-		Price:       price,
-		IsAvailable: true,
+		ProductID:   requestBody.ProductID,
+		StoreID:     requestBody.StoreID,
+		Size:        requestBody.Size,
+		Color:       requestBody.Color,
+		Quantity:    requestBody.Quantity,
+		Price:       requestBody.Price,
+		IsAvailable: requestBody.IsAvailable,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}, nil)
 
 	// テスト対象の実行
-	stock, err := suite.stockUseCase.Create(inputStock)
+	createdStock, err := suite.stockUseCase.Create(requestBody)
 
 	suite.Assert().Nil(err)
-	suite.Assert().Equal(inputStock.ProductID, stock.ProductID)
-	suite.Assert().Equal(inputStock.StoreID, stock.StoreID)
-	suite.Assert().Equal(inputStock.Size, stock.Size)
-	suite.Assert().Equal(inputStock.Color, stock.Color)
-	suite.Assert().Equal(inputStock.Quantity, stock.Quantity)
-	suite.Assert().Equal(inputStock.Price, stock.Price)
-	suite.Assert().Equal(inputStock.IsAvailable, stock.IsAvailable)
-	suite.Assert().Equal(now, stock.CreatedAt)
-	suite.Assert().Equal(now, stock.UpdatedAt)
+	suite.Assert().Equal(requestBody.ProductID, createdStock.ProductID)
+	suite.Assert().Equal(requestBody.StoreID, createdStock.StoreID)
+	suite.Assert().Equal(requestBody.Size, createdStock.Size)
+	suite.Assert().Equal(requestBody.Color, createdStock.Color)
+	suite.Assert().Equal(requestBody.Quantity, createdStock.Quantity)
+	suite.Assert().Equal(requestBody.Price, createdStock.Price)
+	suite.Assert().Equal(requestBody.IsAvailable, createdStock.IsAvailable)
+	suite.Assert().Equal(now, createdStock.CreatedAt)
+	suite.Assert().Equal(now, createdStock.UpdatedAt)
 }

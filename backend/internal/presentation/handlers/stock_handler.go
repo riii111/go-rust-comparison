@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
-	"github.com/riii111/go-rust-comparison/internal/domain/models"
 	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 )
@@ -20,23 +19,12 @@ func NewStockHandler(stockUserCase usecase.StockUserCase) *StockHandler {
 }
 
 func (s *StockHandler) CreateStock(c *gin.Context) {
-	var requestBody requests.CreateStockInput
+	var requestBody requests.CreateStockRequest
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "入力内容に誤りがあります"})
 		return
 	}
-
-	stock := models.Stock{
-		ProductID:   requestBody.ProductID,
-		StoreID:     requestBody.StoreID,
-		Size:        requestBody.Size,
-		Color:       requestBody.Color,
-		Quantity:    requestBody.Quantity,
-		Price:       requestBody.Price,
-		IsAvailable: requestBody.IsAvailable,
-	}
-
-	createdStock, err := s.stockUserCase.Create(&stock)
+	createdStock, err := s.stockUserCase.Create(&requestBody)
 	if err != nil {
 		switch {
 		case errors.Is(err, repository.ErrForeignKey):

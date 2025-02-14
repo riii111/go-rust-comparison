@@ -4,7 +4,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type CreateStockInput struct {
+type CreateStockRequest struct {
 	ProductID   string          `json:"product_id" binding:"required,uuid"`
 	StoreID     string          `json:"store_id" binding:"required,uuid"`
 	Size        string          `json:"size" binding:"required"`
