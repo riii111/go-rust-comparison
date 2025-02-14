@@ -53,6 +53,10 @@ func (s *StockHandlersSuite) SetupSuite() {
 	}
 }
 
+const (
+	overQuantity = 10000
+)
+
 var (
 	productID, _ = uuid.NewV7()
 	storeID, _   = uuid.NewV7()
@@ -67,6 +71,8 @@ var (
 		Price:       price,
 		IsAvailable: true,
 	}
+	overPrice  = decimal.New(10000001, 0)
+	underPrice = decimal.New(-1, 0)
 )
 
 func (suite *StockHandlersSuite) TestCreate() {
@@ -109,6 +115,69 @@ func (suite *StockHandlersSuite) TestCreate() {
 
 func (suite *StockHandlersSuite) TestCreateRequestBodyFailure() {
 	req, _ := http.NewRequest(http.MethodPost, "/api/stocks", nil)
+	req.Header.Add("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	ginContext, _ := gin.CreateTestContext(w)
+	ginContext.Request = req
+
+	suite.stockHandler.CreateStock(ginContext)
+
+	suite.Assert().Equal(http.StatusBadRequest, w.Code)
+	suite.Assert().JSONEq(`{"error": "入力内容に誤りがあります"}`, w.Body.String())
+}
+
+func (suite *StockHandlersSuite) TestCreateRequestBodyFailureRequired() {
+	stockJson, _ := json.Marshal(requests.CreateStockRequest{})
+	req, _ := http.NewRequest(http.MethodPost, "/api/stocks", strings.NewReader(string(stockJson)))
+	req.Header.Add("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	ginContext, _ := gin.CreateTestContext(w)
+	ginContext.Request = req
+
+	suite.stockHandler.CreateStock(ginContext)
+
+	suite.Assert().Equal(http.StatusBadRequest, w.Code)
+	suite.Assert().JSONEq(`{"error": "入力内容に誤りがあります"}`, w.Body.String())
+}
+
+func (suite *StockHandlersSuite) TestCreateRequestBodyFailureQuantity() {
+	requestBody.Quantity = overQuantity
+	stockJson, _ := json.Marshal(requestBody)
+	req, _ := http.NewRequest(http.MethodPost, "/api/stocks", strings.NewReader(string(stockJson)))
+	req.Header.Add("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	ginContext, _ := gin.CreateTestContext(w)
+	ginContext.Request = req
+
+	suite.stockHandler.CreateStock(ginContext)
+
+	suite.Assert().Equal(http.StatusBadRequest, w.Code)
+	suite.Assert().JSONEq(`{"error": "入力内容に誤りがあります"}`, w.Body.String())
+}
+
+func (suite *StockHandlersSuite) TestCreateRequestBodyFailureOverPrice() {
+	requestBody.Price = overPrice
+	stockJson, _ := json.Marshal(requestBody)
+	req, _ := http.NewRequest(http.MethodPost, "/api/stocks", strings.NewReader(string(stockJson)))
+	req.Header.Add("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	ginContext, _ := gin.CreateTestContext(w)
+	ginContext.Request = req
+
+	suite.stockHandler.CreateStock(ginContext)
+
+	suite.Assert().Equal(http.StatusBadRequest, w.Code)
+	suite.Assert().JSONEq(`{"error": "入力内容に誤りがあります"}`, w.Body.String())
+}
+
+func (suite *StockHandlersSuite) TestCreateRequestBodyFailureUnderPrice() {
+	requestBody.Price = underPrice
+	stockJson, _ := json.Marshal(requestBody)
+	req, _ := http.NewRequest(http.MethodPost, "/api/stocks", strings.NewReader(string(stockJson)))
 	req.Header.Add("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
