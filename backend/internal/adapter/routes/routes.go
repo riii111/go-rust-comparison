@@ -26,8 +26,10 @@ func setupProductRoutes(api *gin.RouterGroup, storage storage.Storage) {
 	productRepo := repository.NewProductRepository()
 	productUsecase := usecase.NewProductUsecase(productRepo)
 	productHandler := handlers.NewProductHandler(productUsecase, storage)
+	imageHandler := handlers.NewImageHandler(storage)
+
 	products.POST("", productHandler.CreateProduct)
-	products.POST("/upload", productHandler.UploadImage)
+	products.POST("/upload", imageHandler.UploadImage)
 }
 
 // メインのルーティング設定関数
