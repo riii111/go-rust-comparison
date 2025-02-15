@@ -27,7 +27,7 @@ func main() {
 	database.InitDB()
 
 	// ストレージ(MinIO,s3)の初期化
-	storageClient, err := storage.NewMinioStorage()
+	storageClient, err := storage.NewStorage()
 	if err != nil {
 		log.Fatalf("ストレージの初期化に失敗しました: %v", err)
 	}
