@@ -2,40 +2,42 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/riii111/go-rust-comparison/internal/infrastructure/storage"
+	"github.com/riii111/go-rust-comparison/internal/application/usecase"
+	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
-	"log"
 	"mime/multipart"
 	"net/http"
 )
 
-type ImageHandler struct {
-	storage storage.Storage
+type ImageUploadHandler struct {
+	imageUploadUsecase *usecase.ImageUploadUsecase
 }
 
-func NewImageHandler(storage storage.Storage) *ImageHandler {
-	return &ImageHandler{
-		storage: storage,
+func NewImageUploadHandler(imageUploadUsecase *usecase.ImageUploadUsecase) *ImageUploadHandler {
+	return &ImageUploadHandler{
+		imageUploadUsecase: imageUploadUsecase,
 	}
 }
 
-func (h *ImageHandler) UploadImage(c *gin.Context) {
+// 画像アップロードの処理
+func (h *ImageUploadHandler) UploadImage(c *gin.Context) {
 	form, err := c.MultipartForm()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, responses.ErrorResponse{
-			Error: "マルチパートフォームの解析に失敗しました",
+		// Content-Type: multipart/form-data で送信されていない場合
+		// https://developer.mozilla.org/ja/docs/Web/HTTP/Status/415
+		c.JSON(http.StatusUnsupportedMediaType, responses.ErrorResponse{
+			Error: "リクエストの解析に失敗しました",
 		})
 		return
 	}
 
-	// "images" または "image" のパラメータを確認
+	// フロントではbodyのキー名をimageにする
 	var files []*multipart.FileHeader
-	if formFiles := form.File["images"]; len(formFiles) > 0 {
-		files = formFiles
-	} else if formFiles := form.File["image"]; len(formFiles) > 0 {
+	if formFiles := form.File["image"]; len(formFiles) > 0 {
 		files = formFiles
 	}
 
+	// ファイルが存在しない場合(画像選択せずに送信とかを想定)
 	if len(files) == 0 {
 		c.JSON(http.StatusBadRequest, responses.ErrorResponse{
 			Error: "画像ファイルが必要です",
@@ -43,41 +45,23 @@ func (h *ImageHandler) UploadImage(c *gin.Context) {
 		return
 	}
 
-	urls := make([]string, 0, len(files))
-	for _, file := range files {
-		if !isValidImageType(file.Header.Get("Content-Type")) {
-			c.JSON(http.StatusBadRequest, responses.ErrorResponse{
-				Error: "無効なファイル形式です",
-			})
-			return
-		}
-
-		url, err := h.storage.SaveFile(file)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
-				Error: "画像のアップロードに失敗しました",
-			})
-			log.Printf("アップロードエラー: %v", err)
-			return
-		}
-		urls = append(urls, url)
+	req := requests.ImageUploadRequest{
+		Files: files,
 	}
 
-	c.JSON(http.StatusOK, responses.StandardResponse{
-		Message: "アップロード成功",
-		Data: map[string]interface{}{
-			"urls":  urls,
-			"count": len(urls),
+	// ユースケースを呼び出して画像をアップロード
+	urls, err := h.imageUploadUsecase.UploadImages(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
+			Error: "画像のアップロードに失敗しました",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, responses.DataResponse{
+		StandardResponse: responses.StandardResponse{
+			Message: "アップロード成功",
 		},
+		Data: urls,
 	})
-}
-
-func isValidImageType(contentType string) bool {
-	validTypes := map[string]bool{
-		"image/jpeg": true,
-		"image/png":  true,
-		"image/gif":  true,
-		"image/webp": true,
-	}
-	return validTypes[contentType]
 }

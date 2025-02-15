@@ -3,8 +3,7 @@ package responses
 
 // 標準的な成功レスポンス
 type StandardResponse struct {
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
+	Message string `json:"message"`
 }
 
 // エラー時のレスポンス
