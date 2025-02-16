@@ -1,8 +1,11 @@
 package usecase_test
 
 import (
+	"log"
 	"testing"
 
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
@@ -15,6 +18,14 @@ import (
 func init() {
 	// データベース接続の初期化を先に行う
 	database.InitDB()
+
+	// カスタムバリデーションの登録
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		err := requests.RegisterOperatorValidations(v)
+		if err != nil {
+			log.Fatalf("バリデーション登録に失敗しました: %v", err)
+		}
+	}
 }
 
 func setupTestData(t *testing.T) string {
@@ -34,6 +45,7 @@ func setupTestData(t *testing.T) string {
 		UpdatedBy:     "00000000-0000-0000-0000-000000000000",
 	}
 
+	// 店舗データを作成
 	err := database.DB.Create(store).Error
 	require.NoError(t, err, "店舗データの作成に失敗しました")
 
@@ -76,7 +88,7 @@ func TestCreateOperator(t *testing.T) {
 				Username: "testuser",
 				Password: "Password1!",
 				Role:     models.RoleSystemAdmin,
-				StoreID:  "550e8400-e29b-41d4-a716-446655440000",
+				StoreID:  storeID,
 			},
 			wantErr: nil,
 		},
@@ -87,15 +99,15 @@ func TestCreateOperator(t *testing.T) {
 				Username: "testuser2",
 				Password: "Password1!",
 				Role:     models.RoleSystemAdmin,
-				StoreID:  "550e8400-e29b-41d4-a716-446655440000",
+				StoreID:  storeID,
 			},
 			wantErr: repository.ErrDuplicateEmail,
 		},
 		{
 			name: "異常系：存在しない店舗ID",
 			request: requests.CreateOperatorRequest{
-				Email:    "test@example.com",
-				Username: "testuser",
+				Email:    "test2@example.com",
+				Username: "testuser3",
 				Password: "Password1!",
 				Role:     models.RoleSystemAdmin,
 				StoreID:  "550e8400-e29b-41d4-a716-446655440999",
@@ -106,11 +118,12 @@ func TestCreateOperator(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// サブテスト毎にデータベースをクリーンな状態に
 			if tt.name != "異常系：メールアドレス重複" {
+				// メールアドレス重複テスト以外はデータをクリーンアップ
 				cleanupTestData(t)
 				storeID = setupTestData(t)
-				if tt.request.StoreID == "550e8400-e29b-41d4-a716-446655440000" {
+				// 正しいstore_idを設定
+				if tt.request.StoreID == storeID {
 					tt.request.StoreID = storeID
 				}
 			}
@@ -118,7 +131,7 @@ func TestCreateOperator(t *testing.T) {
 			err := operatorUsecase.CreateOperator(tt.request)
 
 			if tt.wantErr != nil {
-				assert.ErrorIs(t, err, tt.wantErr)
+				assert.ErrorIs(t, err, tt.wantErr, "期待されるエラーが返されませんでした")
 			} else {
 				assert.NoError(t, err)
 

@@ -3,11 +3,14 @@ package handler_test
 import (
 	"bytes"
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
@@ -17,32 +20,57 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 )
+
+type OperatorHandlerTestSuite struct {
+	suite.Suite
+	operatorHandler *handlers.OperatorHandler
+}
+
+func TestOperatorHandlerTestSuite(t *testing.T) {
+	suite.Run(t, new(OperatorHandlerTestSuite))
+}
+
+func (s *OperatorHandlerTestSuite) SetupSuite() {
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		err := requests.RegisterOperatorValidations(v)
+		if err != nil {
+			s.T().Fatalf("バリデーション登録に失敗しました: %v", err)
+		}
+	}
+}
 
 func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 
+	// バリデーションの登録
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		err := requests.RegisterOperatorValidations(v)
+		if err != nil {
+			log.Fatalf("バリデーション登録に失敗しました: %v", err)
+		}
+	}
+
 	operatorRepo := repository.NewOperatorRepository(database.DB)
 	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
 	operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
 
-	api := r.Group("/api")
-	operators := api.Group("/operators")
-	operators.POST("", operatorHandler.CreateOperator)
-
+	r.POST("/api/operators", operatorHandler.CreateOperator)
 	return r
 }
 
 // テストデータセットアップ用のヘルパー関数
 func setupTestData(t *testing.T) {
-	// テスト用の店舗データを作成
 	store := &models.Store{
 		ID:            "550e8400-e29b-41d4-a716-446655440000",
 		Name:          "テスト店舗",
 		Address:       "東京都渋谷区",
 		PhoneNumber:   "09012345678",
 		BusinessHours: "9:00-18:00",
+		ZipCode:       "150-0001",
+		Description:   "テスト用の店舗です",
 		IsActive:      true,
 		CreatedBy:     "550e8400-e29b-41d4-a716-446655440001",
 		UpdatedBy:     "550e8400-e29b-41d4-a716-446655440001",

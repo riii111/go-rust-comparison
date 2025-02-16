@@ -17,7 +17,7 @@ type Operator struct {
 	ID           string         `gorm:"type:uuid;primary_key" json:"id"`
 	Email        string         `gorm:"unique;not null" json:"email" validate:"required,email"`
 	Username     string         `gorm:"not null" json:"username" validate:"required"`
-	PasswordHash string         `gorm:"not null" json:"password_hash" validate:"required,password"`
+	PasswordHash string         `gorm:"not null" json:"password_hash" validate:"required"`
 	Role         string         `gorm:"not null" json:"role" validate:"required,oneof=system_admin store_admin"`
 	StoreID      string         `gorm:"type:uuid;not null" json:"store_id" validate:"required,uuid"`
 	AvatarURL    string         `json:"avatar_url" validate:"omitempty,url"`
