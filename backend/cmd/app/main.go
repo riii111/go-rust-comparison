@@ -32,7 +32,9 @@ func main() {
 
 	// カスタムバリデーションの登録
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		requests.RegisterOperatorValidations(v)
+		if err := requests.RegisterOperatorValidations(v); err != nil {
+			log.Fatalf("オペレーターバリデーションの登録に失敗しました: %v", err)
+		}
 		requests.RegisterProductValidations(v)
 	}
 
