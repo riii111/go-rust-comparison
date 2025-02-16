@@ -9,6 +9,13 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/presentation/handlers"
 )
 
+// システム管理者専用ルートのセットアップ
+func setupAdminRoutes(privateRoutes *gin.RouterGroup) *gin.RouterGroup {
+	adminRoutes := privateRoutes.Group("")
+	adminRoutes.Use(middleware.SystemAdminOnly())
+	return adminRoutes
+}
+
 func setupHealthRoutes(publicRoutes *gin.RouterGroup) {
 	health := publicRoutes.Group("/health")
 	{
@@ -24,8 +31,8 @@ func setupLoginRoutes(publicRoutes *gin.RouterGroup) {
 	login.POST("", loginHandler.Login)
 }
 
-func setupOperatorRoutes(api *gin.RouterGroup) {
-	operators := api.Group("/operators")
+func setupOperatorRoutes(privateRoutes *gin.RouterGroup) {
+	operators := setupAdminRoutes(privateRoutes).Group("/operators")
 	operatorRepo := repository.NewOperatorRepository(database.DB)
 	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
 	operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
@@ -52,15 +59,11 @@ func setupProductRoutes(api *gin.RouterGroup) {
 func setupLogoutRoutes(privateRoutes *gin.RouterGroup) {
 	// ログアウト
 	privateRoutes.POST("/logout", handlers.Logout)
-
-	// システム管理者専用のプライベートルート
-	adminRoutes := privateRoutes.Group("")
-	adminRoutes.Use(middleware.SystemAdminOnly())
 }
 
 // メインのルーティング設定関数
 func SetupRoutes(r *gin.Engine) {
-	apiBase := "/api"
+	const apiBase = "/api"
 	publicRoutes := r.Group(apiBase)
 	privateRoutes := r.Group(apiBase)
 
@@ -76,12 +79,12 @@ func SetupRoutes(r *gin.Engine) {
 func setupPublicRoutes(publicRoutes *gin.RouterGroup) {
 	setupHealthRoutes(publicRoutes)
 	setupLoginRoutes(publicRoutes)
-	setupStockRoutes(publicRoutes)
-	setupProductRoutes(publicRoutes)
 }
 
 // プライベートルートの設定を集約
 func setupPrivateRoutes(privateRoutes *gin.RouterGroup) {
 	setupLogoutRoutes(privateRoutes)
 	setupOperatorRoutes(privateRoutes)
+	setupStockRoutes(privateRoutes)
+	setupProductRoutes(privateRoutes)
 }
