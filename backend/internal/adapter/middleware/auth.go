@@ -99,6 +99,5 @@ func handleError(c *gin.Context, err error) {
 func setUserContext(c *gin.Context, claims jwt.MapClaims) {
 	// クレームからユーザー情報を取得し、コンテキストに設定
 	c.Set("user_id", claims["sub"])
-	c.Set("user_email", claims["email"])
 	c.Set("user_role", claims["role"])
 }
