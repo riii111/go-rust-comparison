@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
 	"gorm.io/gorm"
 )
@@ -14,9 +13,9 @@ type ProductRepository struct {
 	db *gorm.DB
 }
 
-func NewProductRepository() IProductRepository {
+func NewProductRepository(db *gorm.DB) IProductRepository {
 	return &ProductRepository{
-		db: database.DB,
+		db: db,
 	}
 }
 

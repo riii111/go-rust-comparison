@@ -55,7 +55,7 @@ func cleanupTestData(t *testing.T) {
 func TestOperatorRepository(t *testing.T) {
 	// データベースのセットアップ
 	database.InitDB()
-	repo := repository.NewOperatorRepository()
+	repo := repository.NewOperatorRepository(database.DB)
 
 	// テストデータのセットアップ
 	storeID := setupTestData(t)
