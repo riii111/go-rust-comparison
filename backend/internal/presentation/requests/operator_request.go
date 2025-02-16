@@ -1,7 +1,6 @@
 package requests
 
 import (
-	"fmt"
 	"unicode"
 
 	"github.com/go-playground/validator/v10"
@@ -22,7 +21,7 @@ const minPasswordLength = 8
 // カスタムバリデーション関数を登録
 func RegisterOperatorValidations(v *validator.Validate) error {
 	if err := v.RegisterValidation("password", validatePassword); err != nil {
-		return fmt.Errorf("パスワードバリデーションの登録に失敗しました: %w", err)
+		return err
 	}
 	return nil
 }
