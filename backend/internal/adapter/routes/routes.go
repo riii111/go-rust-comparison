@@ -2,60 +2,86 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/adapter/middleware"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
 	"github.com/riii111/go-rust-comparison/internal/presentation/handlers"
 )
 
-// 認証が不要なパブリックルートのセットアップ
-func setupPublicRoutes(publicRoutes *gin.RouterGroup) {
-	// ヘルスチェックルート
+func setupHealthRoutes(publicRoutes *gin.RouterGroup) {
 	health := publicRoutes.Group("/health")
 	{
 		health.GET("", handlers.HealthCheck)
 	}
+}
 
-	// ログインルート
-	loginRepo := repository.NewLoginRepository()
+func setupLoginRoutes(publicRoutes *gin.RouterGroup) {
+	login := publicRoutes.Group("/login")
+	loginRepo := repository.NewLoginRepository(database.DB)
 	loginUseCase := usecase.NewLoginUseCase(loginRepo)
 	loginHandler := handlers.NewLoginHandler(loginUseCase)
-	publicRoutes.POST("/login", loginHandler.Login)
+	login.POST("", loginHandler.Login)
+}
 
-	// 商品関連
-	productRepo := repository.NewProductRepository()
+func setupOperatorRoutes(api *gin.RouterGroup) {
+	operators := api.Group("/operators")
+	operatorRepo := repository.NewOperatorRepository(database.DB)
+	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
+	operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
+	operators.POST("", operatorHandler.CreateOperator)
+}
+
+func setupStockRoutes(api *gin.RouterGroup) {
+	stocks := api.Group("/stocks")
+	stockRepo := repository.NewStockRepository(database.DB)
+	stockUseCase := usecase.NewStockUseCase(stockRepo)
+	stockHan := handlers.NewStockHandler(stockUseCase)
+	stocks.POST("", stockHan.CreateStock)
+}
+
+func setupProductRoutes(api *gin.RouterGroup) {
+	products := api.Group("/products")
+	productRepo := repository.NewProductRepository(database.DB)
 	productUsecase := usecase.NewProductUsecase(productRepo)
 	productHandler := handlers.NewProductHandler(productUsecase)
-	publicRoutes.POST("/products", productHandler.CreateProduct)
+	products.POST("", productHandler.CreateProduct)
 }
 
 // 認証が必要なプライベートルートのセットアップ
-func setupPrivateRoutes(privateRoutes *gin.RouterGroup) {
+func setupLogoutRoutes(privateRoutes *gin.RouterGroup) {
 	// ログアウト
 	privateRoutes.POST("/logout", handlers.Logout)
 
 	// システム管理者専用のプライベートルート
 	adminRoutes := privateRoutes.Group("")
 	adminRoutes.Use(middleware.SystemAdminOnly())
-	{
-
-		// オペレーター関連
-		operatorRepo := repository.NewOperatorRepository()
-		operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
-		operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
-		adminRoutes.POST("/operators", operatorHandler.CreateOperator)
-	}
 }
 
 // メインのルーティング設定関数
 func SetupRoutes(r *gin.Engine) {
-	publicRoutes := r.Group("/api")
+	apiBase := "/api"
+	publicRoutes := r.Group(apiBase)
+	privateRoutes := r.Group(apiBase)
 
 	// 認証が不要なパブリックルート
 	setupPublicRoutes(publicRoutes)
 
 	// 認証が必要なプライベートルート
-	privateRoutes := publicRoutes.Group("")
 	privateRoutes.Use(middleware.AuthMiddleware())
 	setupPrivateRoutes(privateRoutes)
+}
+
+// パブリックルートの設定を集約
+func setupPublicRoutes(publicRoutes *gin.RouterGroup) {
+	setupHealthRoutes(publicRoutes)
+	setupLoginRoutes(publicRoutes)
+	setupStockRoutes(publicRoutes)
+	setupProductRoutes(publicRoutes)
+}
+
+// プライベートルートの設定を集約
+func setupPrivateRoutes(privateRoutes *gin.RouterGroup) {
+	setupLogoutRoutes(privateRoutes)
+	setupOperatorRoutes(privateRoutes)
 }

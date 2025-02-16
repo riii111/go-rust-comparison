@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
 	"gorm.io/gorm"
 )
@@ -25,9 +24,9 @@ type loginRepository struct {
 }
 
 // 新しいLoginRepositoryを作成
-func NewLoginRepository() LoginRepository {
+func NewLoginRepository(db *gorm.DB) LoginRepository {
 	return &loginRepository{
-		db: database.DB, // データベース接続を初期化
+		db: db,
 	}
 }
 
