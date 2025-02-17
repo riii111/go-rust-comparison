@@ -13,6 +13,10 @@ const (
 	ErrMsgRequired   = "を入力してください"
 	ErrMsgPriceRange = "価格は0〜1000万円以下で入力してください"
 )
+const (
+	// 5MB
+	MaxFileSize = 5 * 1024 * 1024
+)
 
 // フィールド名の日本語
 var FieldNames = map[string]string{
@@ -71,5 +75,11 @@ func (r *CreateProductRequest) ValidateProductImage(file *multipart.FileHeader) 
 	if !r.allowedImageTypes[contentType] {
 		return fmt.Errorf("不正なファイル形式です: %s. 許可されている形式: JPEG, PNG, GIF, WebP", contentType)
 	}
+
+	// ファイルサイズの検証
+	if file.Size > MaxFileSize {
+		return fmt.Errorf("ファイルサイズが大きすぎます（5MBまで）")
+	}
+
 	return nil
 }
