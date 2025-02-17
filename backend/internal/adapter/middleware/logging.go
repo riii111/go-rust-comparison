@@ -11,6 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type bodyLogWriter struct {
@@ -87,9 +89,28 @@ func NewLoggingConfig(logger *zap.Logger) *LoggingConfig {
 	}
 }
 
+// createCommonFields 共通ログフィールドを作成
+func createCommonFields(c *gin.Context, logID string) string {
+	return fmt.Sprintf("%s %s %s %s %s",
+		c.ClientIP(),
+		logID,
+		getUserInfo(c),
+		c.Request.Method,
+		c.Request.URL.Path)
+}
+
 // LoggingMiddleware APIのリクエストとレスポンスをロギングするミドルウェア
 func LoggingMiddleware(config *LoggingConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// GORMのロガーを一時的に無効化
+		db, ok := c.Keys["db"].(*gorm.DB)
+		if ok {
+			db = db.Session(&gorm.Session{
+				Logger: logger.Default.LogMode(logger.Silent),
+			})
+			c.Set("db", db)
+		}
+
 		if shouldSkipLogging(c.Request.URL.Path, config.SkipPaths) {
 			c.Next()
 			return
@@ -102,7 +123,9 @@ func LoggingMiddleware(config *LoggingConfig) gin.HandlerFunc {
 		commonFields := createCommonFields(c, logID)
 
 		// リクエスト開始ログ
-		config.Logger.Info("API開始", commonFields...)
+		fmt.Printf("%s [INFO] %s API開始\n",
+			time.Now().Format("2006-01-02 15:04:05"),
+			commonFields)
 
 		blw := &bodyLogWriter{
 			ResponseWriter: c.Writer,
@@ -113,41 +136,22 @@ func LoggingMiddleware(config *LoggingConfig) gin.HandlerFunc {
 		c.Next()
 
 		// レスポンス情報の収集
-		duration := time.Since(startTime)
 		statusCode := c.Writer.Status()
 		responseDetail := parseResponseBody(blw.body.Bytes())
-
-		// 実行結果のフィールドを追加
-		resultFields := append(commonFields,
-			zap.Duration("duration", duration),
-			zap.Int("status", statusCode),
-		)
-
-		// エラーハンドリングの追加
-		if len(c.Errors) > 0 {
-			resultFields = append(resultFields, zap.Strings("errors", c.Errors.Errors()))
+		if responseDetail == "" {
+			responseDetail = getDefaultResponseMessage(statusCode)
 		}
 
 		// ログメッセージの作成
-		message := fmt.Sprintf("API終了_%s", responseDetail)
+		logLevel := getLogLevel(statusCode)
+		message := fmt.Sprintf("%s [%s] %s %d API終了_%s\n",
+			time.Now().Format("2006-01-02 15:04:05"),
+			logLevel,
+			commonFields,
+			statusCode,
+			responseDetail)
 
-		// ログメッセージの作成
-		message = fmt.Sprintf("API終了_%s", responseDetail)
-
-		// ステータスコードに応じて適切なログレベルを選択
-		logResponse(config.Logger, statusCode, message, resultFields)
-	}
-}
-
-// createCommonFields 共通ログフィールドを作成
-func createCommonFields(c *gin.Context, logID string) []zap.Field {
-	return []zap.Field{
-		zap.String("log_id", logID),
-		zap.String("ip", c.ClientIP()),
-		zap.String("user_info", getUserInfo(c)),
-		zap.String("method", c.Request.Method),
-		zap.String("path", c.Request.URL.Path),
-		zap.Any("headers", sanitizeHeaders(c.Request.Header)),
+		fmt.Print(message)
 	}
 }
 
@@ -175,18 +179,6 @@ func sanitizeHeaders(headers http.Header) map[string]string {
 	return sanitized
 }
 
-// logResponse ステータスコードに応じたログ出力
-func logResponse(logger *zap.Logger, statusCode int, message string, fields []zap.Field) {
-	switch {
-	case statusCode >= 500:
-		logger.Error(message, fields...)
-	case statusCode >= 400:
-		logger.Warn(message, fields...)
-	default:
-		logger.Info(message, fields...)
-	}
-}
-
 // getUserInfo ユーザー情報を取得する
 func getUserInfo(c *gin.Context) string {
 	userInfo := "未ログイン"
@@ -198,4 +190,38 @@ func getUserInfo(c *gin.Context) string {
 		}
 	}
 	return userInfo
+}
+
+// getLogLevel ステータスコードに応じたログレベルを取得
+func getLogLevel(statusCode int) string {
+	switch {
+	case statusCode >= 500:
+		return "ERROR"
+	case statusCode >= 400:
+		return "WARNING"
+	default:
+		return "INFO"
+	}
+}
+
+// getDefaultResponseMessage ステータスコードに応じたデフォルトメッセージを取得
+func getDefaultResponseMessage(statusCode int) string {
+	switch statusCode {
+	case http.StatusOK:
+		return "正常に処理が完了しました"
+	case http.StatusCreated:
+		return "リソースの作成が完了しました"
+	case http.StatusBadRequest:
+		return "リクエストの形式が正しくありません"
+	case http.StatusUnauthorized:
+		return "認証に失敗しました"
+	case http.StatusForbidden:
+		return "このアクションを実行する権限がありません"
+	case http.StatusNotFound:
+		return "リソースが見つかりません"
+	case http.StatusInternalServerError:
+		return "サーバー内部でエラーが発生しました"
+	default:
+		return "処理が完了しました"
+	}
 }

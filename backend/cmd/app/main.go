@@ -13,11 +13,32 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/adapter/routes"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	gormlogger "gorm.io/gorm/logger"
 )
+
+func initLogger() (*zap.Logger, error) {
+	config := zap.Config{
+		Encoding:         "console",
+		Level:            zap.NewAtomicLevelAt(zap.InfoLevel),
+		OutputPaths:      []string{"stdout"},
+		ErrorOutputPaths: []string{"stderr"},
+		EncoderConfig: zapcore.EncoderConfig{
+			MessageKey:   "message",
+			TimeKey:      "", // 時刻はメッセージ内に含めるため無効化
+			LevelKey:     "level",
+			EncodeLevel:  zapcore.CapitalLevelEncoder,
+			EncodeTime:   zapcore.ISO8601TimeEncoder,
+			EncodeCaller: zapcore.ShortCallerEncoder,
+		},
+	}
+
+	return config.Build()
+}
 
 func main() {
 	// zapロガーの初期化
-	logger, err := zap.NewProduction()
+	logger, err := initLogger()
 	if err != nil {
 		log.Fatalf("ロガーの初期化に失敗しました: %v", err)
 	}
@@ -38,6 +59,9 @@ func main() {
 
 	// データベース初期化
 	database.InitDB()
+
+	// GORMのログ設定
+	database.DB.Logger = gormlogger.Default.LogMode(gormlogger.Silent)
 
 	// Ginエンジンの初期化
 	r := gin.Default()
