@@ -49,7 +49,9 @@ func main() {
 
 	// CORSミドルウェアの設定
 	r.Use(middleware.CORSConfig())
-	r.Use(middleware.LoggingMiddleware(logger))
+	r.Use(middleware.LoggingMiddleware(&middleware.LoggingConfig{
+		Logger: logger,
+	}))
 
 	// ルーティングの設定
 	routes.SetupRoutes(r)
