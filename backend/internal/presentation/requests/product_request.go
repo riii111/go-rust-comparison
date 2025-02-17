@@ -3,6 +3,7 @@ package requests
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/shopspring/decimal"
+	"mime/multipart"
 )
 
 const maxPriceValue = 10000000
@@ -27,8 +28,9 @@ type CreateProductRequest struct {
 	MaterialInfo string          `json:"material_info" binding:"required"`
 	Price        decimal.Decimal `json:"price" binding:"required,price_range"`
 	Category     string          `json:"category" binding:"required"`
-	// TODO: 画像urlはpostgresで配列として保存、画像ファイルは別コンテナ(MinIO)で管理
-	ImageURLs []string `json:"image_urls"`
+	// 画像urlはpostgresで配列として保存、画像ファイルは別コンテナ(MinIO)で管理
+	Files     []*multipart.FileHeader `form:"files" binding:"required"`
+	ImageURLs []string                `json:"image_urls"`
 }
 
 // カスタムバリデーション登録

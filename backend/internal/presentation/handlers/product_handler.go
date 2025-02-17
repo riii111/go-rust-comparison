@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/infrastructure/storage"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
+	"github.com/shopspring/decimal"
 	"log"
 	"net/http"
 )
@@ -21,18 +23,62 @@ type ProductHandler struct {
 func NewProductHandler(productUsecase *usecase.ProductUsecase, storage storage.Storage) *ProductHandler {
 	return &ProductHandler{
 		productUsecase: productUsecase,
+		storage:        storage,
 	}
 }
 
 // リクエストのバリデーション
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
+	form, err := c.MultipartForm()
+	if err != nil {
+		c.JSON(http.StatusUnsupportedMediaType, responses.ErrorResponse{
+			Error: "リクエストの解析に失敗しました",
+		})
+		return
+	}
+
 	var req requests.CreateProductRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		// レスポンスのバリデーションエラーの場合
+	// productフィールドからJSONデータを取得して解析
+	if productData, exists := form.Value["productData"]; exists && len(productData) > 0 {
+		var productMap map[string]interface{}
+		if err := json.Unmarshal([]byte(productData[0]), &productMap); err != nil {
+			c.JSON(http.StatusBadRequest, responses.ErrorResponse{
+				Error: "商品データの解析に失敗しました",
+			})
+			return
+		}
+
+		req.Name = productMap["name"].(string)
+		req.Description = productMap["description"].(string)
+		req.MaterialInfo = productMap["material_info"].(string)
+		req.Price = decimal.RequireFromString(productMap["price"].(string))
+		req.Category = productMap["category"].(string)
+	}
+
+	// ファイルの処理
+	if files := form.File["images"]; len(files) > 0 {
+		req.Files = files
+	}
+
+	// ファイルのアップロードと画像URLの取得
+	var urls []string
+	for _, file := range req.Files {
+		url, err := h.storage.SaveFile(file)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
+				Error: "画像のアップロードに失敗しました",
+			})
+			return
+		}
+		urls = append(urls, url)
+	}
+	req.ImageURLs = urls
+
+	// バリデーション
+	if err := c.ShouldBind(&req); err != nil {
 		if ve, ok := err.(validator.ValidationErrors); ok {
 			validationErrors := make(map[string]string)
-
 			for _, fieldError := range ve {
 				field := fieldError.Field()
 				tag := fieldError.Tag()
@@ -42,7 +88,6 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 				if !exists {
 					jpfieldName = field
 				}
-
 				switch tag {
 				case "required":
 					validationErrors[field] = jpfieldName + requests.ErrMsgRequired
@@ -53,13 +98,11 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 					validationErrors[field] = fieldError.Error()
 				}
 			}
-
 			c.JSON(http.StatusBadRequest, responses.ErrorResponse{
 				Errors: validationErrors,
 			})
 			return
 		}
-
 		c.JSON(http.StatusBadRequest, responses.ErrorResponse{
 			Error: "入力内容に誤りがあります",
 		})
