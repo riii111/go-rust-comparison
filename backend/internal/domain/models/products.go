@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
@@ -15,7 +16,7 @@ type Product struct {
 	MaterialInfo string          `gorm:"type:text;not null" json:"material_info" validate:"required"`
 	BasePrice    decimal.Decimal `gorm:"type:decimal(10,2);not null" json:"base_price" validate:"required"`
 	Category     string          `gorm:"not null" json:"category" validate:"required"`
-	ImageURLs    []string        `gorm:"type:text[]" json:"image_urls"`
+	ImageURLs    pq.StringArray  `gorm:"type:text[]" json:"image_urls"`
 	CreatedBy    string          `gorm:"type:uuid" json:"created_by" validate:"required,uuid"`
 	UpdatedBy    string          `gorm:"type:uuid" json:"updated_by" validate:"required,uuid"`
 	CreatedAt    time.Time       `gorm:"autoCreateTime" json:"created_at"`
