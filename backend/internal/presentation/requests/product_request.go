@@ -1,9 +1,11 @@
 package requests
 
 import (
+	"fmt"
+	"mime/multipart"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/shopspring/decimal"
-	"mime/multipart"
 )
 
 const maxPriceValue = 10000000
@@ -31,6 +33,8 @@ type CreateProductRequest struct {
 	// 画像urlはpostgresで配列として保存、画像ファイルは別コンテナ(MinIO)で管理
 	Files     []*multipart.FileHeader `form:"files" binding:"required"`
 	ImageURLs []string                `json:"image_urls"`
+
+	allowedImageTypes map[string]bool
 }
 
 // カスタムバリデーション登録
@@ -47,4 +51,25 @@ func validatePriceRange(fl validator.FieldLevel) bool {
 var ValidationErrors = map[string]string{
 	"required":    ErrMsgRequired,
 	"price_range": ErrMsgPriceRange,
+}
+
+func ImageValidator() *CreateProductRequest {
+	return &CreateProductRequest{
+		allowedImageTypes: map[string]bool{
+			"image/jpeg": true,
+			"image/png":  true,
+			"image/gif":  true,
+			"image/webp": true,
+		},
+	}
+}
+
+// ValidateProductImage 画像バリデーション実行
+func (r *CreateProductRequest) ValidateProductImage(file *multipart.FileHeader) error {
+	// アップロードされたファイルのMIMEタイプを取得してmapで許可されている形式か確認
+	contentType := file.Header.Get("Content-Type")
+	if !r.allowedImageTypes[contentType] {
+		return fmt.Errorf("不正なファイル形式です: %s. 許可されている形式: JPEG, PNG, GIF, WebP", contentType)
+	}
+	return nil
 }

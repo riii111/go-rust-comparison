@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
@@ -9,8 +12,6 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
 	"github.com/shopspring/decimal"
-	"log"
-	"net/http"
 )
 
 // ProductHandler 商品に関する操作を管理する構造体
@@ -42,6 +43,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	// productフィールドからJSONデータを取得して解析
 	if productData, exists := form.Value["productData"]; exists && len(productData) > 0 {
 		var productMap map[string]interface{}
+		// JSON 文字列をparse
 		if err := json.Unmarshal([]byte(productData[0]), &productMap); err != nil {
 			c.JSON(http.StatusBadRequest, responses.ErrorResponse{
 				Error: "商品データの解析に失敗しました",
@@ -49,31 +51,43 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 			return
 		}
 
+		// interface{}型の値をstring型に変換してreqに格納
 		req.Name = productMap["name"].(string)
 		req.Description = productMap["description"].(string)
 		req.MaterialInfo = productMap["material_info"].(string)
+		// priceはdecimal.Decimal 型に変換
 		req.Price = decimal.RequireFromString(productMap["price"].(string))
 		req.Category = productMap["category"].(string)
 	}
 
-	// ファイルの処理
+	// 画像ファイルの処理
+	imageValidator := requests.ImageValidator()
 	if files := form.File["images"]; len(files) > 0 {
-		req.Files = files
-	}
-
-	// ファイルのアップロードと画像URLの取得
-	var urls []string
-	for _, file := range req.Files {
-		url, err := h.storage.SaveFile(file)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
-				Error: "画像のアップロードに失敗しました",
-			})
-			return
+		// 画像形式のバリデーション
+		for _, file := range files {
+			if err := imageValidator.ValidateProductImage(file); err != nil {
+				c.JSON(http.StatusBadRequest, responses.ErrorResponse{
+					Error: err.Error(),
+				})
+				return
+			}
 		}
-		urls = append(urls, url)
+		req.Files = files
+
+		// 画像のアップロードとURL取得
+		var urls []string
+		for _, file := range files {
+			url, err := h.storage.SaveFile(file)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, responses.ErrorResponse{
+					Error: "画像のアップロードに失敗しました",
+				})
+				return
+			}
+			urls = append(urls, url)
+		}
+		req.ImageURLs = urls
 	}
-	req.ImageURLs = urls
 
 	// バリデーション
 	if err := c.ShouldBind(&req); err != nil {
