@@ -10,6 +10,7 @@ import (
 type StockRepository interface {
 	Create(stock *models.Stock) (*models.Stock, error)
 	Get(ID string) (*models.Stock, error)
+	Delete(ID string) error
 }
 
 type stockRepository struct {
@@ -55,4 +56,18 @@ func (s *stockRepository) Get(ID string) (*models.Stock, error) {
 	}
 
 	return &getStock, nil
+}
+
+func (s *stockRepository) Delete(ID string) error {
+	stock := models.Stock{ID: ID}
+
+	if err := s.db.Where("id = ?", &stock.ID).Delete(&stock).Error; err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			return ErrNotFound
+		default:
+			return err
+		}
+	}
+	return nil
 }

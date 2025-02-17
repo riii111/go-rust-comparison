@@ -30,7 +30,8 @@ func (suite *StockRepositorySuite) MockDB() sqlmock.Sqlmock {
 }
 
 const (
-	GETSTOCK = `SELECT * FROM "stocks" WHERE id = $1 ORDER BY "stocks"."id" LIMIT $2`
+	GETSTOCK    = `SELECT * FROM "stocks" WHERE id = $1 ORDER BY "stocks"."id" LIMIT $2`
+	DELETESTOCK = `DELETE FROM "stocks" WHERE id = $1 AND "stocks"."id" = $2`
 
 	ID        = "00000000-0000-0000-0000-000000000000"
 	ProductID = "00000000-0000-0000-0000-000000000001"
@@ -120,4 +121,29 @@ func (suite *StockRepositorySuite) TestStockGetFailure() {
 	suite.Assert().Nil(stock)
 	suite.Assert().NotNil(err)
 	suite.Assert().Equal("エラー", err.Error())
+}
+
+func (suite *StockRepositorySuite) TestStockDelete() {
+	mockDB := suite.MockDB()
+
+	mockDB.ExpectBegin()
+	mockDB.ExpectExec(regexp.QuoteMeta(DELETESTOCK)).WithArgs(ID, ID).WillReturnResult(sqlmock.NewResult(0, 0))
+	mockDB.ExpectCommit()
+
+	err := suite.repository.Delete(ID)
+	suite.Assert().Nil(err)
+}
+
+func (suite *StockRepositorySuite) TestStockDeleteFailure() {
+	mockDB := suite.MockDB()
+
+	mockDB.ExpectBegin()
+	mockDB.ExpectExec(regexp.QuoteMeta(DELETESTOCK)).WithArgs(ID, ID).WillReturnError(gorm.ErrRecordNotFound)
+	mockDB.ExpectRollback()
+	mockDB.ExpectCommit()
+
+	err := suite.repository.Delete(ID)
+
+	suite.Assert().NotNil(err)
+	suite.Assert().Equal("レコードが見つかりません", err.Error())
 }
