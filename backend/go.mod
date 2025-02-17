@@ -26,6 +26,10 @@ require (
 	github.com/rs/xid v1.6.0 // indirect
 )
 
+require github.com/stretchr/objx v0.5.2 // indirect
+
+require github.com/lib/pq v1.10.9
+
 require (
 	github.com/bytedance/sonic v1.12.4 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
