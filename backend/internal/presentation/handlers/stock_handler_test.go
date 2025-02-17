@@ -38,17 +38,25 @@ func (m *MockStockUseCase) Create(requestBody *requests.CreateStockRequest) (*mo
 	return args.Get(0).(*models.Stock), args.Error(1)
 }
 
-type StockHandlersSuite struct {
-	suite.Suite
-	stockHandler *handlers.StockHandler
-}
-
 func (m *MockStockUseCase) Get(ID string) (*models.Stock, error) {
 	args := m.Called(ID)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*models.Stock), args.Error(1)
+}
+
+func (m *MockStockUseCase) Delete(ID string) error {
+	args := m.Called(ID)
+	if args.Get(0) == nil {
+		return nil
+	}
+	return args.Error(1)
+}
+
+type StockHandlersSuite struct {
+	suite.Suite
+	stockHandler *handlers.StockHandler
 }
 
 func TestStockHandlersTestSuite(t *testing.T) {
@@ -256,4 +264,25 @@ func (suite *StockHandlersSuite) TestGet() {
 
 	suite.Assert().Nil(err)
 	suite.Assert().Equal(ID.String(), StockResponse.ID)
+}
+
+func (suite *StockHandlersSuite) TestDelete() {
+	ID, _ := uuid.NewV7()
+	mockUseCase := NewMockStockUseCase()
+	mockUseCase.On("Delete", ID.String()).Return(nil)
+
+	suite.stockHandler = handlers.NewStockHandler(mockUseCase)
+
+	req, _ := http.NewRequest(http.MethodGet, "/api/stocks", nil)
+	w := httptest.NewRecorder()
+	ginContext, _ := gin.CreateTestContext(w)
+	ginContext.Request = req
+
+	// パスパラをセット
+	param := gin.Param{Key: "id", Value: ID.String()}
+	ginContext.Params = append(ginContext.Params, param)
+
+	suite.stockHandler.DeleteStock(ginContext)
+
+	suite.Assert().Equal(http.StatusNoContent, w.Code)
 }

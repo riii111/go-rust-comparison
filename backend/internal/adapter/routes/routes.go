@@ -29,6 +29,7 @@ func setupStockRoutes(api *gin.RouterGroup) {
 
 	stocks.POST("", stockHan.CreateStock)
 	stocks.GET("/:id", stockHan.GetStock)
+	stocks.DELETE("/:id", stockHan.DeleteStock)
 }
 
 func setupProductRoutes(api *gin.RouterGroup) {
