@@ -8,6 +8,7 @@ import (
 
 type StockUserCase interface {
 	Create(requestBody *requests.CreateStockRequest) (*models.Stock, error)
+	Get(ID string) (*models.Stock, error)
 }
 
 type stockUserCase struct {
@@ -29,4 +30,8 @@ func (s *stockUserCase) Create(requestBody *requests.CreateStockRequest) (*model
 		IsAvailable: requestBody.IsAvailable,
 	}
 	return s.stockRepository.Create(stock)
+}
+
+func (s *stockUserCase) Get(ID string) (*models.Stock, error) {
+	return s.stockRepository.Get(ID)
 }
