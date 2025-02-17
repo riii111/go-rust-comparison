@@ -62,7 +62,7 @@ Parameters:
     Type: String
     Default: develop
   AmplifyDomainName:
-    Description: "Enter the custom Amplify domain name. (Alias) (ex: dev.inquiry-pro.lifecard.co.jp)"
+    Description: "Enter the custom Amplify domain name. (Alias) (ex: go-rust-comparison.funtechlab.com)"
     Type: String
   AmplifySubDomainPrefix:
     Description: "Enter the custom Amplify domain name subdomain prefix. (ex: amplify)"
@@ -90,7 +90,7 @@ Parameters:
     MaxLength: 255
     ConstraintDescription: "AmplifyBasicPassword must be 7 to 225 characters"
   APIURL:
-    Description: "Enter the API URL for backend. (ex: https://<CloudFront domain>)"
+    Description: "Enter the API URL for backend. (ex: https://api.go-rust-comparison.funtechlab.com)"
     Type: String
   FetchCredential:
     Description: "Enter the auth settings for API fetch from frontend. (default: include)"
