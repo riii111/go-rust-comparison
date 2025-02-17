@@ -37,6 +37,14 @@ func (m *mockStockRepository) Get(ID string) (*models.Stock, error) {
 	return args.Get(0).(*models.Stock), args.Error(1)
 }
 
+func (m *mockStockRepository) Delete(ID string) error {
+	args := m.Called(ID)
+	if args.Get(0) == nil {
+		return args.Error(1)
+	}
+	return nil
+}
+
 type StockUseCaseSuite struct {
 	suite.Suite
 	stockUseCase usecase.StockUserCase
@@ -128,4 +136,15 @@ func (suite *StockUseCaseSuite) TestGet() {
 	stock, err := suite.stockUseCase.Get(stockID)
 	suite.Assert().Nil(err)
 	suite.Assert().Equal(stockID, stock.ID)
+}
+
+func (suite *StockUseCaseSuite) TestDelete() {
+	mockStockRepository := NewMockStockRepository()
+	suite.stockUseCase = usecase.NewStockUseCase(mockStockRepository)
+
+	inputStockID := ID.String()
+	mockStockRepository.On("Delete", inputStockID).Return(nil, nil)
+
+	err := suite.stockUseCase.Delete(inputStockID)
+	suite.Assert().Nil(err)
 }

@@ -9,6 +9,7 @@ import (
 type StockUserCase interface {
 	Create(requestBody *requests.CreateStockRequest) (*models.Stock, error)
 	Get(ID string) (*models.Stock, error)
+	Delete(ID string) error
 }
 
 type stockUserCase struct {
@@ -34,4 +35,8 @@ func (s *stockUserCase) Create(requestBody *requests.CreateStockRequest) (*model
 
 func (s *stockUserCase) Get(ID string) (*models.Stock, error) {
 	return s.stockRepository.Get(ID)
+}
+
+func (s *stockUserCase) Delete(ID string) error {
+	return s.stockRepository.Delete(ID)
 }
