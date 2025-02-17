@@ -42,7 +42,7 @@ Parameters:
     AllowedValues:
       - disabled
       - enabled
-    Default: disabled
+    Default: disabled # コストがかかるためデフォルトは無効化にしています。
 
 # -------------------------------------
 # Resources
