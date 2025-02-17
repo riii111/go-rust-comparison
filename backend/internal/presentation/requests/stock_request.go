@@ -13,3 +13,7 @@ type CreateStockRequest struct {
 	Price       decimal.Decimal `json:"price" binding:"required,price_range"`
 	IsAvailable bool            `json:"is_available" binding:"required"`
 }
+
+type GetStockRequest struct {
+	ID string `uri:"id" binding:"required,uuid"`
+}

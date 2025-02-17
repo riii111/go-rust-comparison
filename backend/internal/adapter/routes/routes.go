@@ -28,6 +28,7 @@ func setupStockRoutes(api *gin.RouterGroup) {
 	stockHan := handlers.NewStockHandler(stockUseCase)
 
 	stocks.POST("", stockHan.CreateStock)
+	stocks.GET("/:id", stockHan.GetStock)
 }
 
 func setupProductRoutes(api *gin.RouterGroup) {

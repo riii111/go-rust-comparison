@@ -43,6 +43,14 @@ type StockHandlersSuite struct {
 	stockHandler *handlers.StockHandler
 }
 
+func (m *MockStockUseCase) Get(ID string) (*models.Stock, error) {
+	args := m.Called(ID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.Stock), args.Error(1)
+}
+
 func TestStockHandlersTestSuite(t *testing.T) {
 	suite.Run(t, new(StockHandlersSuite))
 }
@@ -209,4 +217,43 @@ func (suite *StockHandlersSuite) TestCreateFailure() {
 
 	suite.Assert().Equal(http.StatusInternalServerError, w.Code)
 	suite.Assert().JSONEq(`{"error":"システムエラーが発生しました。しばらく時間をおいて再度お試しください"}`, w.Body.String())
+}
+
+func (suite *StockHandlersSuite) TestGet() {
+	ID, _ := uuid.NewV7()
+	mockUseCase := NewMockStockUseCase()
+	mockUseCase.On("Get", ID.String()).Return(&models.Stock{
+		ID:          ID.String(),
+		ProductID:   productID.String(),
+		StoreID:     storeID.String(),
+		Size:        "large",
+		Color:       "red",
+		Quantity:    100,
+		Price:       price,
+		IsAvailable: true,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}, nil)
+
+	suite.stockHandler = handlers.NewStockHandler(mockUseCase)
+
+	req, _ := http.NewRequest(http.MethodGet, "/api/stocks", nil)
+	w := httptest.NewRecorder()
+	ginContext, _ := gin.CreateTestContext(w)
+	ginContext.Request = req
+
+	// パスパラをセット
+	param := gin.Param{Key: "id", Value: ID.String()}
+	ginContext.Params = append(ginContext.Params, param)
+
+	suite.stockHandler.GetStock(ginContext)
+
+	suite.Assert().Equal(http.StatusOK, w.Code)
+
+	bodyBytes, _ := io.ReadAll(w.Body)
+	var StockResponse models.Stock
+	err := json.Unmarshal(bodyBytes, &StockResponse)
+
+	suite.Assert().Nil(err)
+	suite.Assert().Equal(ID.String(), StockResponse.ID)
 }

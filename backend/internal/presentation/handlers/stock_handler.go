@@ -38,3 +38,24 @@ func (s *StockHandler) CreateStock(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"id": createdStock.ID})
 }
+
+func (s *StockHandler) GetStock(c *gin.Context) {
+	var requestURL requests.GetStockRequest
+	if err := c.ShouldBindUri(&requestURL); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "IDを確認してください"})
+		return
+	}
+
+	getStock, err := s.stockUserCase.Get(requestURL.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, repository.ErrNotFound):
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "システムエラーが発生しました。しばらく時間をおいて再度お試しください"})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, getStock)
+}
