@@ -19,6 +19,7 @@ type DBConfig struct {
 	Host     string
 	Port     string
 	DBName   string
+	SSLMode  string
 }
 
 // 環境変数からDB設定を取得
