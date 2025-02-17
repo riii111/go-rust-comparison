@@ -36,6 +36,7 @@ Metadata:
           - ALBPublicSubnet1
           - ALBPublicSubnet2
           - ALBSecurityGroupID
+          - ACMCertificateArn
           - AuthHeaderName
           - AuthHeaderValue
           - HealthCheckPath
@@ -64,7 +65,7 @@ Parameters:
     ConstraintDescription: "Environment name must be selected."
     Default: dev
   DomainNameForAPI:
-    Description: "Enter the domain name for backend API. (ex: api.dev.inquiry-pro.lifecard.co.jp)"
+    Description: "Enter the domain name for backend API. (ex: api.go-rust-comparison.funtechlab.com)"
     Type: String
   DomainNameForFront:
     Description: "Enter the domain name for frontend."
@@ -84,6 +85,9 @@ Parameters:
   ALBSecurityGroupID:
     Description: "Select the Security Group ID for ALB."
     Type: AWS::EC2::SecurityGroup::Id
+  ACMCertificateArn:
+    Description: "Enter the Certificate ARN. (ex: arn:aws:acm:<AWS_REGION>:<AWS_ACCOUNT_ID>:certificate/<ACMCertificateID>)"
+    Type: String
   AuthHeaderName:
     Description: "Enter the header name required for authentication between Amplify and ALB. (default: X-Auth-ALB)"
     Type: String
@@ -222,7 +226,6 @@ Resources:
   # Listener
   # -------------------------------------
   # Internet-Facing
-  # ALBを先に作成しないと自己証明書を適用出来ないため、HTTPSのListenerはコンソールで設定する
   ALBListenerHTTPS:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
