@@ -78,7 +78,7 @@ Parameters:
     Description: "Select the Route 53 hosted zone ID."
     Type: AWS::Route53::HostedZone::Id
   DomainName:
-    Description: "Enter the CloudFront domain name used for alias record. (ex: dev.inquiry-pro.lifecard.co.jp)"
+    Description: "Enter the CloudFront domain name used for alias record. (ex:go-rust-comparison.funtechlab.com)"
     Type: String
   ACMPublicCertificateArn:
     Description: "Enter the ACM public certificate ARN for global region."
