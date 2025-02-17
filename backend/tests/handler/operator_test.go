@@ -23,7 +23,7 @@ func setupTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 
-	operatorRepo := repository.NewOperatorRepository()
+	operatorRepo := repository.NewOperatorRepository(database.DB)
 	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
 	operatorHandler := handlers.NewOperatorHandler(operatorUsecase)
 
@@ -91,7 +91,7 @@ func TestCreateOperator(t *testing.T) {
 				StoreID:  "550e8400-e29b-41d4-a716-446655440000",
 			},
 			expectedStatus: http.StatusCreated,
-			expectedBody: responses.CreateOperatorResponse{
+			expectedBody: responses.StandardResponse{
 				Message: "オペレーターの登録に成功しました",
 			},
 		},
@@ -179,7 +179,7 @@ func TestCreateOperator(t *testing.T) {
 
 			// 期待値の型に応じて検証
 			switch expected := tt.expectedBody.(type) {
-			case responses.CreateOperatorResponse:
+			case responses.StandardResponse:
 				assert.Equal(t, expected.Message, response["message"])
 			case responses.ErrorResponse:
 				assert.Equal(t, expected.Error, response["error"])

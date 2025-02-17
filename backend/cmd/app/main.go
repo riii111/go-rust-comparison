@@ -1,13 +1,16 @@
 package main
 
 import (
-	"log"
-	"os"
-
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/adapter/middleware"
+
 	"github.com/riii111/go-rust-comparison/internal/adapter/routes"
+	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
+	"log"
+	"os"
 )
 
 func main() {
@@ -25,6 +28,11 @@ func main() {
 
 	// Ginエンジンの初期化
 	r := gin.Default()
+
+	// カスタムバリデーションの登録
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		requests.RegisterProductValidations(v)
+	}
 
 	// CORSミドルウェアの設定
 	r.Use(middleware.CORSConfig())
