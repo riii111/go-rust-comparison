@@ -30,7 +30,7 @@ func getDBConfig() *DBConfig {
 		Host:     os.Getenv("POSTGRES_HOST"),
 		Port:     os.Getenv("POSTGRES_PORT"),
 		DBName:   os.Getenv("POSTGRES_NAME"),
-		SSlMode:  os.Getenv("POSTGRES_SSLMODE"),
+		SSLMode:  os.Getenv("POSTGRES_SSLMODE"),
 	}
 }
 
@@ -39,7 +39,7 @@ func (c *DBConfig) buildDSN() string {
 	// ローカルと本番とでsslmodeの設定を変える
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
-		c.User, c.Password, c.Host, c.Port, c.DBName, c.SSlMode,
+		c.User, c.Password, c.Host, c.Port, c.DBName, c.SSLMode,
 	)
 }
 
