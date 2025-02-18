@@ -6,6 +6,7 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/adapter/middleware"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/infrastructure/repository"
+	"github.com/riii111/go-rust-comparison/internal/infrastructure/storage"
 	"github.com/riii111/go-rust-comparison/internal/presentation/handlers"
 )
 
@@ -47,11 +48,12 @@ func setupStockRoutes(api *gin.RouterGroup) {
 	stocks.POST("", stockHan.CreateStock)
 }
 
-func setupProductRoutes(api *gin.RouterGroup) {
+func setupProductRoutes(api *gin.RouterGroup, storage storage.Storage) {
 	products := api.Group("/products")
 	productRepo := repository.NewProductRepository(database.DB)
 	productUsecase := usecase.NewProductUsecase(productRepo)
-	productHandler := handlers.NewProductHandler(productUsecase)
+	productHandler := handlers.NewProductHandler(productUsecase, storage)
+
 	products.POST("", productHandler.CreateProduct)
 }
 
@@ -62,7 +64,7 @@ func setupLogoutRoutes(privateRoutes *gin.RouterGroup) {
 }
 
 // メインのルーティング設定関数
-func SetupRoutes(r *gin.Engine) {
+func SetupRoutes(r *gin.Engine, storage storage.Storage) {
 	const apiBase = "/api"
 	publicRoutes := r.Group(apiBase)
 	privateRoutes := r.Group(apiBase)
@@ -72,7 +74,7 @@ func SetupRoutes(r *gin.Engine) {
 
 	// 認証が必要なプライベートルート
 	privateRoutes.Use(middleware.AuthMiddleware())
-	setupPrivateRoutes(privateRoutes)
+	setupPrivateRoutes(privateRoutes, storage)
 }
 
 // パブリックルートの設定を集約
@@ -82,9 +84,9 @@ func setupPublicRoutes(publicRoutes *gin.RouterGroup) {
 }
 
 // プライベートルートの設定を集約
-func setupPrivateRoutes(privateRoutes *gin.RouterGroup) {
+func setupPrivateRoutes(privateRoutes *gin.RouterGroup, storage storage.Storage) {
 	setupLogoutRoutes(privateRoutes)
 	setupOperatorRoutes(privateRoutes)
 	setupStockRoutes(privateRoutes)
-	setupProductRoutes(privateRoutes)
+	setupProductRoutes(privateRoutes, storage)
 }
