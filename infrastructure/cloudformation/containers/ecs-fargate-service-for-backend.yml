@@ -1,0 +1,278 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "ECS Fargate Service Stack"
+
+# -------------------------------------
+# Metadata
+# -------------------------------------
+Metadata:
+  AWS::CloudFormation::Interface:
+    # パラメータの並び順
+    ParameterGroups:
+      - Label:
+          default: "Project Configuration"
+        Parameters:
+          - ProjectName
+          - Environment
+      - Label:
+          default: "ECS Configuration"
+        Parameters:
+          - ECSClusterName
+          - ECSProtectedSubnet1
+          - ECSProtectedSubnet2
+          - ECSSecurityGroupID
+          - ECSTaskCPUUnit
+          - ECSTaskMemory
+          - ECSTaskDesiredCount
+          - ECSTaskRoleArn
+          - ECSTaskExecutionRoleArn
+          - EntrypointPath
+          - ApplicationRootPath
+          - ALBTargetGroupArn
+      - Label:
+          default: "ECR Configuration"
+        Parameters:
+          - ECRAppContainerImageURI
+          - ECRWebContainerImageURI
+      - Label:
+          default: "CloudWatch Logs Configuration"
+        Parameters:
+          - AppLogGroupName
+          - WebLogGroupName
+
+# -------------------------------------
+# Parameters
+# -------------------------------------
+Parameters:
+  ProjectName:
+    Description: "Enter the project name. (ex: go-rust-comparison)"
+    Type: String
+    MinLength: 1
+    ConstraintDescription: "ProjectName must be entered."
+    Default: go-rust-comparison
+  Environment:
+    Description: "Select a environment name."
+    Type: String
+    AllowedValues:
+      - dev
+      - stg
+      - prd
+    ConstraintDescription: "Environment name must be selected."
+    Default: dev
+  ECSClusterName:
+    Description: "Enter the ECS cluster name. (ex: go-rust-comparison-dev-cluster)"
+    Type: String
+  ECSProtectedSubnet1:
+    Description: "Enter the Subnet ID for ECS in the selected VPC."
+    Type: AWS::EC2::Subnet::Id
+  ECSProtectedSubnet2:
+    Description: "Enter the Subnet ID for ECS in the selected VPC."
+    Type: AWS::EC2::Subnet::Id
+  ECSSecurityGroupID:
+    Description: "Select the Security Group ID for ECS."
+    Type: AWS::EC2::SecurityGroup::Id
+  ECSTaskCPUUnit:
+    Description: "Enter a numeric CPU size used by ECS Tasks."
+    Type: Number
+    Default: 512
+    AllowedValues:
+      - 256
+      - 512
+      - 1024
+      - 2048
+      - 4096
+  ECSTaskMemory:
+    Description: "Enter a numeric memory size used by ECS Tasks."
+    Type: Number
+    Default: 2048 # 1024だと起動しなかったため、2048に変更
+    AllowedValues:
+      - 256
+      - 512
+      - 1024
+      - 2048
+      - 4096
+  # ECS サービス上で常時起動するタスク数
+  ECSTaskDesiredCount:
+    Description: "Enter a number of tasks to always keep running."
+    Type: Number
+    Default: 1
+  ECSTaskRoleArn:
+    Description: "Specify the IAM Role ARN required to run the application. (ex: arn:aws:iam::012345678910:role/ECSTaskRole)"
+    Type: String
+  ECSTaskExecutionRoleArn:
+    Description: "Specify the IAM Role ARN required to execute the task. (ex: arn:aws:iam::012345678910:role/ECSTaskExecutionRole)"
+    Type: String
+  EntrypointPath:
+    Description: "Enter the path of the entrypoint to be executed at ECS task startup. (ex: /usr/local/bin/entrypoint.sh)"
+    Type: String
+  # アプリケーション用の Dockerfile で設定しているワーキングディレクトリと揃える
+  ApplicationRootPath:
+    Description: "Enter the application root path as defined in the Dockerfile. (ex: /usr/local/go/src/go_rust_comparison/backend)"
+    Type: String
+    Default: /usr/local/go/src/go_rust_comparison/backend
+  ALBTargetGroupArn:
+    Description: "Enter the ALB Target Group ARN."
+    Type: String
+  # ECR リポジトリにプッシュしているアプリケーションまたはウェブサーバのイメージタグを指定
+  # CI/CD で Image URI が置き換えられている場合は Tag （コミットハッシュ） を揃えること
+  ECRAppContainerImageURI:
+    Description: "Enter the ECR image URI for application."
+    Type: String
+  ECRWebContainerImageURI:
+    Description: "Enter the ECR image URI for webserver."
+    Type: String
+  AppLogGroupName:
+    Description: "Enter the CloudWatch Logs log-group name for application. (ex: /ecs/go-rust-comparison/dev/back/golang)"
+    Type: String
+  WebLogGroupName:
+    Description: "Enter the CloudWatch Logs log-group name for webserver. (ex: /ecs/go-rust-comparison/dev/back/nginx)"
+    Type: String
+
+# -------------------------------------
+# Resources
+# -------------------------------------
+Resources:
+  # -------------------------------------
+  # ECS Fargate
+  # -------------------------------------
+  # ECS Task Definition
+  ECSTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      # タスク定義名
+      Family: !Sub ${ProjectName}-${Environment}-back-taskdef
+      # タスク定義で起動できる ECS タイプの指定
+      RequiresCompatibilities:
+        - FARGATE
+      # Fargate の場合は `awsvpc` で固定
+      NetworkMode: awsvpc
+      TaskRoleArn: !Ref ECSTaskRoleArn
+      ExecutionRoleArn: !Ref ECSTaskExecutionRoleArn
+      # タスクが使用する CPU と Memory を指定
+      Cpu: !Ref ECSTaskCPUUnit
+      Memory: !Ref ECSTaskMemory
+      # タスク内のアーキテクチャと OS ファミリーを指定
+      RuntimePlatform:
+        CpuArchitecture: ARM64
+        OperatingSystemFamily: LINUX
+      # タスク内のコンテナ定義
+      ContainerDefinitions:
+        # Application
+        - Name: app
+          Image: !Ref ECRAppContainerImageURI
+          PortMappings:
+            - ContainerPort: 8000
+              HostPort: 8000
+              Protocol: tcp
+          EntryPoint:
+            - !Ref EntrypointPath
+          WorkingDirectory: !Ref ApplicationRootPath
+          # 環境変数
+          # アプリケーションによって、必要な環境変数や環境変数名が異なるため、適宜カスタマイズする
+          Secrets:
+            # -------------------------------------
+            # Specific Environment
+            # -------------------------------------
+            - Name: POSTGRES_NAME
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/POSTGRES_NAME
+            - Name: POSTGRES_USER
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/POSTGRES_USER
+            - Name: POSTGRES_PASSWORD
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/POSTGRES_PASSWORD
+            - Name: POSTGRES_PORT
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/POSTGRES_PORT
+            - Name: POSTGRES_HOST
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/POSTGRES_HOST
+            - Name: POSTGRES_SSLMODE
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/POSTGRES_SSLMODE
+            - Name: CORS_ALLOW_ORIGINS
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/CORS_ALLOW_ORIGINS
+            - Name: CORS_ALLOW_METHODS
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/CORS_ALLOW_METHODS
+            - Name: CORS_ALLOW_HEADERS
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/CORS_ALLOW_HEADERS
+            - Name: CORS_EXPOSE_HEADERS
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/CORS_EXPOSE_HEADERS
+            - Name: CORS_ALLOW_CREDENTIALS
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/CORS_ALLOW_CREDENTIALS
+            - Name: CORS_MAX_AGE
+              ValueFrom: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${ProjectName}/${Environment}/back/CORS_MAX_AGE
+          MountPoints:
+            - SourceVolume: tmp-data
+              ContainerPath: !Sub ${ApplicationRootPath}/tmp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref AppLogGroupName
+              awslogs-stream-prefix: !Ref ProjectName
+          Essential: true
+        # Web Server
+        - Name: web
+          Image: !Ref ECRWebContainerImageURI
+          PortMappings:
+            - ContainerPort: 80
+              HostPort: 80
+              Protocol: tcp
+          DependsOn:
+            - ContainerName: app
+              Condition: START
+          MountPoints:
+            - SourceVolume: tmp-data
+              ContainerPath: !Sub ${ApplicationRootPath}/tmp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref WebLogGroupName
+              awslogs-stream-prefix: !Ref ProjectName
+          Essential: true
+      Volumes:
+        - Name: tmp-data
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ECS Service
+  ECSService:
+    Type: AWS::ECS::Service
+    Properties:
+      LaunchType: FARGATE
+      TaskDefinition: !Ref ECSTaskDefinition
+      Cluster: !Ref ECSClusterName
+      ServiceName: !Sub ${ProjectName}-${Environment}-back-service
+      SchedulingStrategy: REPLICA
+      DesiredCount: !Ref ECSTaskDesiredCount
+      DeploymentConfiguration:
+        MinimumHealthyPercent: 100
+        MaximumPercent: 200
+      DeploymentController:
+        Type: CODE_DEPLOY
+      LoadBalancers:
+        - TargetGroupArn: !Ref ALBTargetGroupArn
+          ContainerPort: 80
+          ContainerName: web
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !Ref ECSSecurityGroupID
+          Subnets:
+            - !Ref ECSProtectedSubnet1
+            - !Ref ECSProtectedSubnet2
+      # ECS Exec の有効化 (Fargate に SSM Session Manager 経由で SSH 接続出来るようにする)
+      EnableExecuteCommand: true
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+# -------------------------------------
+# Outputs
+# -------------------------------------
+Outputs:
+  ECSTaskDefinitionName:
+    Value: !Ref ECSTaskDefinition
+  ECSServiceArn:
+    Value: !Ref ECSService
