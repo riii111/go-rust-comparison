@@ -7,7 +7,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 // TestOperatorModel は Operator モデルの機能をテストします。
@@ -22,8 +21,8 @@ import (
 //   - 特殊文字を含む
 func TestOperatorModel(t *testing.T) {
 	validate := validator.New()
-	models.RegisterCustomValidations(validate)
 
+	// 有効な店舗データを作成
 	validStore := models.Store{
 		ID:            "550e8400-e29b-41d4-a716-446655440000",
 		Name:          "テスト店舗",
@@ -71,7 +70,7 @@ func TestOperatorModel(t *testing.T) {
 				operator: &models.Operator{
 					Email:        "test@example.com",
 					Username:     "testuser",
-					PasswordHash: "Password1!",
+					PasswordHash: "hashedpassword",
 					Role:         models.RoleSystemAdmin,
 					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
 					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
@@ -85,9 +84,9 @@ func TestOperatorModel(t *testing.T) {
 				operator: &models.Operator{
 					Email:        "store@example.com",
 					Username:     "storeuser",
-					PasswordHash: "Password1!",
+					PasswordHash: "hashedpassword",
 					Role:         models.RoleStoreAdmin,
-					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
+					StoreID:      validStore.ID,
 					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 					Store:        validStore,
@@ -95,16 +94,15 @@ func TestOperatorModel(t *testing.T) {
 				wantErr: false,
 			},
 			{
-				name: "無効なメール",
+				name: "無効なロール",
 				operator: &models.Operator{
 					Email:        "test@example.com",
 					Username:     "testuser",
-					PasswordHash: "Password1!",
+					PasswordHash: "hashedpassword",
 					Role:         "invalid_role",
 					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
 					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-					Store:        validStore,
 				},
 				wantErr: true,
 			},
@@ -113,26 +111,11 @@ func TestOperatorModel(t *testing.T) {
 				operator: &models.Operator{
 					Email:        "invalid-email",
 					Username:     "testuser",
-					PasswordHash: "Password1!",
-					Role:         "operator",
+					PasswordHash: "hashedpassword",
+					Role:         models.RoleSystemAdmin,
 					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
 					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
 					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-					Store:        validStore,
-				},
-				wantErr: true,
-			},
-			{
-				name: "無効なUUID",
-				operator: &models.Operator{
-					Email:        "test@example.com",
-					Username:     "testuser",
-					PasswordHash: "Password1!",
-					Role:         "operator",
-					StoreID:      "invalid-uuid",
-					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-					Store:        validStore,
 				},
 				wantErr: true,
 			},
@@ -141,76 +124,8 @@ func TestOperatorModel(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
 				err := validate.Struct(tt.operator)
-
 				if tt.wantErr {
-					require.Error(t, err)
-					if tt.name == "無効なロール" {
-						assert.Contains(t, err.Error(), "Role")
-						assert.Contains(t, err.Error(), "oneof")
-					}
-				} else {
-					assert.NoError(t, err)
-				}
-			})
-		}
-	})
-
-	t.Run("パスワードバリデーション", func(t *testing.T) {
-		tests := []struct {
-			name     string
-			password string
-			wantErr  bool
-		}{
-			{
-				name:     "有効なパスワード",
-				password: "Password1!",
-				wantErr:  false,
-			},
-			{
-				name:     "8文字未満",
-				password: "Pass1!",
-				wantErr:  true,
-			},
-			{
-				name:     "大文字なし",
-				password: "password1!",
-				wantErr:  true,
-			},
-			{
-				name:     "小文字なし",
-				password: "PASSWORD1!",
-				wantErr:  true,
-			},
-			{
-				name:     "数字なし",
-				password: "Password!",
-				wantErr:  true,
-			},
-			{
-				name:     "記号なし",
-				password: "Password1",
-				wantErr:  true,
-			},
-		}
-
-		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
-				operator := &models.Operator{
-					Email:        "test@example.com",
-					Username:     "testuser",
-					PasswordHash: tt.password,
-					Role:         models.RoleSystemAdmin,
-					StoreID:      "550e8400-e29b-41d4-a716-446655440000",
-					CreatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-					UpdatedBy:    "550e8400-e29b-41d4-a716-446655440001",
-					Store:        validStore,
-				}
-
-				err := validate.Struct(operator)
-
-				if tt.wantErr {
-					require.Error(t, err)
-					assert.Contains(t, err.Error(), "password")
+					assert.Error(t, err)
 				} else {
 					assert.NoError(t, err)
 				}

@@ -130,7 +130,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		return
 	}
 
-	// TODO: 認証実装後に実際のoperaterのIDを取得するように修正
+	// TODO: 認証実装後に実際のoperatorのIDを取得するように修正
 	userID := "00000000-0000-0000-0000-000000000000"
 
 	if err := h.productUsecase.CreateProduct(req, userID); err != nil {
