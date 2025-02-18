@@ -202,7 +202,11 @@ Resources:
           ViewerProtocolPolicy: redirect-to-https
         HttpVersion: http2
         ViewerCertificate:
-          CloudFrontDefaultCertificate: true
+          AcmCertificateArn: !Ref ACMPublicCertificateArn
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+        Aliases:
+          - !Ref DomainName
         CacheBehaviors:
             - PathPattern: ".next/static/*"
               TargetOriginId: Amplify
