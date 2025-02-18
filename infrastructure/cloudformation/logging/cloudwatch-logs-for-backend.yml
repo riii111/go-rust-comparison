@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "CloudWatch Logs Stack For Backend"
+
+# -------------------------------------
+# Metadata
+# -------------------------------------
+Metadata:
+  AWS::CloudFormation::Interface:
+    # パラメータの並び順
+    ParameterGroups:
+      - Label:
+          default: "Project Configuration"
+        Parameters:
+          - ProjectName
+          - Environment
+      - Label:
+          default: "CloudWatch Logs Configuration for ECS Fargate"
+        Parameters:
+          - BackendAppLogGroupName
+          - BackendWebLogGroupName
+          - LogRetentionInDays
+
+# -------------------------------------
+# Parameters
+# -------------------------------------
+Parameters:
+  ProjectName:
+    Description: "Enter the project name. (ex: go-rust-comparison)"
+    Type: String
+    MinLength: 1
+    ConstraintDescription: "ProjectName must be entered."
+    Default: go-rust-comparison
+  Environment:
+    Description: "Select the environment name."
+    Type: String
+    AllowedValues:
+      - dev
+      - stg
+      - prd
+    ConstraintDescription: "Environment name must be selected."
+    Default: dev
+  BackendAppLogGroupName:
+    Description: "CloudWatch Logs log-group name for application. (ex: /ecs/go-rust-comparison/<environment>/back/golang)"
+    Type: String
+  BackendWebLogGroupName:
+    Description: "CloudWatch Logs log-group name for webserver. (ex: /ecs/go-rust-comparison/<environment>/back/nginx)"
+    Type: String
+  LogRetentionInDays:
+    Description: "Enter the data retention period."
+    Type: String
+    Default: 30
+    AllowedValues: [30, 60, 90]
+
+# -------------------------------------
+# Resources
+# -------------------------------------
+Resources:
+  # -------------------------------------
+  # CloudWatchLogs LogGroup
+  # -------------------------------------
+  # for application
+  LogGroupForApp:
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref BackendAppLogGroupName
+      RetentionInDays: !Ref LogRetentionInDays
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+  # for webserver
+  LogGroupForWeb:
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Ref BackendWebLogGroupName
+      RetentionInDays: !Ref LogRetentionInDays
+      Tags:
+        - Key: ProjectName
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # -------------------------------------
+  # Metric Filter
+  # -------------------------------------
+  ErrorInBackendWebLogs:
+    Type: AWS::Logs::MetricFilter
+    DependsOn: LogGroupForWeb
+    Properties:
+      LogGroupName: !Ref BackendWebLogGroupName
+      FilterPattern: ?"[error]" ?"[crit]" ?"[alert]" ?"[emerg]"
+      MetricTransformations:
+        - DefaultValue: 0
+          MetricValue: 1
+          MetricNamespace: Backend/Logs
+          MetricName: ErrorInBackendWebLogs
