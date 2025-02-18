@@ -7,6 +7,10 @@ import (
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 )
 
+type IProductUsecase interface {
+	CreateProduct(req requests.CreateProductRequest, userID string) error
+}
+
 type ProductUsecase struct {
 	productRepo repository.IProductRepository
 }

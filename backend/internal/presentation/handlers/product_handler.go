@@ -16,12 +16,12 @@ import (
 
 // ProductHandler 商品に関する操作を管理する構造体
 type ProductHandler struct {
-	productUsecase *usecase.ProductUsecase
+	productUsecase usecase.IProductUsecase
 	storage        storage.Storage
 }
 
 // NewProductHandler 商品ハンドラーのインスタンスを生成
-func NewProductHandler(productUsecase *usecase.ProductUsecase, storage storage.Storage) *ProductHandler {
+func NewProductHandler(productUsecase usecase.IProductUsecase, storage storage.Storage) *ProductHandler {
 	return &ProductHandler{
 		productUsecase: productUsecase,
 		storage:        storage,
@@ -102,6 +102,13 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 				if !exists {
 					jpfieldName = field
 				}
+
+				// Filesフィールドで選択されなかった場合
+				if field == "Files" && tag == "required" {
+					validationErrors[field] = requests.ErrMsgNoImage
+					continue
+				}
+
 				switch tag {
 				case "required":
 					validationErrors[field] = jpfieldName + requests.ErrMsgRequired

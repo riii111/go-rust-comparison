@@ -12,6 +12,7 @@ const maxPriceValue = 10000000
 const (
 	ErrMsgRequired   = "を入力してください"
 	ErrMsgPriceRange = "価格は0〜1000万円以下で入力してください"
+	ErrMsgNoImage    = "商品画像を最低一枚は選択してください"
 )
 const (
 	// 5MB
@@ -43,10 +44,10 @@ type CreateProductRequest struct {
 
 // カスタムバリデーション登録
 func RegisterProductValidations(v *validator.Validate) {
-	v.RegisterValidation("price_range", validatePriceRange)
+	v.RegisterValidation("price_range", ValidatePriceRange)
 }
 
-func validatePriceRange(fl validator.FieldLevel) bool {
+func ValidatePriceRange(fl validator.FieldLevel) bool {
 	price := fl.Field().Interface().(decimal.Decimal)
 	maxPrice := decimal.NewFromInt(maxPriceValue)
 	return price.GreaterThanOrEqual(decimal.Zero) && price.LessThanOrEqual(maxPrice)
