@@ -7,6 +7,7 @@ import (
 
 	"errors"
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -63,7 +64,7 @@ func validateToken(tokenString string) (jwt.MapClaims, error) {
 	})
 
 	if err != nil {
-		// トークン解析エラーのログ出力
+		// トークン解析エラーのロギング
 		log.Printf("トークンの解析エラー: %v", err)
 		return nil, err
 	}
@@ -100,4 +101,15 @@ func setUserContext(c *gin.Context, claims jwt.MapClaims) {
 	// クレームからユーザー情報を取得し、コンテキストに設定
 	c.Set("user_id", claims["sub"])
 	c.Set("user_role", claims["role"])
+
+	logID := c.GetString("log_id")
+	userID, _ := c.Get("user_id")
+	userRole, _ := c.Get("user_role")
+	// TODO: ログアウトしているのに、ユーザーID と ロールが表示される
+	log.Printf("%s [INFO] IP: %s Log ID: %s 認証情報 - ユーザーID: %v, ロール: %v",
+		time.Now().Format("2006-01-02 15:04:05"),
+		c.ClientIP(),
+		logID,
+		userID,
+		userRole)
 }

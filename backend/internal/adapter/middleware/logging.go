@@ -95,10 +95,9 @@ func NewLoggingConfig(logger *zap.Logger) *LoggingConfig {
 
 // createCommonFields 共通ログフィールドを作成
 func createCommonFields(c *gin.Context, logID string) string {
-	return fmt.Sprintf("%s %s %s %s %s",
+	return fmt.Sprintf("%s %s %s %s",
 		fmt.Sprintf("IP: %s", c.ClientIP()),
 		fmt.Sprintf("Log ID: %s", logID),
-		getUserInfo(c),
 		c.Request.Method,
 		c.Request.URL.Path)
 }
@@ -181,19 +180,6 @@ func sanitizeHeaders(headers http.Header) map[string]string {
 		}
 	}
 	return sanitized
-}
-
-// getUserInfo ユーザー情報を取得する
-func getUserInfo(c *gin.Context) string {
-	userInfo := "未ログイン"
-	if user, exists := c.Get("user"); exists {
-		if u, ok := user.(interface {
-			GetIdentifier() string
-		}); ok {
-			userInfo = u.GetIdentifier()
-		}
-	}
-	return userInfo
 }
 
 // getLogLevel ステータスコードに応じたログレベルを取得
