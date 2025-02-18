@@ -2,9 +2,7 @@ package models
 
 import (
 	"time"
-	"unicode"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -19,7 +17,7 @@ type Operator struct {
 	ID           string         `gorm:"type:uuid;primary_key" json:"id"`
 	Email        string         `gorm:"unique;not null" json:"email" validate:"required,email"`
 	Username     string         `gorm:"not null" json:"username" validate:"required"`
-	PasswordHash string         `gorm:"not null" json:"password_hash" validate:"required,password"`
+	PasswordHash string         `gorm:"not null" json:"password_hash" validate:"required"`
 	Role         string         `gorm:"not null" json:"role" validate:"required,oneof=system_admin store_admin"`
 	StoreID      string         `gorm:"type:uuid;not null" json:"store_id" validate:"required,uuid"`
 	AvatarURL    string         `json:"avatar_url" validate:"omitempty,url"`
@@ -45,55 +43,4 @@ func (o *Operator) BeforeCreate(tx *gorm.DB) error {
 
 	o.ID = id.String()
 	return nil
-}
-
-// パスワードの最小文字数
-const minPasswordLength = 8
-
-// カスタムバリデーション関数を登録
-func RegisterCustomValidations(v *validator.Validate) {
-	v.RegisterValidation("password", validatePassword)
-}
-
-// パスワードバリデーション関数
-// パスワードは以下の条件を満たす必要があります:
-// - 8文字以上であること
-// - 大文字を1文字以上含むこと
-// - 小文字を1文字以上含むこと
-// - 数字を1文字以上含むこと
-// - 記号を1文字以上含むこと
-func validatePassword(fl validator.FieldLevel) bool {
-	password := fl.Field().String()
-
-	if len(password) < minPasswordLength {
-		return false
-	}
-
-	return hasRequiredCharacterTypes(password)
-}
-
-// パスワードに必要な文字種が含まれているかチェックする
-func hasRequiredCharacterTypes(password string) bool {
-	var (
-		hasUpper, hasLower, hasNumber, hasSymbol bool
-	)
-
-	for _, char := range password {
-		switch {
-		case unicode.IsUpper(char):
-			hasUpper = true
-		case unicode.IsLower(char):
-			hasLower = true
-		case unicode.IsNumber(char):
-			hasNumber = true
-		case unicode.IsPunct(char) || unicode.IsSymbol(char):
-			hasSymbol = true
-		}
-
-		if hasUpper && hasLower && hasNumber && hasSymbol {
-			return true
-		}
-	}
-
-	return false
 }

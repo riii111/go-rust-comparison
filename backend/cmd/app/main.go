@@ -1,15 +1,14 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/adapter/middleware"
-
-	"log"
-	"os"
-
 	"github.com/riii111/go-rust-comparison/internal/adapter/routes"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"go.uber.org/zap"
@@ -68,6 +67,9 @@ func main() {
 
 	// カスタムバリデーションの登録
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		if err := requests.RegisterOperatorValidations(v); err != nil {
+			log.Fatalf("オペレーターバリデーションの登録に失敗しました: %v", err)
+		}
 		requests.RegisterProductValidations(v)
 	}
 

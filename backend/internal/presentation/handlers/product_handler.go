@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/presentation/requests"
 	"github.com/riii111/go-rust-comparison/internal/presentation/responses"
-	"log"
-	"net/http"
 )
 
 // ProductHandler 商品に関する操作を管理する構造体
@@ -64,7 +65,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 		return
 	}
 
-	// TODO: 認証実装後に実際のoperaterのIDを取得するように修正
+	// TODO: 認証実装後に実際のoperatorのIDを取得するように修正
 	userID := "00000000-0000-0000-0000-000000000000"
 
 	if err := h.productUsecase.CreateProduct(req, userID); err != nil {
