@@ -8,12 +8,13 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.10.0
+	go.uber.org/zap v1.27.0
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
 )
 
+require go.uber.org/multierr v1.10.0 // indirect
 require github.com/stretchr/objx v0.5.2 // indirect
-
 require github.com/lib/pq v1.10.9
 
 require (
