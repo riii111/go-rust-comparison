@@ -19,6 +19,7 @@ type DBConfig struct {
 	Host     string
 	Port     string
 	DBName   string
+	SSLMode  string
 }
 
 // 環境変数からDB設定を取得
@@ -29,14 +30,16 @@ func getDBConfig() *DBConfig {
 		Host:     os.Getenv("POSTGRES_HOST"),
 		Port:     os.Getenv("POSTGRES_PORT"),
 		DBName:   os.Getenv("POSTGRES_NAME"),
+		SSLMode:  os.Getenv("POSTGRES_SSLMODE"),
 	}
 }
 
 // DSN文字列を生成
 func (c *DBConfig) buildDSN() string {
+	// ローカルと本番とでsslmodeの設定を変える
 	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		c.User, c.Password, c.Host, c.Port, c.DBName,
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		c.User, c.Password, c.Host, c.Port, c.DBName, c.SSLMode,
 	)
 }
 
