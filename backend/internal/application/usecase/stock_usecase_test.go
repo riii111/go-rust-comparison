@@ -29,6 +29,22 @@ func (m *mockStockRepository) Create(stock *models.Stock) (*models.Stock, error)
 	return args.Get(0).(*models.Stock), args.Error(1)
 }
 
+func (m *mockStockRepository) Get(ID string) (*models.Stock, error) {
+	args := m.Called(ID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*models.Stock), args.Error(1)
+}
+
+func (m *mockStockRepository) Delete(ID string) error {
+	args := m.Called(ID)
+	if args.Get(0) == nil {
+		return args.Error(1)
+	}
+	return nil
+}
+
 type StockUseCaseSuite struct {
 	suite.Suite
 	stockUseCase usecase.StockUserCase
@@ -97,4 +113,38 @@ func (suite *StockUseCaseSuite) TestCreate() {
 	suite.Assert().Equal(requestBody.IsAvailable, createdStock.IsAvailable)
 	suite.Assert().Equal(now, createdStock.CreatedAt)
 	suite.Assert().Equal(now, createdStock.UpdatedAt)
+}
+
+func (suite *StockUseCaseSuite) TestGet() {
+	mockStockRepository := NewMockStockRepository()
+	suite.stockUseCase = usecase.NewStockUseCase(mockStockRepository)
+
+	stockID := ID.String()
+	mockStockRepository.On("Get", stockID).Return(&models.Stock{
+		ID:          stockID,
+		ProductID:   productID.String(),
+		StoreID:     storeID.String(),
+		Size:        "large",
+		Color:       "red",
+		Quantity:    100,
+		Price:       price,
+		IsAvailable: true,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}, nil)
+
+	stock, err := suite.stockUseCase.Get(stockID)
+	suite.Assert().Nil(err)
+	suite.Assert().Equal(stockID, stock.ID)
+}
+
+func (suite *StockUseCaseSuite) TestDelete() {
+	mockStockRepository := NewMockStockRepository()
+	suite.stockUseCase = usecase.NewStockUseCase(mockStockRepository)
+
+	inputStockID := ID.String()
+	mockStockRepository.On("Delete", inputStockID).Return(nil, nil)
+
+	err := suite.stockUseCase.Delete(inputStockID)
+	suite.Assert().Nil(err)
 }

@@ -45,6 +45,8 @@ func setupStockRoutes(api *gin.RouterGroup) {
 	stockUseCase := usecase.NewStockUseCase(stockRepo)
 	stockHan := handlers.NewStockHandler(stockUseCase)
 	stocks.POST("", stockHan.CreateStock)
+	stocks.GET("/:id", stockHan.GetStock)
+	stocks.DELETE("/:id", stockHan.DeleteStock)
 }
 
 func setupProductRoutes(api *gin.RouterGroup) {
