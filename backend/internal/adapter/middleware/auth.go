@@ -64,7 +64,7 @@ func validateToken(tokenString string) (jwt.MapClaims, error) {
 	})
 
 	if err != nil {
-		// トークン解析エラーのロギング
+		// トークン解析エラーのログ出力
 		log.Printf("トークンの解析エラー: %v", err)
 		return nil, err
 	}
@@ -98,14 +98,22 @@ func handleError(c *gin.Context, err error) {
 
 // ユーザー情報をGinのコンテキストに設定
 func setUserContext(c *gin.Context, claims jwt.MapClaims) {
-	// クレームからユーザー情報を取得し、コンテキストに設定
 	c.Set("user_id", claims["sub"])
 	c.Set("user_role", claims["role"])
 
+	// ログアウトエンドポイントの場合はログ出力をスキップ
+	if c.Request.URL.Path == "/api/logout" {
+		return
+	}
+	// TODO:現状だと、ログアウト時に誰がログアウトしたのかわからない
+	// この関数を通ると、ログアウトした後でも、ユーザーID と ロールが表示される
+	// そのための、上記if文を追記しているが、いい解決策ではない
+	// LoggingMiddleware と AuthMiddleware の通る順番を意識してロギング構築する必要がある
+	// 後他のエラー時のログもフォーマットを統一する必要がある
+	// 共通のログフォーマットを使用するように全体を修正したい
 	logID := c.GetString("log_id")
 	userID, _ := c.Get("user_id")
 	userRole, _ := c.Get("user_role")
-	// TODO: ログアウトしているのに、ユーザーID と ロールが表示される
 	log.Printf("%s [INFO] IP: %s Log ID: %s 認証情報 - ユーザーID: %v, ロール: %v",
 		time.Now().Format("2006-01-02 15:04:05"),
 		c.ClientIP(),
