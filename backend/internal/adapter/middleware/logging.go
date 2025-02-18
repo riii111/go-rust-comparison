@@ -27,9 +27,13 @@ func (w bodyLogWriter) Write(b []byte) (int, error) {
 
 // generateLogID ログIDを生成する
 func generateLogID(t time.Time) string {
-	return fmt.Sprintf("%s%04d",
-		t.Format("20060102"),
-		rand.Intn(9000)+1000)
+	const length = 12
+
+	result := make([]byte, length)
+	for i := range result {
+		result[i] = byte('0' + rand.Intn(10))
+	}
+	return string(result)
 }
 
 // parseResponseBody レスポンスボディを解析する
@@ -92,8 +96,8 @@ func NewLoggingConfig(logger *zap.Logger) *LoggingConfig {
 // createCommonFields 共通ログフィールドを作成
 func createCommonFields(c *gin.Context, logID string) string {
 	return fmt.Sprintf("%s %s %s %s %s",
-		c.ClientIP(),
-		logID,
+		fmt.Sprintf("IP: %s", c.ClientIP()),
+		fmt.Sprintf("Log ID: %s", logID),
 		getUserInfo(c),
 		c.Request.Method,
 		c.Request.URL.Path)
