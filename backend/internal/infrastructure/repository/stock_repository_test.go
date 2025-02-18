@@ -30,27 +30,23 @@ func (suite *StockRepositorySuite) MockDB() sqlmock.Sqlmock {
 }
 
 const (
-	GETSTOCK    = `SELECT * FROM "stocks" WHERE id = $1 ORDER BY "stocks"."id" LIMIT $2`
-	DELETESTOCK = `DELETE FROM "stocks" WHERE id = $1 AND "stocks"."id" = $2`
+	GetStock    = `SELECT * FROM "stocks" WHERE id = $1 ORDER BY "stocks"."id" LIMIT $2`
+	DeleteStock = `DELETE FROM "stocks" WHERE id = $1 AND "stocks"."id" = $2`
 
-	ID        = "00000000-0000-0000-0000-000000000000"
-	ProductID = "00000000-0000-0000-0000-000000000001"
-	StoreID   = "00000000-0000-0000-0000-000000000002"
-	CreatedBy = "00000000-0000-0000-0000-000000000003"
-	UpdatedBy = "00000000-0000-0000-0000-000000000004"
+	ID = "00000000-0000-0000-0000-000000000000"
 )
 
 var testStock = models.Stock{
 	ID:          ID,
-	ProductID:   ProductID,
-	StoreID:     StoreID,
+	ProductID:   "00000000-0000-0000-0000-000000000001",
+	StoreID:     "00000000-0000-0000-0000-000000000002",
 	Size:        "Large",
 	Color:       "RED",
 	Quantity:    100,
 	Price:       decimal.New(1000, 0),
 	IsAvailable: false,
-	CreatedBy:   CreatedBy,
-	UpdatedBy:   UpdatedBy,
+	CreatedBy:   "00000000-0000-0000-0000-000000000003",
+	UpdatedBy:   "00000000-0000-0000-0000-000000000004",
 	CreatedAt:   time.Now(),
 	UpdatedAt:   time.Now(),
 }
@@ -89,7 +85,7 @@ func (suite *StockRepositorySuite) TestStockGet() {
 	)
 
 	// regexp.QuoteMeta関数を使うことでsqlmockの正規表現マッチを楽に記述できます。
-	mockDB.ExpectQuery(regexp.QuoteMeta(GETSTOCK)).WithArgs(ID, 1).WillReturnRows(rows)
+	mockDB.ExpectQuery(regexp.QuoteMeta(GetStock)).WithArgs(ID, 1).WillReturnRows(rows)
 
 	stock, err := suite.repository.Get(ID)
 	suite.Assert().NotNil(stock)
@@ -99,7 +95,7 @@ func (suite *StockRepositorySuite) TestStockGet() {
 
 func (suite *StockRepositorySuite) TestStockGetNotFound() {
 	mockDB := suite.MockDB()
-	mockDB.ExpectQuery(regexp.QuoteMeta(GETSTOCK)).
+	mockDB.ExpectQuery(regexp.QuoteMeta(GetStock)).
 		WithArgs(ID, 1).
 		WillReturnError(gorm.ErrRecordNotFound)
 
@@ -112,7 +108,7 @@ func (suite *StockRepositorySuite) TestStockGetNotFound() {
 
 func (suite *StockRepositorySuite) TestStockGetFailure() {
 	mockDB := suite.MockDB()
-	mockDB.ExpectQuery(regexp.QuoteMeta(GETSTOCK)).
+	mockDB.ExpectQuery(regexp.QuoteMeta(GetStock)).
 		WithArgs(ID, 1).
 		WillReturnError(errors.New("エラー"))
 
@@ -127,7 +123,7 @@ func (suite *StockRepositorySuite) TestStockDelete() {
 	mockDB := suite.MockDB()
 
 	mockDB.ExpectBegin()
-	mockDB.ExpectExec(regexp.QuoteMeta(DELETESTOCK)).WithArgs(ID, ID).WillReturnResult(sqlmock.NewResult(0, 0))
+	mockDB.ExpectExec(regexp.QuoteMeta(DeleteStock)).WithArgs(ID, ID).WillReturnResult(sqlmock.NewResult(0, 0))
 	mockDB.ExpectCommit()
 
 	err := suite.repository.Delete(ID)
@@ -138,7 +134,7 @@ func (suite *StockRepositorySuite) TestStockDeleteFailure() {
 	mockDB := suite.MockDB()
 
 	mockDB.ExpectBegin()
-	mockDB.ExpectExec(regexp.QuoteMeta(DELETESTOCK)).WithArgs(ID, ID).WillReturnError(gorm.ErrRecordNotFound)
+	mockDB.ExpectExec(regexp.QuoteMeta(DeleteStock)).WithArgs(ID, ID).WillReturnError(gorm.ErrRecordNotFound)
 	mockDB.ExpectRollback()
 	mockDB.ExpectCommit()
 
