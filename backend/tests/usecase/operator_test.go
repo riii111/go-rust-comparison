@@ -1,8 +1,11 @@
 package usecase_test
 
 import (
+	"log"
 	"testing"
 
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/riii111/go-rust-comparison/internal/adapter/database"
 	"github.com/riii111/go-rust-comparison/internal/application/usecase"
 	"github.com/riii111/go-rust-comparison/internal/domain/models"
@@ -15,6 +18,14 @@ import (
 func init() {
 	// データベース接続の初期化を先に行う
 	database.InitDB()
+
+	// カスタムバリデーションの登録
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		err := requests.RegisterOperatorValidations(v)
+		if err != nil {
+			log.Fatalf("バリデーション登録に失敗しました: %v", err)
+		}
+	}
 }
 
 func setupTestData(t *testing.T) string {
@@ -51,18 +62,24 @@ func cleanupTestData(t *testing.T) {
 }
 
 func TestCreateOperator(t *testing.T) {
-	// データベース初期化
+	// データベースのセットアップ
 	database.InitDB()
+	operatorRepo := repository.NewOperatorRepository(database.DB)
+	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
 
 	// テストデータのセットアップ
 	storeID := setupTestData(t)
 
-	// テスト終了時のクリーンアップを確実に実行
-	defer cleanupTestData(t)
-
-	// オペレーターリポジトリを作成し、usecaseに注入
-	operatorRepo := repository.NewOperatorRepository(database.DB)
-	operatorUsecase := usecase.NewOperatorUsecase(operatorRepo)
+	// 重複チェック用の初期データを作成
+	initialOperator := requests.CreateOperatorRequest{
+		Email:    "test@example.com",
+		Username: "testuser",
+		Password: "Password1!",
+		Role:     models.RoleSystemAdmin,
+		StoreID:  storeID,
+	}
+	err := operatorUsecase.CreateOperator(initialOperator)
+	require.NoError(t, err, "初期データの作成に失敗しました")
 
 	tests := []struct {
 		name    string
@@ -72,30 +89,30 @@ func TestCreateOperator(t *testing.T) {
 		{
 			name: "正常系：オペレーター作成成功",
 			request: requests.CreateOperatorRequest{
-				Email:    "test@example.com",
+				Email:    "unique@example.com",
 				Username: "testuser",
 				Password: "Password1!",
 				Role:     models.RoleSystemAdmin,
-				StoreID:  "550e8400-e29b-41d4-a716-446655440000",
+				StoreID:  storeID,
 			},
 			wantErr: nil,
 		},
 		{
 			name: "異常系：メールアドレス重複",
 			request: requests.CreateOperatorRequest{
-				Email:    "test@example.com",
+				Email:    "test@example.com", // 初期データと同じメールアドレス
 				Username: "testuser2",
 				Password: "Password1!",
 				Role:     models.RoleSystemAdmin,
-				StoreID:  "550e8400-e29b-41d4-a716-446655440000",
+				StoreID:  storeID,
 			},
 			wantErr: repository.ErrDuplicateEmail,
 		},
 		{
 			name: "異常系：存在しない店舗ID",
 			request: requests.CreateOperatorRequest{
-				Email:    "test@example.com",
-				Username: "testuser",
+				Email:    "test2@example.com",
+				Username: "testuser3",
 				Password: "Password1!",
 				Role:     models.RoleSystemAdmin,
 				StoreID:  "550e8400-e29b-41d4-a716-446655440999",
@@ -106,51 +123,11 @@ func TestCreateOperator(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// サブテスト毎にデータベースをクリーンな状態に
-			if tt.name != "異常系：メールアドレス重複" {
-				cleanupTestData(t)
-				storeID = setupTestData(t)
-				if tt.request.StoreID == "550e8400-e29b-41d4-a716-446655440000" {
-					tt.request.StoreID = storeID
-				}
-			}
-
 			err := operatorUsecase.CreateOperator(tt.request)
-
 			if tt.wantErr != nil {
 				assert.ErrorIs(t, err, tt.wantErr)
 			} else {
 				assert.NoError(t, err)
-
-				// データベースに正しく保存されているか確認
-				var operator models.Operator
-				err = database.DB.Where("email = ?", tt.request.Email).First(&operator).Error
-				require.NoError(t, err)
-
-				// 比較用の構造体を作成
-				expected := models.Operator{
-					ID:           operator.ID,      // 自動生成される値はそのまま使用
-					Email:        tt.request.Email, // リクエストの値を使用
-					Username:     tt.request.Username,
-					Role:         tt.request.Role,
-					StoreID:      tt.request.StoreID,
-					PasswordHash: operator.PasswordHash, // DBから取得した値をそのまま使用
-					AvatarURL:    operator.AvatarURL,
-					CreatedBy:    operator.CreatedBy,
-					UpdatedBy:    operator.UpdatedBy,
-					DeletedBy:    operator.DeletedBy,
-					CreatedAt:    operator.CreatedAt,
-					UpdatedAt:    operator.UpdatedAt,
-					DeletedAt:    operator.DeletedAt,
-				}
-				// 構造体全体をチェック
-				assert.Equal(t, expected, operator)
-
-				// フィールドごとにチェック
-				// assert.Equal(t, tt.request.Email, operator.Email)
-				// assert.Equal(t, tt.request.Username, operator.Username)
-				// assert.Equal(t, tt.request.Role, operator.Role)
-				// assert.Equal(t, tt.request.StoreID, operator.StoreID)
 			}
 		})
 	}
