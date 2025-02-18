@@ -40,6 +40,11 @@ Metadata:
           - ProjectName
           - Environment
       - Label:
+          default: "Route 53 Configuration"
+        Parameters:
+          - HostZoneID
+          - DomainName
+      - Label:
           default: "CloudFront Configuration"
         Parameters:
           - AmplifyURL
@@ -69,6 +74,15 @@ Parameters:
       - prd
     ConstraintDescription: "Environment name must be selected."
     Default: dev
+  HostZoneID:
+    Description: "Select the Route 53 hosted zone ID."
+    Type: AWS::Route53::HostedZone::Id
+  DomainName:
+    Description: "Enter the CloudFront domain name used for alias record. (ex:go-rust-comparison.funtechlab.com)"
+    Type: String
+  ACMPublicCertificateArn:
+    Description: "Enter the ACM public certificate ARN for global region."
+    Type: String
   AmplifyURL:
     Description: "Enter the Amplify URL. (ex: develop.xxxxx.amplifyapp.com)"
     Type: String
@@ -119,6 +133,21 @@ Conditions:
 # -------------------------------------
 Resources:
   # -------------------------------------
+  # Route 53
+  # -------------------------------------
+  CloudFrontAliasRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostZoneID
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        # ref: https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/quickref-route53.html#w4ab1c23c21c84c11
+        HostedZoneId: Z2FDTNDATAQYW2
+        DNSName: !GetAtt CloudFrontDistribution.DomainName
+
+
+  # -------------------------------------
   # CloudFront CachePolicy
   # -------------------------------------
   # .next/static/* などの静的ファイルのキャッシュポリシー
@@ -146,6 +175,7 @@ Resources:
   # -------------------------------------
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
+    DependsOn: AccessLogsStorageBucket
     Properties:
       DistributionConfig:
         Origins:
@@ -172,7 +202,11 @@ Resources:
           ViewerProtocolPolicy: redirect-to-https
         HttpVersion: http2
         ViewerCertificate:
-          CloudFrontDefaultCertificate: true
+          AcmCertificateArn: !Ref ACMPublicCertificateArn
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+        Aliases:
+          - !Ref DomainName
         CacheBehaviors:
             - PathPattern: ".next/static/*"
               TargetOriginId: Amplify
@@ -250,10 +284,10 @@ Resources:
         RestrictPublicBuckets: true
       LifecycleConfiguration:
         Rules:
-          - Id: TransitionToGlacierAfter365Days
+          - Id: TransitionToGlacierAfter90Days
             Status: Enabled
             Transitions:
-              - TransitionInDays: 365
+              - TransitionInDays: 90
                 StorageClass: GLACIER
           - Id: ExpireAfter5Years
             Status: Enabled
